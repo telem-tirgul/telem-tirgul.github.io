@@ -306,6 +306,9 @@
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
   }
+  .closed-box{ text-align:center; background:#FBEBD2; border:1.5px solid var(--gold-deep); border-radius:14px; padding:28px 18px; margin:24px 0; font-size:18px; line-height:1.7; }
+  .closed-box b{ font-size:22px; color:var(--maroon); }
+  [hidden]{ display:none !important; }
   select.locked{ background-color:#F3EEE7; color:var(--maroon); font-weight:800; opacity:1; cursor:default; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1183,6 +1186,22 @@
 
   var form = document.getElementById('regForm');
   var formError = document.getElementById('formError');
+  // טופס השיבוץ פתוח/סגור לפי המתג במערכת (הרשמה ושיבוץ > כללי). כשסגור - רק הודעה, בלי טופס.
+  (function(){
+    try {
+      var h = { "Content-Type": "application/json", "apikey": SUPABASE.key };
+      if (SUPABASE.key.indexOf("eyJ") === 0) h["Authorization"] = "Bearer " + SUPABASE.key;
+      fetch(SUPABASE.url + "/rest/v1/rpc/scheduling_status", { method: "POST", headers: h, body: "{}" })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(st){
+          if (!st || st.open !== false) return;
+          var box = document.createElement("div"); box.className = "closed-box";
+          if (PREVIEW) { box.textContent = "טופס השיבוץ סגור כרגע - זו תצוגה מקדימה בלבד."; form.parentNode.insertBefore(box, form); return; }
+          box.innerHTML = "<b>השיבוצים לשנה זו הסתיימו</b><br>נתראה בשנה הבאה!";
+          form.parentNode.insertBefore(box, form); form.hidden = true;
+        }).catch(function(){});
+    } catch (err) {}
+  })();
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
