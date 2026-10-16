@@ -796,144 +796,131 @@
   // ----------------------------------------------------------------
   function buildSignedPdf(opts){
     // הכול על עמוד אחד: מציירים על קנבס גבוה בגדלים קומפקטיים, ואז מכווצים (אם צריך) לעמוד A4 אחד
-    var W = 1240, H = 1754, M = 70, TALL = 5000, y = M;
+    // תלם 5.19.45: אותו עיצוב כמו טופס המרתון (הועתק מ-marathon.html)
+    // תלם 5.19.40: עיצוב חדש - פס כותרת, כרטיס המרתון (מפגשים + מחיר), תלמיד/הורה בשני כרטיסים, תנאים, אישורים וחתימה
+    var W = 1240, H = 1754, M = 64, TALL = 5200, y = 0;
     var FONT = getComputedStyle(document.body).fontFamily || "Arial, sans-serif";
+    var C = { ink: "#2B2320", soft: "#6B5F55", line: "#E5DDD3", cream: "#FBF8F4", red: "#5A1216", red2: "#7A1A20", gold: "#D9A441", goldL: "#F1D9A6", ok: "#3F7D4F" };
     var big = document.createElement("canvas"); big.width = W; big.height = TALL;
     var ctx = big.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, TALL);
     ctx.direction = "rtl"; ctx.textAlign = "right"; ctx.textBaseline = "top";
-    function wrap(text, font, maxW){
-      ctx.font = font; var words = String(text).split(/\s+/), lines = [], cur = "";
-      words.forEach(function(w){ var t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; });
+    var DRY = false;   // מצב מדידה: מחשבים גובה בלי לצייר (כדי לצייר קודם את רקע הכרטיס)
+    function F(size, weight){ return (weight || 400) + " " + size + "px " + FONT; }
+    function wrap(t, font, maxW){
+      ctx.font = font; var words = String(t).split(/\s+/), lines = [], cur = "";
+      words.forEach(function(w){ var s = cur ? cur + " " + w : w; if (ctx.measureText(s).width > maxW && cur) { lines.push(cur); cur = w; } else cur = s; });
       if (cur) lines.push(cur); return lines;
     }
-    function text(t, size, weight, color, indent, gapAfter, lhMul){
-      var font = (weight || 400) + " " + size + "px " + FONT, lh = Math.round(size * (lhMul || 1.42));
-      wrap(t, font, W - 2 * M - (indent || 0)).forEach(function(line){ ctx.font = font; ctx.fillStyle = color || "#2B2320"; ctx.fillText(line, W - M - (indent || 0), y); y += lh; });
-      y += gapAfter || 0;
+    function put(t, x, yy, font, color, align){ if (DRY) return; ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align || "right"; ctx.fillText(t, x, yy); ctx.textAlign = "right"; }
+    // טקסט עם גלישת שורות בין xRight ל-xRight-maxW; מחזיר את הגובה
+    function para(t, xR, maxW, size, weight, color, lhMul){
+      var font = F(size, weight), lh = Math.round(size * (lhMul || 1.45)), ls = wrap(t, font, maxW);
+      ls.forEach(function(l, i){ put(l, xR, y + i * lh, font, color); }); y += ls.length * lh; return ls.length * lh;
     }
-    function rule(){ ctx.fillStyle = "#E5DDD3"; ctx.fillRect(M, y + 5, W - 2 * M, 2); y += 16; }
-    // שדות בשלוש עמודות
-    function grid(rows){
-      var N = 3, gap = 30, colW = (W - 2 * M - gap * (N - 1)) / N, lw = 150, lf = "700 19px " + FONT, vf = "400 21px " + FONT, lh = 29;
-      for (var i = 0; i < rows.length; i += N) {
-        var hMax = 1;
-        rows.slice(i, i + N).forEach(function(r, k){
-          if (!r) return;
-          var x = W - M - k * (colW + gap), ll = wrap(r[0], lf, lw - 10), vl = wrap(r[1], vf, colW - lw);
-          ll.forEach(function(l, j){ ctx.font = lf; ctx.fillStyle = "#6B5F55"; ctx.fillText(l, x, y + j * lh); });
-          vl.forEach(function(l, j){ ctx.font = vf; ctx.fillStyle = "#2B2320"; ctx.fillText(l, x - lw, y + j * lh); });
-          hMax = Math.max(hMax, ll.length, vl.length);
-        });
-        y += hMax * lh + 4;
-      }
+    function rr(x, yy, w, h, r, fill, stroke){
+      if (DRY) return; ctx.beginPath(); ctx.moveTo(x + r, yy); ctx.arcTo(x + w, yy, x + w, yy + h, r); ctx.arcTo(x + w, yy + h, x, yy + h, r); ctx.arcTo(x, yy + h, x, yy, r); ctx.arcTo(x, yy, x + w, yy, r); ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
     }
-    // כותרת ממורכזת: לוגו ומתחתיו הפרטים
-    function ctext(t, size, weight, color, gapAfter){
-      ctx.font = (weight || 400) + " " + size + "px " + FONT; ctx.fillStyle = color; ctx.textAlign = "center";
-      ctx.fillText(t, W / 2, y); ctx.textAlign = "right"; y += Math.round(size * 1.42) + (gapAfter || 0);
+    // כרטיס: מודדים, מציירים רקע, ואז את התוכן
+    function card(x, w, pad, fill, stroke, body){
+      var y0 = y; DRY = true; y = y0 + pad; body(x + w - pad, w - 2 * pad); var h = y - y0 + pad; DRY = false;
+      rr(x, y0, w, h, 18, fill, stroke); y = y0 + pad; body(x + w - pad, w - 2 * pad); y = y0 + h; return h;
     }
+    function head(t, xR){ put(t, xR, y, F(22, 800), C.red); y += 36; }
+    function check(xR, yy){ if (DRY) return; ctx.beginPath(); ctx.arc(xR - 11, yy + 11, 11, 0, Math.PI * 2); ctx.fillStyle = C.ok; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(xR - 16, yy + 11); ctx.lineTo(xR - 12, yy + 15); ctx.lineTo(xR - 5, yy + 7); ctx.strokeStyle = "#fff"; ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.stroke(); }
+    var ev = opts.event || null;
+
+    // 1) פס כותרת
+    var HB = 210; if (!DRY) { var g = ctx.createLinearGradient(0, 0, W, HB); g.addColorStop(0, C.red2); g.addColorStop(1, C.red); ctx.fillStyle = g; ctx.fillRect(0, 0, W, HB);
+      ctx.fillStyle = C.gold; ctx.fillRect(0, HB, W, 6); }
+    var tileW = 0;
     if (opts.logo && opts.logo.naturalWidth) {
-      var lh0 = 110, lw0 = opts.logo.naturalWidth * lh0 / opts.logo.naturalHeight;
-      if (lw0 > 320) { lw0 = 320; lh0 = opts.logo.naturalHeight * lw0 / opts.logo.naturalWidth; }
-      ctx.drawImage(opts.logo, (W - lw0) / 2, y, lw0, lh0); y += lh0 + 8;
+      var lh0 = 120, lw0 = opts.logo.naturalWidth * lh0 / opts.logo.naturalHeight; if (lw0 > 260) { lw0 = 260; lh0 = opts.logo.naturalHeight * lw0 / opts.logo.naturalWidth; }
+      tileW = lw0 + 36; rr(W - M - tileW, (HB - lh0 - 28) / 2, tileW, lh0 + 28, 18, "#fff");
+      ctx.drawImage(opts.logo, W - M - tileW + 18, (HB - lh0) / 2, lw0, lh0);
     }
-    ctext("תלם - המרכז לשיעורי תרגול", 32, 800, "#5A1216");
-    ctext(opts.title, 24, 700, "#2B2320");
-    ctext("טלפון: 052-9067101 · אימייל: telem.tr@gmail.com", 17, 400, "#6B5F55");
-    ctext("תאריך ושעת החתימה: " + opts.signedAt, 17, 400, "#6B5F55", 2);
-    // סידור השדות בשורות קבועות (כל שורה - מספר העמודות שלה)
-    var ORDER = [
-      [/^עיר$/, /^בית ספר$/, /^שכב/, /כיתה/],
-      [/^מסלול/, /^מקצוע/],
-      [/שם פרטי.*תלמיד/, /שם משפחה.*תלמיד/],
-      [/^בית ספר$/, /^שכב/],
-      [/רמת לימוד מתמטיקה/, /רמת לימוד אנגלית/],
-      [/שם פרטי הורה/, /שם משפחה הורה/],
-      [/טלפון/, /אימייל/]
-    ];
-    function arrange(rows){
-      var out = [], used = [];
-      rows.forEach(function(r){
-        if (r[0] === "מספר כיתה") r[0] = "כיתה";
-        if (r[0] === "אימייל") r[0] = "אימייל הורה";
-        if (r[0] === "מסלול") {
-          var v = String(r[1]).replace(/^טופס הרשמה ל[^-–]*[-–]\s*/, "");
-          if (/^שני מקצועות/.test(v)) { r[1] = "שני מקצועות"; rows.push(["מקצועות", "מתמטיקה ואנגלית"]); }
-          else r[1] = v.replace(/\s*-\s*מתמטיקה או אנגלית/, "").replace(/,\s*מתמטיקה או אנגלית\s*$/, "");
+    var tx = W - M - tileW - (tileW ? 34 : 0);
+    put("תלם - המרכז לשיעורי תרגול", tx, 44, F(20, 700), C.goldL);
+    put(opts.title || "טופס הרשמה", tx, 74, F(40, 900), "#fff");
+    put(ev ? (ev.sub || ev.name || "") : "", tx, 128, F(24, 700), "#fff");
+    put("נחתם ב-" + opts.signedAt, M, 52, F(18, 700), C.goldL, "left");
+    put("052-9067101 · telem.tr@gmail.com", M, 82, F(17, 400), "#fff", "left");
+    y = HB + 6 + 34;
+
+    // 2) כרטיס המרתון: מפגשים + מחיר + אופן תשלום
+    var pay = opts.payment || { main: [], breakdown: [] }, price = pay.main.length ? pay.main[0] : null;
+    if (ev) {
+      card(M, W - 2 * M, 28, C.cream, C.line, function(xR, w){
+        var priceW = price ? 300 : 0, colW = w - priceW - (price ? 30 : 0), y0 = y;
+        head(ev.head || "פרטי המרתון", xR);
+        if (ev.desc) { para(ev.desc, xR, colW, 18, 400, C.soft, 1.5); y += 10; }
+        (ev.meetings || []).forEach(function(m){
+          if (!DRY) { ctx.beginPath(); ctx.arc(xR - 7, y + 15, 6, 0, Math.PI * 2); ctx.fillStyle = C.gold; ctx.fill(); }
+          put(m, xR - 24, y + 2, F(22, 700), C.ink); y += 38;
+        });
+        // 5.19.42: פירוט התשלום (בטופס ההרשמה השוטף - דמי הרשמה, חומרים וכו')
+        (pay.breakdown || []).forEach(function(r, i){ if (!i) y += 4; put(r[0], xR, y, F(16, 400), C.soft); ctx.font = F(16, 400); var bw = ctx.measureText(r[0] + "  ").width; put(r[1], xR - bw, y, F(16, 700), C.ink); y += 24; });
+        if (ev.payMethod) { y += 4; put("אופן התשלום: ", xR, y, F(18, 700), C.soft); ctx.font = F(18, 700); var pw = ctx.measureText("אופן התשלום: ").width; put(ev.payMethod, xR - pw - 4, y, F(18, 400), C.ink); y += 28; }
+        if (price) {
+          // תלם 5.19.45: שורות נוספות (תשלום חודשי) - הכותרת נגלשת בתוך הריבוע
+          var more = pay.main.slice(1).map(function(r){ return [wrap(r[0], F(15, 700), priceW - 48), String(r[1]).replace(/\s+/g, " ")]; });
+          var bx = xR - w, bh = 130 + more.reduce(function(a, r){ return a + r[0].length * 21 + 36; }, 0), by = y0 + 6; rr(bx, by, priceW, bh, 16, C.red);
+          put(price[0], bx + priceW - 24, by + 22, F(19, 700), C.goldL);
+          put(String(price[1]).replace(/\s+/g, ""), bx + priceW - 24, by + 54, F(46, 900), "#fff");
+          var yy = by + 124; more.forEach(function(r){ r[0].forEach(function(l){ put(l, bx + priceW - 24, yy, F(15, 700), C.goldL); yy += 21; }); put(r[1], bx + priceW - 24, yy + 2, F(24, 800), "#fff"); yy += 36; });
+          y = Math.max(y, by + bh);
         }
       });
-      ORDER.forEach(function(g, gi){
-        var row = [];
-        if (gi === 0 && !rows.some(function(r){ return /^עיר$/.test(r[0]); })) return;
-        g.forEach(function(re){ for (var i = 0; i < rows.length; i++) if (!used[i] && re.test(rows[i][0])) { used[i] = 1; row.push(rows[i]); break; } });
-        if (row.length) out.push(row);
-      });
-      rows.forEach(function(r, i){ if (!used[i]) out.push([r]); });
-      return out;
+      y += 22;
     }
-    // כל שורה בתוך מסגרת, עם קו מפריד בין התאים
-    function gridRows(lines){
-      lines.forEach(function(row){
-        var n = row.length, pad = 12, colW = (W - 2 * M) / n;
-        var lw = n >= 4 ? (ctx.font = "700 19px " + FONT, Math.max.apply(null, row.map(function(r){ return ctx.measureText(r[0]).width; })) + 26) : 245;
-        var lf = "700 19px " + FONT, vf = "400 21px " + FONT, lh = 29, hMax = 1, ty = y + 9;
-        var cells = row.map(function(r){ var ll = wrap(r[0], lf, lw - 10), vl = wrap(r[1], vf, colW - lw - 2 * pad); hMax = Math.max(hMax, ll.length, vl.length); return [ll, vl]; });
-        var h = hMax * lh + 14;
-        ctx.fillStyle = "#FBF8F4"; ctx.fillRect(M, y, W - 2 * M, h);
-        ctx.strokeStyle = "#E5DDD3"; ctx.lineWidth = 2; ctx.strokeRect(M, y, W - 2 * M, h);
-        cells.forEach(function(c, k){
-          var x = W - M - k * colW - pad;
-          if (k > 0) { ctx.fillStyle = "#E5DDD3"; ctx.fillRect(W - M - k * colW - 1, y, 2, h); }
-          c[0].forEach(function(l, j){ ctx.font = lf; ctx.fillStyle = "#6B5F55"; ctx.fillText(l, x, ty + j * lh); });
-          c[1].forEach(function(l, j){ ctx.font = vf; ctx.fillStyle = "#2B2320"; ctx.fillText(l, x - lw, ty + j * lh); });
-        });
-        y += h + 6;
+
+    // 3) הסעיפים: תלמיד/ה והורה זה לצד זה, השאר ברוחב מלא
+    var secs = (opts.sections || []).filter(function(s){ return !(ev && /המפגשים|בחירת קבוצה/.test(s.title)) && s.rows.length; });
+    function secBody(sec){ return function(xR, w){ head(sec.title, xR);
+      sec.rows.forEach(function(r, i){ if (i) { if (!DRY) { ctx.fillStyle = C.line; ctx.fillRect(xR - w, y + 2, w, 2); } y += 12; }
+        put(r[0].replace(/\s*(תלמיד\/ה|הורה)$/, "") || r[0], xR, y, F(16, 700), C.soft); y += 24; para(r[1], xR, w, 21, 700, C.ink, 1.35); }); }; }
+    var pairs = [], rest = [];
+    secs.forEach(function(s){ if (/פרטי התלמיד|פרטי ההורה/.test(s.title) && pairs.length < 2) pairs.push(s); else rest.push(s); });
+    if (pairs.length === 2) {
+      var gap = 24, cw = (W - 2 * M - gap) / 2, y0 = y;
+      DRY = true; var hs = pairs.map(function(s){ y = y0 + 26; secBody(s)(0, cw - 52); return y - y0 + 26; }); DRY = false;
+      var hh = Math.max.apply(null, hs);
+      pairs.forEach(function(s, k){ var x = W - M - cw - k * (cw + gap); rr(x, y0, cw, hh, 18, "#fff", C.line); y = y0 + 26; secBody(s)(x + cw - 26, cw - 52); });
+      y = y0 + hh + 22;
+    } else rest = pairs.concat(rest);
+    rest.forEach(function(s){ card(M, W - 2 * M, 26, "#fff", C.line, secBody(s)); y += 22; });
+    if (!ev && price) { card(M, W - 2 * M, 22, C.cream, C.line, function(xR){ put(price[0], xR, y, F(20, 700), C.soft); put(price[1], xR - 360, y - 4, F(28, 900), C.red); y += 36; }); y += 22; }
+
+    // 4) תנאי ההתקשרות
+    card(M, W - 2 * M, 26, C.cream, null, function(xR, w){
+      head("תנאי ההתקשרות", xR);
+      (opts.terms || []).forEach(function(t){
+        if (t.h) { y += 4; put(t.h, xR, y, F(16, 800), C.ink); y += 24; }
+        else { para((t.li ? t.li + ". " : "") + t.p, xR - (t.li ? 18 : 0), w - (t.li ? 18 : 0), 14.5, 400, "#4A3F37", 1.4); y += 4; }
       });
-    }
-    (opts.sections || []).forEach(function(sec){ rule(); text(sec.title, 21, 800, "#5A1216", 0, 2); gridRows(arrange(sec.rows)); });
-    // תשלום: מימין הסכומים העיקריים (מודגש), משמאל פירוט התשלום המיידי (רגיל)
-    var pay = opts.payment || { main: [], breakdown: [] };
-    if (pay.main.length) {
-      rule(); text("תשלום", 21, 800, "#5A1216", 0, 4);
-      var half = (W - 2 * M - 40) / 2, top = y, yR = y;
-      pay.main.forEach(function(r){
-        var m = r[0].match(/^([^(]+)\s*(\(.*\))?$/) || [0, r[0]], lab = m[1].trim(), sub = m[2] || "";
-        ctx.font = "700 23px " + FONT; ctx.fillStyle = "#2B2320"; ctx.fillText(lab, W - M, yR);
-        ctx.fillStyle = "#5A1216"; ctx.fillText(r[1].replace(/\s+/g, " "), W - M - 250, yR);
-        yR += 33;
-        if (sub) { ctx.font = "400 16px " + FONT; ctx.fillStyle = "#6B5F55"; ctx.fillText(sub.replace(/^\(|\)$/g, ""), W - M, yR); yR += 24; }
-        yR += 6;
-      });
-      var yL = top;
-      if (pay.breakdown.length) {
-        var xr = M + half - 14, xl = M + 14;
-        ctx.font = "700 18px " + FONT; ctx.fillStyle = "#4A3F37"; ctx.fillText("פירוט התשלום המיידי:", xr, yL + 8); yL += 36;
-        pay.breakdown.forEach(function(r){
-          ctx.font = "400 18px " + FONT; ctx.fillStyle = "#4A3F37"; ctx.fillText(r[0], xr, yL);
-          ctx.fillText(r[1], xr - 290, yL);
-          yL += 27;
-        });
-        yL += 6;
-        ctx.strokeStyle = "#E5DDD3"; ctx.lineWidth = 2; ctx.strokeRect(M, top, half, yL - top);
-      }
-      y = Math.max(yR, yL) + 4;
-    }
-    rule(); text("תנאי ההתקשרות", 21, 800, "#5A1216", 0, 2);
-    (opts.terms || []).forEach(function(t){
-      if (t.h) { y += 3; text(t.h, 16, 800, "#2B2320", 0, 0); }
-      else text((t.li ? (t.li + ". ") : "") + t.p, 14.5, 400, "#2B2320", t.li ? 18 : 0, 2, 1.36);
     });
-    rule(); text("אישורים", 21, 800, "#5A1216", 0, 2);
-    (opts.consents || []).forEach(function(c){ text("☑ " + c, 14.5, 400, "#2B2320", 0, 2, 1.36); });
-    rule();
-    text("חתימת ההורה" + (opts.signerName ? " - " + opts.signerName : ""), 19, 700, "#2B2320", 0, 4);
-    if (opts.signature) {
-      var img = opts.signature, iw = Math.min(380, img.width), ih = img.height * iw / img.width;
-      ctx.strokeStyle = "#E5DDD3"; ctx.lineWidth = 2; ctx.strokeRect(W - M - iw - 8, y - 4, iw + 16, ih + 8);
-      ctx.drawImage(img, W - M - iw, y, iw, ih); y += ih + 12;
-    }
+    y += 22;
+
+    // 5) אישורים וחתימה
+    card(M, W - 2 * M, 26, "#fff", C.line, function(xR, w){
+      head("אישורים וחתימה", xR);
+      (opts.consents || []).forEach(function(c){ check(xR, y); var hh = para(c, xR - 34, w - 34, 16, 400, C.ink, 1.45); y += 8; });
+      y += 10;
+      if (opts.signature) {
+        var img = opts.signature, iw = Math.min(360, img.width), ih = img.height * iw / img.width, sx = xR - iw - 20;
+        rr(sx, y, iw + 20, ih + 20, 14, C.cream, C.line); if (!DRY) ctx.drawImage(img, sx + 10, y + 10, iw, ih);
+        var ty = y + 20, lx = sx - 30;
+        put("חתימת ההורה", lx, ty, F(16, 700), C.soft); put(opts.signerName || "", lx, ty + 26, F(24, 800), C.ink);
+        put("נחתם דיגיטלית ב-" + opts.signedAt, lx, ty + 64, F(16, 400), C.soft);
+        y += ih + 20;
+      }
+    });
+    y += 26;
+    put("המסמך הופק אוטומטית עם שליחת טופס ההרשמה · תלם - המרכז לשיעורי תרגול · 052-9067101 · telem.tr@gmail.com", W / 2, y, F(14, 400), "#9A8F86", "center");
+    y += 24;
     // עמוד A4 אחד: אם התוכן ארוך מהעמוד - מכווצים אותו כולו
-    var used = y + M, page = document.createElement("canvas"); page.width = W; page.height = H;
+    var used = y + 30, page = document.createElement("canvas"); page.width = W; page.height = H;
     var pc = page.getContext("2d"); pc.fillStyle = "#fff"; pc.fillRect(0, 0, W, H);
     var sc = Math.min(1, H / used), dw = W * sc;
     pc.imageSmoothingQuality = "high"; pc.drawImage(big, 0, 0, W, used, (W - dw) / 2, 0, dw, used * sc);
@@ -999,13 +986,34 @@
     var consents = []; form.querySelectorAll("label.consent").forEach(function(l){ var cb = l.querySelector("input[type=checkbox]"); if (cb && cb.checked) consents.push(l.textContent.replace(/\s+/g, " ").trim()); });
     return { sections: sections, terms: terms, payment: payment, consents: consents };
   }
+  // תלם 5.19.45: פרטי המסלול ל-PDF (כמו כרטיס המרתון), ופיצול "פרטי התלמיד/ה וההורה" לשני כרטיסים
+  function pdfEvent(){
+    var t = document.getElementById("trackInfoTitle"), d = document.getElementById("trackInfoBody");
+    var sub = [cityEl.value, getSchoolValue && getSchoolValue()].filter(Boolean).join(" · ");
+    var pc = document.getElementById("f-paycard"), pp = document.getElementById("f-payphone");
+    return { head: t ? t.textContent.trim() : "פרטי המסלול", sub: sub, name: sub, desc: d ? (d.innerText || d.textContent || "").replace(/\s*\n\s*/g, " ").trim() : "", meetings: [],
+      payMethod: pp && pp.checked ? "תשלום טלפוני - ניצור קשר לתשלום" : "כרטיס אשראי (עמוד תשלום מאובטח) + הוראת קבע חודשית" };
+  }
+  function pdfSplit(data){
+    var out = [], reg = [];
+    data.sections.forEach(function(sec){
+      // עיר ובית ספר - בכותרת; המסלול - בכרטיס המסלול; שכבה, כיתה ומקצוע - בכרטיס התלמיד/ה
+      if (/פרטי ההרשמה/.test(sec.title)) { reg = sec.rows.filter(function(r){ return !/^(מסלול|עיר|בית ספר)/.test(r[0]); }); return; }
+      if (!/התלמיד.*ההורה/.test(sec.title)) { out.push(sec); return; }
+      var st = { title: "פרטי התלמיד/ה", rows: [] }, pa = { title: "פרטי ההורה", rows: [] };
+      sec.rows.forEach(function(r){ var isP = /הורה|אימייל|דוא"ל/.test(r[0]); (isP ? pa : st).rows.push([r[0].replace(/\s*\((תלמיד\/ה|הורה)\)\s*$/, "").replace(/\s+הורה$/, ""), r[1]]); });
+      st.rows = st.rows.slice(0, 2).concat(reg, st.rows.slice(2)); reg = [];
+      if (st.rows.length) out.push(st); if (pa.rows.length) out.push(pa);
+    });
+    data.sections = out; return data;
+  }
   function makeSignedPdf(title, signerName){
     return new Promise(function(resolve){
-      var data = collectFormForPdf(document.querySelector("form"));
+      var data = pdfSplit(collectFormForPdf(document.querySelector("form")));
       var img = new Image();
       img.onload = function(){
         var now = new Date(), when = now.toLocaleDateString("he-IL") + " " + now.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-        try { resolve(buildSignedPdf({ title: title, signedAt: when, sections: data.sections, terms: data.terms, payment: data.payment, consents: data.consents, signature: img, signerName: signerName, logo: document.querySelector(".brand-logo") })); }
+        try { resolve(buildSignedPdf({ title: title, signedAt: when, sections: data.sections, terms: data.terms, payment: data.payment, consents: data.consents, signature: img, signerName: signerName, logo: document.querySelector(".brand-logo"), event: pdfEvent() })); }
         catch (e) { console.error("pdf failed", e); resolve(null); }
       };
       img.onerror = function(){ resolve(null); };
@@ -1446,7 +1454,8 @@
     var lockNote = document.createElement("div"); lockNote.className = "lock-note"; lockNote.textContent = "העיר נקבעה לפי הקישור שקיבלתם";
     cityEl.parentNode.appendChild(lockNote);
     var sl = document.getElementById("subtitleLocation"); if (sl && !sl.textContent) sl.textContent = cityEl.value;
-    pick(subjectEl, q.get("track"));
+    // תלם 5.19.45: כשהמסלול נקבע בקישור (שורת מסלול במערכת) - לא מציגים את בחירת המסלול; כרטיס המסלול נשאר
+    if (pick(subjectEl, q.get("track"))) { var fs = document.getElementById("field-subject"); if (fs) fs.style.display = "none"; }
     var school = q.get("school");
     if (school && !pick(schoolEl, school)) {
       pick(schoolEl, "אחר");
@@ -1542,7 +1551,7 @@
       if (!pdf) return;
       try { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", "telem-registration" + (isPreview ? "-preview" : "") + ".pdf"); } catch (e) {}
     }
-    makeSignedPdf("טופס הרשמה לתרגולים השוטפים" + (cityEl.value ? " - " + cityEl.value : ""), (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
+    makeSignedPdf("טופס הרשמה לתרגולים", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
     if (isPreviewNow()) {
       saveRegPdf(signedPdf, true);   // תלם 5.19.42: לא מורידים אוטומטית - כפתור הורדה בדף התודה (כמו במרתון)
       try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
