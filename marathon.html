@@ -1418,7 +1418,7 @@
     function saveRegPdf(pdf, isPreview){
       try { sessionStorage.removeItem("reg_pdf"); sessionStorage.removeItem("reg_pdf_name"); } catch (e) {}
       if (!pdf) return;
-      try { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", "telem-marathon-registration" + (isPreview ? "-preview" : "") + ".pdf"); } catch (e) {}
+      try { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", ("טופס הרשמה למרתון - " + String(studentFirst + " " + studentLast).replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim() + (isPreview ? " (תצוגה מקדימה)" : "")).trim() + ".pdf"); } catch (e) {}   // תלם 5.19.48: שם הקובץ בעברית
     }
     makeSignedPdf("טופס הרשמה למרתון", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
     if (isPreviewNow()) {

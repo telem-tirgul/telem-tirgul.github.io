@@ -405,6 +405,8 @@
   }
   .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
   @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
+  .closed-box{ background:var(--paper); border:1.5px solid var(--accent); border-radius:16px; padding:22px 18px; text-align:center; font-size:17px; line-height:1.8; margin:10px 0 18px; }
+  .closed-box a{ color:var(--accent); font-weight:800; }
 </style>
 </head>
 <body>
@@ -1513,7 +1515,18 @@
       CONFIG.trackPricing[c] = Object.assign({}, CONFIG.trackPricing[c] || {}, x);
     });
     updateAmountDisplay(); updateRecurDisplay(); updateTrackInfo(); updateTermsBox();
+    REG_OPEN = all; regClosedCheck();
   }).catch(function(){});
+  // תלם 5.19.48 (קובץ 68): טופס ההרשמה בעיר סגור - הודעה במקום הטופס (בתצוגה מקדימה מהמערכת - הטופס מוצג)
+  var REG_OPEN = null;
+  function regClosedCheck(){
+    var c = cityEl.value, x = REG_OPEN && c && REG_OPEN[c], closed = !!(x && x.registerOpen === false) && !/[?&]preview=1(&|$)/.test(location.search);
+    var box = document.getElementById("closedBox");
+    if (!box) { box = document.createElement("div"); box.id = "closedBox"; box.className = "closed-box"; form.parentNode.insertBefore(box, form); }
+    box.hidden = !closed; form.hidden = closed;
+    if (closed) box.innerHTML = "<b>ההרשמה" + (c ? " ב" + c.replace(/[<>&]/g, "") : "") + " כרגע סגורה.</b><br>לפרטים ולהרשמה: <a href=\"tel:0529067101\">052-9067101</a>";
+  }
+  cityEl.addEventListener("change", regClosedCheck);
   updateSubjectChoiceVisibility();
   updateLevelFieldsVisibility();
   renderSchoolOptions();
@@ -1645,7 +1658,7 @@
     function saveRegPdf(pdf, isPreview){
       try { sessionStorage.removeItem("reg_pdf"); sessionStorage.removeItem("reg_pdf_name"); } catch (e) {}
       if (!pdf) return;
-      try { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", "telem-registration" + (isPreview ? "-preview" : "") + ".pdf"); } catch (e) {}
+      try { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", ("טופס הרשמה - " + String(studentFirst + " " + studentLast).replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim() + (isPreview ? " (תצוגה מקדימה)" : "")).trim() + ".pdf"); } catch (e) {}   // תלם 5.19.48: שם הקובץ בעברית
     }
     makeSignedPdf("טופס הרשמה לתרגולים", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
     if (isPreviewNow()) {

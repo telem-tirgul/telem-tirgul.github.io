@@ -147,7 +147,7 @@
 
   // תלם 5.19.40: הורדת הטופס החתום (נשמר בדפדפן בעת השליחה, בלשונית הזו בלבד) - רק בלחיצה, לא אוטומטית
   (function(){
-    var pdf = null, name = "telem-registration.pdf";
+    var pdf = null, name = "טופס הרשמה - תלם.pdf";
     try { pdf = sessionStorage.getItem("reg_pdf"); name = sessionStorage.getItem("reg_pdf_name") || name; } catch (e) {}
     if (!pdf || pdf.indexOf("data:application/pdf;base64,") !== 0) return;
     var btn = document.getElementById("dlPdf"); btn.hidden = false; document.getElementById("dlNote").hidden = false;

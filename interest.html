@@ -399,6 +399,8 @@
   }
   .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
   @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
+  .closed-box{ background:var(--paper); border:1.5px solid var(--accent); border-radius:16px; padding:22px 18px; text-align:center; font-size:17px; line-height:1.8; margin:10px 0 18px; }
+  .closed-box a{ color:var(--accent); font-weight:800; }
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -574,7 +576,19 @@ callSupabase("reg_prices_public", null).then(function(all){
   if (!all || typeof all !== "object") return;
   Object.keys(all).forEach(function(c){ const x = all[c]; if (!x || !x.single || x.single.early == null) return; CONFIG.trackPricing[c] = Object.assign({}, CONFIG.trackPricing[c] || {}, x); });
   renderTracks();
+  INT_OPEN = all; intClosedCheck();
 }).catch(function(){});
+// תלם 5.19.48 (קובץ 68): טופס ההתעניינות סגור - הודעה במקום הטופס
+var INT_OPEN = null;
+function intClosedCheck(){
+  if (!INT_OPEN || PREVIEW) return;
+  const c = $("f-city").value, vals = Object.values(INT_OPEN);
+  const closed = c && INT_OPEN[c] ? INT_OPEN[c].interestOpen === false : (vals.length > 0 && vals.every(x => x && x.interestOpen === false));
+  let box = $("closedBox"); if (!box) { box = document.createElement("div"); box.id = "closedBox"; box.className = "closed-box"; $("intForm").parentNode.insertBefore(box, $("intForm")); }
+  box.hidden = !closed; $("intForm").hidden = closed; const tb = $("tracksBox"); if (tb) tb.hidden = closed; const ib = document.querySelector(".intro"); if (ib) ib.hidden = closed;
+  if (closed) box.innerHTML = "<b>ההרשמה כרגע סגורה.</b><br>לפרטים: <a href=\"tel:0529067101\">052-9067101</a>";
+}
+$("f-city").addEventListener("change", intClosedCheck);
 const digits = (v) => String(v || "").replace(/\D/g, "");
   function callSupabase(fnName, payload, raw){
     const s = CONFIG.supabase;
