@@ -69,7 +69,7 @@
       <div class="sum" id="sum" hidden></div>
       <div class="sec-t" id="meetT" hidden>מועדי המפגשים</div>
       <ul class="meet" id="meet" hidden></ul>
-      <div class="sec-t" id="nextT" hidden>לקראת המרתון</div>
+      <div class="sec-t" id="nextT" hidden>השלבים הבאים</div>
       <ul class="next" id="next" hidden></ul>
       <button type="button" class="dl-btn" id="dlPdf" hidden>⬇ הורדת הטופס החתום (PDF)</button>
       <div class="dl-note" id="dlNote" hidden>מומלץ לשמור את הקובץ - הוא זמין להורדה רק מהדף הזה.</div>
@@ -114,7 +114,8 @@
       steps.push("להביא למפגש: ספר ומחברת הלימוד, כלי כתיבה ומחשבון (לתלמידי כיתות ח' ומעלה).");
       steps.push("ביטול אפשרי עד 24 שעות לפני תחילת המרתון, בפנייה בכתב.");
     }
-    $("nextT").textContent = x.kind === "marathon" ? "לקראת המרתון" : "השלבים הבאים";
+    // תלם 5.19.46: הכותרת לפי מספר הסעיפים - "השלב הבא" (אחד) / "השלבים הבאים" (כמה), גם במרתון
+    $("nextT").textContent = steps.length === 1 ? "השלב הבא" : "השלבים הבאים";
     if (steps.length) { var nl = $("next"); steps.forEach(function(t, i){ var li = document.createElement("li"); var n = document.createElement("span"); n.className = "n"; n.textContent = i + 1; var s2 = document.createElement("span"); s2.textContent = t; li.appendChild(n); li.appendChild(s2); nl.appendChild(li); }); nl.hidden = false; $("nextT").hidden = false; }
   })();
 
@@ -130,6 +131,7 @@
     [].slice.call(nl.children).forEach(function(li){ if (/חשבונית/.test(li.textContent)) li.remove(); });
     [].slice.call(nl.children).forEach(function(li, i){ var n = li.querySelector(".n"); if (n) n.textContent = i + 1; });
     if (!nl.children.length) { nl.hidden = true; document.getElementById("nextT").hidden = true; }
+    else document.getElementById("nextT").textContent = nl.children.length === 1 ? "השלב הבא" : "השלבים הבאים";
   };
 
   // תלם 5.19.40: הורדת הטופס החתום (נשמר בדפדפן בעת השליחה, בלשונית הזו בלבד) - רק בלחיצה, לא אוטומטית
