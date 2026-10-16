@@ -416,6 +416,11 @@
           </select>
           <div class="error-msg">שדה חובה</div>
         </div>
+        <div class="field" id="field-hakbatsa" hidden>
+          <label for="f-hakbatsa">הקבצה <span class="req">*</span></label>
+          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected>בחרו הקבצה</option></select>
+          <div class="error-msg">שדה חובה</div>
+        </div>
         <div class="field" id="field-student-phone">
           <label for="f-student-phone">נייד תלמיד/ה</label>
           <input type="tel" id="f-student-phone" name="studentPhone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel">
@@ -688,6 +693,14 @@
         }
         document.getElementById("marInfoTitle").textContent = (MARATHON.name || "מרתון מתמטיקה") + (MARATHON.school ? " · " + MARATHON.school + (MARATHON.city ? ", " + MARATHON.city : "") : "");
         if (MARATHON.name && MARATHON.name !== "מרתון מתמטיקה") document.querySelector(".subtitle").firstChild.textContent = "טופס הרשמה ל" + MARATHON.name;
+        // הקבצה (תלם 5.19.35): האפשרויות מוגדרות במרתון במערכת. אם יש - שדה חובה.
+        var hk = Array.isArray(MARATHON.hakbatsa_options) ? MARATHON.hakbatsa_options.filter(Boolean) : [];
+        var hkSel = document.getElementById("f-hakbatsa");
+        if (hk.length) {
+          hk.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
+          document.getElementById("field-hakbatsa").hidden = false; hkSel.required = true;
+          hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); });
+        }
         updateAmountDisplay(); renderGroups();
       });
   }
@@ -1124,6 +1137,11 @@
     setInvalid("field-grade", !grade);
     if (!grade) valid = false;
 
+    const hakEl = document.getElementById("f-hakbatsa"), needHak = !document.getElementById("field-hakbatsa").hidden;
+    const hakbatsa = needHak ? hakEl.value : "";
+    setInvalid("field-hakbatsa", needHak && !hakbatsa);
+    if (needHak && !hakbatsa) valid = false;
+
     setInvalid("field-parent-first", !parentFirst);
     if (!parentFirst) valid = false;
 
@@ -1174,6 +1192,7 @@
       pay_by_phone: isPhonePay(),
       marathon_code: MARATHON_CODE,
       session_id: sessionId,
+      hakbatsa: hakbatsa || null,
       student: { first_name: studentFirst, last_name: studentLast, phone: studentPhone, school: school, grade: grade },
       parent: { first_name: parentFirst, last_name: parentLast, phone: phone, email: email }
     };
