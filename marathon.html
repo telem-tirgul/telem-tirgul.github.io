@@ -152,7 +152,7 @@
   }
 
   .row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  @media (max-width:520px){ .row{ grid-template-columns:1fr; } }
+  @media (max-width:520px){ .row{ grid-template-columns:1fr; } .row.keep2{ grid-template-columns:1fr 1fr; gap:10px; } }
 
   .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
   .field label{ font-weight:700; font-size:14.5px; color:var(--ink); }
@@ -339,6 +339,10 @@
   .sig-tools{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:13px; color:var(--ink-soft); }
   .sig-tools button{ background:none; border:1px solid var(--border); border-radius:8px; padding:4px 12px; font:inherit; color:var(--ink); cursor:pointer; }
   .hp-field{ position:absolute !important; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; opacity:0; pointer-events:none; }
+  #field-payphone.invalid #payMethodError{ display:block; } #field-payphone.invalid .pm-opts{ outline:2px solid var(--error); outline-offset:3px; border-radius:10px; }
+  .pm-lock{ margin:8px 0 2px; font-size:13px; }
+  #fsFirstTime .opt-price{ font-family:'Heebo',sans-serif; font-size:19px; font-weight:800; color:var(--accent); }
+  .amount-row.main strong{ font-size:22px !important; } .amount-row.main strong.ph{ font-size:15px !important; font-weight:700; }
   .price-option.single{ cursor:default; } .price-option.single input{ display:none; }
 </style>
 </head>
@@ -353,20 +357,17 @@
   <h1><span class="line"></span> תלם - המרכז לשיעורי תרגול <span class="line right"></span></h1>
   <div class="subtitle">טופס הרשמה למרתון מתמטיקה<span id="subtitleLocation"></span></div>
 
-  <div class="intro">
-    <div id="marIntro">בוחרים קבוצה, ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח.</div>
-    <div class="lock-line">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
-  </div>
+  <div class="intro" hidden><div id="marIntro"></div></div>
 
   <div class="top-error" id="topError" style="display:none;">יש לתקן את השדות המסומנים לפני שממשיכים.</div>
 
   <form id="marathonForm" novalidate>
 
     <div class="mar-info" id="marInfo">
-      <div class="mar-info-title" id="marInfoTitle">מרתון מתמטיקה</div>
+      <div class="mar-info-title" id="marInfoTitle" hidden>מרתון מתמטיקה</div>
       <div id="marInfoDesc">שיעורי לימוד ותרגול אקדמיים.</div>
-      <div class="mar-info-label">מחיר (תשלום חד-פעמי):</div>
-      <ul class="mar-info-list">
+      <div class="mar-info-label" hidden>מחיר (תשלום חד-פעמי):</div>
+      <ul class="mar-info-list" hidden>
         <li><b id="marPriceFirst">295 ₪</b> - מרתון ראשון בשנת הלימודים</li>
         <li><b id="marPriceRepeat">236 ₪</b> - למי שכבר השתתף/ה במרתון השנה</li>
       </ul>
@@ -382,7 +383,7 @@
     </fieldset>
 
     <fieldset>
-      <legend>פרטי התלמיד/ה וההורה</legend>
+      <legend>פרטי התלמיד/ה</legend>
 
       <div class="field" id="field-school">
         <label for="f-school">בית ספר <span class="req">*</span></label>
@@ -390,7 +391,7 @@
         <div class="error-msg">שדה חובה</div>
       </div>
 
-      <div class="row">
+      <div class="row keep2">
         <div class="field" id="field-student-first">
           <label for="f-student-first">שם פרטי תלמיד/ה <span class="req">*</span></label>
           <input type="text" id="f-student-first" name="studentFirst" autocomplete="given-name" required>
@@ -418,18 +419,24 @@
           </select>
           <div class="error-msg">שדה חובה</div>
         </div>
-        <div class="field" id="field-hakbatsa" hidden>
-          <label for="f-hakbatsa">הקבצה <span class="req">*</span></label>
-          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected>בחרו הקבצה</option></select>
-          <div class="error-msg">שדה חובה</div>
-        </div>
         <div class="field" id="field-student-phone">
           <label for="f-student-phone">נייד תלמיד/ה</label>
           <input type="tel" id="f-student-phone" name="studentPhone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel">
         </div>
+
       </div>
 
-      <div class="row">
+      <div class="field" id="field-hakbatsa" hidden>
+          <label for="f-hakbatsa">הקבצה <span class="req">*</span></label>
+          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected>בחרו הקבצה</option></select>
+          <div class="error-msg">שדה חובה</div>
+      </div>
+
+    </fieldset>
+
+    <fieldset>
+      <legend>פרטי ההורה</legend>
+      <div class="row keep2">
         <div class="field" id="field-parent-first">
           <label for="f-parent-first">שם פרטי הורה <span class="req">*</span></label>
           <input type="text" id="f-parent-first" name="parentFirst" autocomplete="given-name" required>
@@ -441,17 +448,18 @@
         </div>
       </div>
 
-      <div class="field" id="field-phone">
-        <label for="f-phone">טלפון הורה <span class="req">*</span></label>
-        <input type="tel" id="f-phone" name="phone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
-        <div class="hint">10 ספרות, ללא מקפים</div>
-        <div class="error-msg">יש להזין 10 ספרות</div>
-      </div>
-
-      <div class="field" id="field-email">
-        <label for="f-email">אימייל <span class="req">*</span></label>
-        <input type="email" id="f-email" name="email" autocomplete="email" required>
-        <div class="error-msg">כתובת אימייל לא תקינה</div>
+      <div class="row">
+        <div class="field" id="field-phone">
+          <label for="f-phone">טלפון הורה <span class="req">*</span></label>
+          <input type="tel" id="f-phone" name="phone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
+          <div class="hint">10 ספרות, ללא מקפים</div>
+          <div class="error-msg">יש להזין 10 ספרות</div>
+        </div>
+        <div class="field" id="field-email">
+          <label for="f-email">אימייל <span class="req">*</span></label>
+          <input type="email" id="f-email" name="email" autocomplete="email" required>
+          <div class="error-msg">כתובת אימייל לא תקינה</div>
+        </div>
       </div>
     </fieldset>
 
@@ -502,11 +510,13 @@
     <div class="amount-breakdown" id="amountBreakdown"></div>
 
     <div class="pay-method" id="field-payphone">
-      <div class="pm-title">אופן התשלום</div>
+      <div class="pm-title">איך תרצו לשלם? <span class="req">*</span></div>
       <div class="pm-opts" id="pmOpts">
-        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b>אשראי עכשיו</b><small>מעבר לעמוד תשלום מאובטח</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b>תשלום טלפוני</b><small>ניצור איתכם קשר לתשלום בכרטיס אשראי</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard"><span><b>💳 תשלום באשראי עכשיו</b><small>אחרי השליחה עוברים לעמוד תשלום מאובטח</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b>📞 תשלום טלפוני</b><small>שולחים את ההרשמה, וניצור איתכם קשר לתשלום בכרטיס אשראי</small></span></label>
       </div>
+      <div class="lock-line pm-lock">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
+      <div class="error-msg" id="payMethodError">יש לבחור אופן תשלום</div>
       <div class="pm-only" id="payPhoneOnly" hidden><b>📞 התשלום טלפוני</b> - אחרי שליחת ההרשמה ניצור איתכם קשר לתשלום בכרטיס אשראי.</div>
     </div>
     <label class="consent" id="field-consent">
@@ -524,7 +534,7 @@
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></label></div>
 
     <div class="submit-wrap">
-      <button type="submit" id="submitBtn">המשך לתשלום מאובטח</button>
+      <button type="submit" id="submitBtn">שליחת ההרשמה</button>
     </div>
   </form>
 
@@ -611,6 +621,7 @@
     optFirst.classList.toggle("selected", firstTimeYesEl.checked);
     var amount = getAmount();
     amountDisplay.textContent = amount != null ? "₪" + amount.toFixed(0) : "יש לבחור אפשרות למעלה";
+    amountDisplay.classList.toggle("ph", amount == null);
     amountBreakdown.textContent = "";
   }
 
@@ -654,9 +665,14 @@
     if (!gs.length) { box.innerHTML = '<div class="hint">אין כרגע קבוצות פתוחות להרשמה.</div>'; return; }
     // תלם 5.19.37: התיאור לפי המפגשים האמיתיים (מספר ומשך), לא טקסט קבוע
     (function(){ var ms = meetingsOf(gs[0]) || [], mins = function(m){ var a = String(m.start || "").split(":"), z = String(m.end || "").split(":"); return (Number(z[0]) * 60 + Number(z[1] || 0)) - (Number(a[0]) * 60 + Number(a[1] || 0)); };
-      var durTxt = function(d){ return d === 60 ? "שעה" : d === 90 ? "שעה וחצי" : d === 120 ? "שעתיים" : d === 150 ? "שעתיים וחצי" : d === 180 ? "שלוש שעות" : d + " דקות"; };
+      // תלם 5.19.38: משך בעברית רגילה - שעה ורבע, שעתיים וחצי, שעתיים ו-40 דקות...
+      var durTxt = function(d){ var h = Math.floor(d / 60), m = d % 60, H = ["", "שעה", "שעתיים", "שלוש שעות", "ארבע שעות", "חמש שעות"][h] || (h + " שעות");
+        if (!h) return d + " דקות"; if (!m) return H; var M = m === 15 ? "ורבע" : m === 30 ? "וחצי" : m === 45 ? "ושלושה רבעים" : "ו-" + m + " דקות"; return H + " " + M; };
       var ds = ms.map(mins).filter(function(d){ return d > 0; }), n = ms.length, nTxt = ["", "מפגש אחד", "שני מפגשים", "שלושה מפגשים", "ארבעה מפגשים", "חמישה מפגשים"][n] || (n + " מפגשים");
-      if (n) document.getElementById("marInfoDesc").textContent = "שיעורי לימוד ותרגול אקדמיים, ב" + nTxt + (ds.length === n && ds.every(function(d){ return d === ds[0]; }) ? " של " + durTxt(ds[0]) : "") + ".";
+      // תלם 5.19.38: שעת לימוד במרתון (וגם שיעור של תלם) = 45 דקות. למשל 135 דקות = "3 שעות לימוד (שעתיים ורבע)"
+      var same = ds.length === n && ds.every(function(d){ return d === ds[0]; });
+      var lenTxt = !same ? "" : (ds[0] % 45 === 0 && ds[0] > 45 ? " של " + (ds[0] / 45) + " שעות לימוד (" + durTxt(ds[0]) + ")" : " של " + durTxt(ds[0]));
+      if (n) document.getElementById("marInfoDesc").textContent = "המרתון כולל " + nTxt + lenTxt + (n > 1 ? " כל אחד" : "") + ", שבהם עוברים יחד על החומר, מתרגלים ופותרים שאלות בליווי צמוד של המתרגלים.";
     })();
     gs.forEach(function(g){
       var full = g.seats_left != null && g.seats_left <= 0;
@@ -667,7 +683,7 @@
       var add = function(text, cls){ var sp = document.createElement("span"); sp.className = "sep"; sp.textContent = " · "; title.appendChild(sp);
         var t = document.createElement("span"); t.className = "mt" + (cls ? " " + cls : ""); t.textContent = text; title.appendChild(t); };
       meetingsOf(g).forEach(function(m){ add(meetingText(m)); });
-      if (g.location) add("בבית הספר " + g.location, "loc");
+      // תלם 5.19.38: בית הספר כבר בשם המרתון
       wrap.appendChild(title);
       var seats = full ? "הקבוצה מלאה" : (g.seats_left != null && g.seats_left <= 5 ? "נשארו " + g.seats_left + " מקומות" : "");
       if (seats) { var sd = document.createElement("div"); sd.className = "opt-seats"; sd.textContent = seats; wrap.appendChild(sd); }
@@ -688,23 +704,30 @@
     return fetch(s.url + "/rest/v1/rpc/marathon_public", { method: "POST", headers: headers, body: JSON.stringify({ p_code: MARATHON_CODE }) })
       .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }).then(function(m){
         MARATHON = m || null;
-        if (!MARATHON) { marNotice("ההרשמה למרתון הזה סגורה, או שהקישור לא תקין. לפרטים: 052-9067101"); document.getElementById("groupOptions").innerHTML = ""; submitBtn.disabled = true; MAR_BLOCKED = true; return; }
+        if (!MARATHON) { marNotice("ההרשמה למרתון הזה סגורה, או שהקישור לא תקין. לפרטים: 052-9067101"); document.getElementById("groupOptions").innerHTML = ""; submitBtn.disabled = true; MAR_BLOCKED = true;
+          form.hidden = true; return; }   // תלם 5.19.38: סגור - רק ההודעה, בלי שום תוכן
         lockSchool(MARATHON.school || "");
+        // תלם 5.19.38: בית הספר והשכבה קבועים לפי המרתון - לא שואלים את ההורה (השם של המרתון בכותרת אומר את זה)
+        document.getElementById("field-school").hidden = true;
+        if (MARATHON.grade) { var gsel = document.getElementById("f-grade"), gv = String(MARATHON.grade).replace(/['"׳]/g, "") + "'";
+          if (![].some.call(gsel.options, function(o){ return o.value === gv; })) { var go = document.createElement("option"); go.value = gv; go.textContent = gv; gsel.appendChild(go); }
+          gsel.value = gv; document.getElementById("field-grade").hidden = true; }
         CONFIG.locationLabel = [MARATHON.city, MARATHON.school].filter(Boolean).join(" · ");
-        document.getElementById("subtitleLocation").textContent = CONFIG.locationLabel;
-        CONFIG.priceFirstTime = Number(MARATHON.price_first); CONFIG.priceReturning = Number(MARATHON.price_repeat);
+        document.getElementById("subtitleLocation").textContent = "";
+        CONFIG.priceFirstTime = Number(MARATHON.price_first); CONFIG.priceReturning = Number(MARATHON.price_repeat) || Number(MARATHON.price_first);
         document.querySelector("#opt-first .opt-price").textContent = CONFIG.priceFirstTime.toFixed(0) + " ₪";
         document.querySelector("#opt-returning .opt-price").textContent = CONFIG.priceReturning.toFixed(0) + " ₪";
         document.getElementById("marPriceFirst").textContent = CONFIG.priceFirstTime.toFixed(0) + " ₪";
         document.getElementById("marPriceRepeat").textContent = CONFIG.priceReturning.toFixed(0) + " ₪";
         // מחיר אחד למרתון: לא שואלים אם זה המרתון הראשון, ומציגים מחיר אחד
         if (CONFIG.priceFirstTime === CONFIG.priceReturning) {
-          document.getElementById("fsFirstTime").hidden = true; firstTimeYesEl.checked = true;
+          document.getElementById("fsFirstTime").hidden = true; firstTimeYesEl.checked = true; document.querySelector(".amount-row.main span").textContent = "מחיר המרתון";
           document.getElementById("marPriceRepeat").parentNode.hidden = true;
           document.getElementById("marPriceFirst").parentNode.innerHTML = '<b id="marPriceFirst">' + CONFIG.priceFirstTime.toFixed(0) + ' ₪</b>';
         }
-        document.getElementById("marInfoTitle").textContent = (MARATHON.name || "מרתון מתמטיקה") + (MARATHON.school ? " · " + MARATHON.school + (MARATHON.city ? ", " + MARATHON.city : "") : "");
-        if (MARATHON.name && MARATHON.name !== "מרתון מתמטיקה") document.querySelector(".subtitle").firstChild.textContent = "טופס הרשמה ל" + MARATHON.name;
+        // תלם 5.19.38: הכותרת = שם המרתון בלבד (בית הספר והשכבה כבר בשם)
+        document.querySelector(".subtitle").firstChild.textContent = MARATHON.name || ("מרתון מתמטיקה" + (MARATHON.school ? " · " + MARATHON.school : ""));
+        document.title = (MARATHON.name || "מרתון מתמטיקה") + " - תלם";
         // הקבצה (תלם 5.19.35): האפשרויות מוגדרות במרתון במערכת. אם יש - שדה חובה.
         var hk = Array.isArray(MARATHON.hakbatsa_options) ? MARATHON.hakbatsa_options.filter(Boolean) : [];
         var hkSel = document.getElementById("f-hakbatsa");
@@ -770,10 +793,12 @@
   const payPhoneEl = document.getElementById("f-payphone");
   const isPhonePay = () => payPhoneEl.checked;
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
-  const SUBMIT_TXT = () => isPhonePay() ? "שליחת ההרשמה" : "המשך לתשלום מאובטח";
+  const isCardPay = () => document.getElementById("f-paycard").checked;
+  const SUBMIT_TXT = () => isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
   function paintPayPhone(){
     const c = document.getElementById("consentText"); c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;
-    if (!submitBtn.disabled || submitBtn.textContent === "המשך לתשלום מאובטח" || submitBtn.textContent === "שליחת ההרשמה") submitBtn.textContent = SUBMIT_TXT();
+    if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
+    document.getElementById("field-payphone").classList.remove("invalid");
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
   if (NO_TERMINAL) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; document.getElementById("payPhoneOnly").hidden = false; }
@@ -1167,6 +1192,11 @@
 
     setInvalid("field-first-time", !firstTime);
     if (!firstTime) valid = false;
+
+    // תלם 5.19.38: אופן התשלום - בחירה מפורשת (אשראי עכשיו / טלפוני)
+    const pmOk = isPhonePay() || isCardPay();
+    document.getElementById("field-payphone").classList.toggle("invalid", !pmOk);
+    if (!pmOk) valid = false;
 
     document.getElementById("termsConsentError").textContent =
       termsConsent ? "" : "יש לאשר את תנאי ההתקשרות כדי להמשיך.";
