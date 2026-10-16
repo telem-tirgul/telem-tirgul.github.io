@@ -217,7 +217,8 @@
     color:var(--ink); font-size:15px; line-height:1.75; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
   .mar-info-title{ font-family:'Heebo',sans-serif; font-weight:800; font-size:18px; color:var(--accent); margin-bottom:6px; }
   .mar-info-label{ font-weight:800; color:var(--accent); margin:10px 0 2px; }
-  .mar-info-list{ margin:0; padding-inline-start:20px; } .mar-info-list b{ font-weight:800; }
+  .mar-info-list{ margin:4px 0 0; padding:0; list-style:none; display:grid; gap:4px; } .mar-info-list li{ font-size:15px; }
+  .mar-info-list b{ font-family:'Heebo',sans-serif; font-weight:900; font-size:26px; color:var(--accent); margin-inline-end:6px; vertical-align:-2px; }
   #groupOptions .price-option{ padding:14px 16px; }
   #groupOptions .opt-title{ font-size:16px; } #groupOptions .opt-title b{ font-size:17px; color:var(--accent); }
   #groupOptions .opt-title .sep{ display:none; } #groupOptions .opt-title .mt{ display:block; font-weight:700; margin-top:3px; }
@@ -338,6 +339,7 @@
   .sig-tools{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:13px; color:var(--ink-soft); }
   .sig-tools button{ background:none; border:1px solid var(--border); border-radius:8px; padding:4px 12px; font:inherit; color:var(--ink); cursor:pointer; }
   .hp-field{ position:absolute !important; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; opacity:0; pointer-events:none; }
+  .price-option.single{ cursor:default; } .price-option.single input{ display:none; }
 </style>
 </head>
 <body>
@@ -352,7 +354,7 @@
   <div class="subtitle">טופס הרשמה למרתון מתמטיקה<span id="subtitleLocation"></span></div>
 
   <div class="intro">
-    <div>בוחרים קבוצה, ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח.</div>
+    <div id="marIntro">בוחרים קבוצה, ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח.</div>
     <div class="lock-line">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
   </div>
 
@@ -362,7 +364,7 @@
 
     <div class="mar-info" id="marInfo">
       <div class="mar-info-title" id="marInfoTitle">מרתון מתמטיקה</div>
-      <div>ארבעה שיעורי לימוד ותרגול אקדמיים, בשני מפגשים של שעה וחצי.</div>
+      <div id="marInfoDesc">שיעורי לימוד ותרגול אקדמיים.</div>
       <div class="mar-info-label">מחיר (תשלום חד-פעמי):</div>
       <ul class="mar-info-list">
         <li><b id="marPriceFirst">295 ₪</b> - מרתון ראשון בשנת הלימודים</li>
@@ -371,7 +373,7 @@
     </div>
 
     <fieldset id="groupFieldset">
-      <legend>בחירת קבוצה - ימים ושעות</legend>
+      <legend id="groupLegend">בחירת קבוצה - ימים ושעות</legend>
       <div class="field" id="field-group">
         <div class="field-title" hidden>קבוצה</div>
         <div class="price-options" id="groupOptions"><div class="hint">טוען את הקבוצות…</div></div>
@@ -650,6 +652,12 @@
     var box = document.getElementById("groupOptions"), gs = (MARATHON && MARATHON.groups) || [];
     box.innerHTML = "";
     if (!gs.length) { box.innerHTML = '<div class="hint">אין כרגע קבוצות פתוחות להרשמה.</div>'; return; }
+    // תלם 5.19.37: התיאור לפי המפגשים האמיתיים (מספר ומשך), לא טקסט קבוע
+    (function(){ var ms = meetingsOf(gs[0]) || [], mins = function(m){ var a = String(m.start || "").split(":"), z = String(m.end || "").split(":"); return (Number(z[0]) * 60 + Number(z[1] || 0)) - (Number(a[0]) * 60 + Number(a[1] || 0)); };
+      var durTxt = function(d){ return d === 60 ? "שעה" : d === 90 ? "שעה וחצי" : d === 120 ? "שעתיים" : d === 150 ? "שעתיים וחצי" : d === 180 ? "שלוש שעות" : d + " דקות"; };
+      var ds = ms.map(mins).filter(function(d){ return d > 0; }), n = ms.length, nTxt = ["", "מפגש אחד", "שני מפגשים", "שלושה מפגשים", "ארבעה מפגשים", "חמישה מפגשים"][n] || (n + " מפגשים");
+      if (n) document.getElementById("marInfoDesc").textContent = "שיעורי לימוד ותרגול אקדמיים, ב" + nTxt + (ds.length === n && ds.every(function(d){ return d === ds[0]; }) ? " של " + durTxt(ds[0]) : "") + ".";
+    })();
     gs.forEach(function(g){
       var full = g.seats_left != null && g.seats_left <= 0;
       var lab = document.createElement("label"); lab.className = "price-option" + (full ? " full" : "");
@@ -664,6 +672,10 @@
       var seats = full ? "הקבוצה מלאה" : (g.seats_left != null && g.seats_left <= 5 ? "נשארו " + g.seats_left + " מקומות" : "");
       if (seats) { var sd = document.createElement("div"); sd.className = "opt-seats"; sd.textContent = seats; wrap.appendChild(sd); }
       lab.appendChild(inp); lab.appendChild(wrap); box.appendChild(lab);
+      // תלם 5.19.37: קבוצה אחת בלבד - לא צריך לבחור. מוצגים התאריכים והשעות, והקבוצה כבר נבחרה.
+      if (gs.length === 1 && !full) { inp.checked = true; lab.classList.add("selected", "single"); b.textContent = "המפגשים";
+        document.getElementById("groupLegend").textContent = "המפגשים - ימים ושעות";
+        document.getElementById("marIntro").textContent = "ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח."; }
       inp.addEventListener("change", function(){
         box.querySelectorAll(".price-option").forEach(function(l){ l.classList.toggle("selected", l.querySelector("input").checked); });
         setInvalid("field-group", false);
