@@ -482,6 +482,15 @@
   }
   .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
   @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
+  /* 5.19.47: כמה קבוצות - כל שורות המפגשים באותו רוחב (מיושר), והתיאור במחשב מתחיל למעלה */
+  #groupOptions .price-option > div{ flex:1 1 auto; min-width:0; }
+  #groupOptions .opt-title .mt{ width:100%; box-sizing:border-box; }
+  .layout-side > .mar-info{ justify-content:flex-start !important; }
+  #groupOptions .opt-title .mt.mt2{ display:grid !important; grid-template-columns:auto 1fr auto; align-items:center; column-gap:10px; row-gap:2px; }
+  #groupOptions .opt-title .mt.mt2::before{ grid-row:1; }
+  #groupOptions .mt2 .md{ font-weight:700; }
+  #groupOptions .mt2 .mtm{ grid-column:3; font-weight:700; direction:ltr; text-align:left; white-space:nowrap; }
+  #groupOptions .mt2 .mr{ grid-column:2 / 4; font-size:13px; font-weight:600; color:var(--ink-soft); }
 </style>
 </head>
 <body>
@@ -850,7 +859,11 @@
       var b = document.createElement("b"); b.textContent = g.label; title.appendChild(b);
       var add = function(text, cls){ var sp = document.createElement("span"); sp.className = "sep"; sp.textContent = " · "; title.appendChild(sp);
         var t = document.createElement("span"); t.className = "mt" + (cls ? " " + cls : ""); t.textContent = text; title.appendChild(t); };
-      meetingsOf(g).forEach(function(m){ add(meetingText(m)); });
+      // תלם 5.19.47: כל מפגש בשורה מסודרת - יום ותאריך מימין, השעה משמאל, הכיתה מתחת (גם בנייד מיושר)
+      meetingsOf(g).forEach(function(m){ var sp = document.createElement("span"); sp.className = "sep"; sp.textContent = " · "; title.appendChild(sp);
+        var parts = meetingText(m).split(" · "), t = document.createElement("span"); t.className = "mt mt2";
+        [["md", parts[0]], ["mtm", parts[1] || ""], ["mr", parts.slice(2).join(" · ")]].forEach(function(x){ if (!x[1]) return; var e = document.createElement("span"); e.className = x[0]; e.textContent = x[1]; t.appendChild(e); });
+        title.appendChild(t); });
       // תלם 5.19.38: בית הספר כבר בשם המרתון
       wrap.appendChild(title);
       var seats = full ? "הקבוצה מלאה" : (g.seats_left != null && g.seats_left <= 5 ? "נשארו " + g.seats_left + " מקומות" : "");
