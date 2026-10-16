@@ -213,7 +213,8 @@
   .track-info.blue{ --track-color:var(--cat-blue); }
   .track-info-title{ font-family:'Heebo',sans-serif; font-weight:800; font-size:15.5px; margin-bottom:10px; color:var(--track-color, var(--ink)); }
   .track-info-body{ margin-bottom:10px; }
-  .track-info-label{ font-weight:800; margin:0 0 4px; color:var(--track-color, var(--ink)); }
+  .track-info-label{ font-weight:800; margin:0 0 4px; color:var(--ink); }   /* 5.19.42: צבע רק בפס ובכותרת */
+  #tracksBox .track-info{ margin-bottom:12px; }
   .track-info-list{
     list-style:disc;
     margin:0 0 10px;
@@ -482,8 +483,16 @@ function renderTracks(){
       d.querySelector("p").textContent = MAR ? ("מפגשי תרגול מרוכזים לקראת מבחנים" + (dts ? " · מועדים: " + dts : "") + (MAR.price_first ? " · מחיר: " + Number(MAR.price_first) + " ₪" : "") + ".") : "מפגשי תרגול מרוכזים לקראת מבחנים. המועדים והמחיר יישלחו אליכם.";
       box.appendChild(d); return; }
     const info = CONFIG.trackInfo[t], cityT = CONFIG.trackPricing[city], pr = cityT && cityT[t];
-    d.innerHTML = "<h3></h3><p></p>" + (pr ? "<ul><li>הרשמה מוקדמת: <b>" + pr.early + " ₪</b> לחודש</li><li>הרשמה רגילה: <b>" + pr.regular + " ₪</b> לחודש</li><li>דמי שיבוץ והרשמה: <b>" + cityT.registrationFee + " ₪</b></li>" + (cityT.materialsFee ? "<li>חומרי תרגול ועזרי לימוד דיגיטליים: <b>" + cityT.materialsFee + " ₪</b> (מקוזז מעלות חודש יוני)</li>" : "") + "</ul>" : "");
-    d.querySelector("h3").textContent = info.title; d.querySelector("p").textContent = info.body; box.appendChild(d);
+    // תלם 5.19.42: כמו בטופס ההרשמה - כרטיס המסלול (צבע רק בפס בצד ובכותרת), תשלום חודשי ותשלומים חד-פעמיים
+    const sd = (iso) => { const p = String(iso || "").split("-"); return p.length === 3 ? Number(p[2]) + "." + Number(p[1]) + "." + p[0].slice(2) : ""; };
+    const cut = sd(CONFIG.earlyRegistrationCutoff);
+    d.className = "track-info " + (info.color || "");
+    d.innerHTML = '<div class="track-info-title"></div><div class="track-info-body"></div>' + (pr ? '<div class="track-info-label">תשלום חודשי:</div><ul class="track-info-list">'
+        + '<li><b>' + pr.early + ' ₪</b> להרשמה מוקדמת' + (cut ? ' (עד ' + cut + ')' : '') + '</li><li><b>' + pr.regular + ' ₪</b> להרשמה רגילה' + (cut ? ' (מ-' + cut + ' ואילך)' : '') + '</li></ul>'
+        + '<div class="track-info-label">בנוסף, בעת ההרשמה יגבו תשלומים חד-פעמיים:</div><ul class="track-info-list">'
+        + (cityT.materialsFee ? '<li><b>' + cityT.registrationFee + ' ₪</b> דמי שיבוץ והרשמה</li><li><b>' + cityT.materialsFee + ' ₪</b> חומרי תרגול ועזרי לימוד דיגיטליים - סכום זה יקוזז מתשלום חודש יוני.</li>'
+          : '<li><b>' + cityT.registrationFee + ' ₪</b> דמי שיבוץ והרשמה - סכום זה יקוזז מתשלום חודש יוני.</li>') + '</ul>' : '');
+    d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; box.appendChild(d);
   });
   $("introText").textContent = tracks.length ? "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה." : "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.";
 }

@@ -1536,10 +1536,16 @@
     const signature = signatureImage();
     if (!signature) { document.getElementById("sigError").textContent = "יש לחתום כדי להמשיך."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); return; }
     submitBtn.textContent = "מכין את הטופס החתום…";
+    // תלם 5.19.42: הטופס החתום נשמר בדפדפן (בלשונית הזו בלבד) - בדף התודה כפתור "הורדת הטופס החתום"
+    function saveRegPdf(pdf, isPreview){
+      try { sessionStorage.removeItem("reg_pdf"); sessionStorage.removeItem("reg_pdf_name"); } catch (e) {}
+      if (!pdf) return;
+      try { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", "telem-registration" + (isPreview ? "-preview" : "") + ".pdf"); } catch (e) {}
+    }
     makeSignedPdf("טופס הרשמה לתרגולים השוטפים" + (cityEl.value ? " - " + cityEl.value : ""), (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
     if (isPreviewNow()) {
-      if (signedPdf) { const dl = document.createElement("a"); dl.href = signedPdf; dl.download = "טופס-חתום-תצוגה-מקדימה.pdf"; document.body.appendChild(dl); dl.click(); }
-      try { sessionStorage.setItem("reg_summary", JSON.stringify({ name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
+      saveRegPdf(signedPdf, true);   // תלם 5.19.42: לא מורידים אוטומטית - כפתור הורדה בדף התודה (כמו במרתון)
+      try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
       setTimeout(function(){ location.href = new URL("thank-you.html?preview=1", location.href).href; }, 600); return;
     }
     const payload = {
@@ -1562,9 +1568,10 @@
     };
 
     callSupabase("submit_registration_v2", payload).then(function(res){
+      saveRegPdf(signedPdf, false);
       try {
         sessionStorage.setItem("reg_studentFullName", studentFirst + " " + studentLast);
-        sessionStorage.setItem("reg_summary", JSON.stringify({ name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
+        sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
         sessionStorage.setItem("reg_form_url", location.href);
       } catch (err) {}
       if (CONFIG.provider === "none" || isPhonePay()) { location.href = new URL("thank-you.html?pending=1" + (isPhonePay() ? "&phone=1" : ""), location.href).href; return; }

@@ -50,6 +50,7 @@
   .contact{ margin-top:20px; padding-top:16px; border-top:1px solid var(--border); text-align:center; font-size:13.5px; color:var(--ink-soft); line-height:1.8; }
   .contact a{ color:var(--maroon); font-weight:700; text-decoration:none; }
   .ph-big{ display:block; width:max-content; margin-top:8px; font-family:'Heebo',sans-serif; font-size:22px; font-weight:900; letter-spacing:.5px; color:var(--maroon); background:#fff; border:1.5px solid #E8CFA0; border-radius:10px; padding:4px 14px; text-decoration:none; white-space:nowrap; unicode-bidi:isolate; }   /* 5.19.41 */
+  .status{ justify-content:center; text-align:center; } .status .ph-big{ margin-inline:auto; } .status .ic{ display:none; }   /* 5.19.42: תיבות הזהב/הירוק במרכז */
   [hidden]{ display:none !important; }
 </style>
 </head>
@@ -91,7 +92,8 @@
       var tk = document.querySelector(".tick"); if (tk) tk.innerHTML = '<span style="font-size:30px;line-height:1">📝</span>';
       var pm0 = $("pendingMsg"); pm0.innerHTML = '<span class="ic">📞</span><span>טופס ההרשמה התקבל אך ההרשמה טרם הושלמה.<br>אנא צרו איתנו קשר בטלפון לצורך השלמת הרישום:<a class="ph-big" href="tel:0529067101" dir="ltr">052-9067101</a></span>';
     }
-    if (x && x.kind === "marathon" && !(phone && pending && !preview)) {   // בינתיים רק בטופס המרתון; שאר הטפסים - כמו קודם
+    var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
+    if (regLike && !(phone && pending && !preview)) {
       $("title").textContent = preview ? "כך ייראה האישור" : "ההרשמה התקבלה!";
       var first = String(x.name || "").trim().split(/\s+/)[0];
       if (x.name && (x.event || x.track)) { $("lead").textContent = first + " רשום/ה ל" + (x.event || x.track).replace(/^ל/, ""); $("lead").hidden = false; }
@@ -112,8 +114,23 @@
       steps.push("להביא למפגש: ספר ומחברת הלימוד, כלי כתיבה ומחשבון (לתלמידי כיתות ח' ומעלה).");
       steps.push("ביטול אפשרי עד 24 שעות לפני תחילת המרתון, בפנייה בכתב.");
     }
+    $("nextT").textContent = x.kind === "marathon" ? "לקראת המרתון" : "השלבים הבאים";
     if (steps.length) { var nl = $("next"); steps.forEach(function(t, i){ var li = document.createElement("li"); var n = document.createElement("span"); n.className = "n"; n.textContent = i + 1; var s2 = document.createElement("span"); s2.textContent = t; li.appendChild(n); li.appendChild(s2); nl.appendChild(li); }); nl.hidden = false; $("nextT").hidden = false; }
   })();
+
+  // תלם 5.19.42: תשלום אושר - למעלה בגדול "ההרשמה אושרה / חשבונית תישלח אליכם במייל"
+  window.__tyPaid = function(){
+    var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
+    if (!x || (x.kind !== "marathon" && x.kind !== "register")) return;
+    document.getElementById("title").textContent = "ההרשמה אושרה";
+    var ld = document.getElementById("lead"), inv = "חשבונית תישלח אליכם במייל";
+    if (ld.hidden || !ld.textContent) ld.textContent = inv; else ld.innerHTML = ld.textContent.replace(/[<>&]/g, "") + "<br>" + inv;
+    ld.hidden = false;
+    var nl = document.getElementById("next");
+    [].slice.call(nl.children).forEach(function(li){ if (/חשבונית/.test(li.textContent)) li.remove(); });
+    [].slice.call(nl.children).forEach(function(li, i){ var n = li.querySelector(".n"); if (n) n.textContent = i + 1; });
+    if (!nl.children.length) { nl.hidden = true; document.getElementById("nextT").hidden = true; }
+  };
 
   // תלם 5.19.40: הורדת הטופס החתום (נשמר בדפדפן בעת השליחה, בלשונית הזו בלבד) - רק בלחיצה, לא אוטומטית
   (function(){
@@ -144,7 +161,7 @@
         method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" },
         body: JSON.stringify({ ref: m[1] })
       }).then(function(r){ return r.json(); }).then(function(b){
-        if (b && b.paid) { msg.className = "status ok"; msg.textContent = "✔ התשלום התקבל בהצלחה. חשבונית תישלח אליכם במייל."; try { sessionStorage.removeItem("pay_pending"); } catch (e) {} return; }
+        if (b && b.paid) { msg.className = "status ok"; msg.textContent = "✔ התשלום התקבל בהצלחה."; if (window.__tyPaid) window.__tyPaid(); try { sessionStorage.removeItem("pay_pending"); } catch (e) {} return; }
         if (tries < 5) { setTimeout(check, 3000); return; }
         msg.textContent = "אישור התשלום עוד לא הגיע אלינו. אם חויבתם - הכול בסדר, האישור יתעדכן אצלנו בדקות הקרובות.";
       }).catch(function(){ if (tries < 5) setTimeout(check, 3000); else msg.textContent = "לא הצלחנו לבדוק כרגע את אישור התשלום. אם חויבתם - הכול בסדר."; });
