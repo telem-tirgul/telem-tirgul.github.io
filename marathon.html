@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://oulivucqbpmbavbavfvy.supabase.co; form-action 'self' https://directng.tranzila.com; frame-src https://challenges.cloudflare.com; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://oulivucqbpmbavbavfvy.supabase.co; form-action 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>הרשמה למרתון מתמטיקה - תלם</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -534,9 +534,14 @@
   // 1) הגדרות - כאן בלבד יש לעדכן פרטים
   // ----------------------------------------------------------------
   const CONFIG = {
-    // "tranzila" = מעבר לתשלום. ("none" = שמירה בלי תשלום - לא בשימוש)
+    // "icredit" = מעבר לעמוד תשלום מאובטח של איקרדיט (ריווחית). ("none" = שמירה בלי תשלום - לא בשימוש)
     // תצוגה מקדימה: מוסיפים לקישור ?preview=1 - שום דבר לא נשמר ולא עובר לתשלום.
-    provider: "tranzila",
+    provider: "icredit",
+    // תשלום באשראי באיקרדיט. enabled: false = כרגע רק תשלום טלפוני.
+    // לבדיקה לפני שמדליקים: מוסיפים לקישור ?cardtest=1 - יופיע גם "אשראי עכשיו".
+    // אין כאן שום סוד: פרטי המסוף נמצאים רק ב-Supabase Secrets.
+    creditCard: { enabled: false },
+
     // קישור "חזרה לאתר תלם" בראש הטופס - false כל עוד האתר לא עלה
     showSiteLink: false,
     currency: 1, // 1 = ש"ח
@@ -558,12 +563,6 @@
     // אותו הסכום בשני השדות).
     priceReturning: 236, // מי שכבר נרשם/השתתף במרתון מתמטיקה השנה
     priceFirstTime: 295, // מי שזה המרתון הראשון שלו/ה השנה
-
-    tranzila: {
-      terminalName: "YOUR_TERMINAL_NAME", // שם המסוף שקיבלת מטרנזילה
-      successUrl: new URL("thank-you.html", location.href).href,
-      failUrl: new URL("payment-failed.html", location.href).href
-    },
 
     // מסד הנתונים (Supabase). כל הרשמה נשמרת שם לפני המעבר לתשלום.
     // anonKey = המפתח הציבורי (publishable / anon). לא את המפתח הסודי.
@@ -738,8 +737,8 @@
   paymentConsentEl.addEventListener("change", updateSubmitAvailability);
   updateSubmitAvailability();
   if (CONFIG.showSiteLink) document.getElementById("siteBackLink").hidden = false;
-  // תצוגה מקדימה: ?preview=1 בקישור, או אוטומטית כל עוד אין מסוף טרנזילה אמיתי
-  const NO_TERMINAL = !CONFIG.tranzila || !CONFIG.tranzila.terminalName || /^YOUR_/.test(CONFIG.tranzila.terminalName);
+  // תצוגה מקדימה: ?preview=1 בקישור. כל עוד האשראי כבוי (creditCard.enabled) - רק תשלום טלפוני
+  const NO_TERMINAL = !(CONFIG.creditCard && CONFIG.creditCard.enabled) && !/[?&]cardtest=1(&|$)/.test(location.search);
   const EXPLICIT_PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   const PREVIEW = EXPLICIT_PREVIEW || NO_TERMINAL;
   // תשלום טלפוני: נשמר גם כשהאשראי באתר עוד לא מחובר (רק לא בתצוגה מקדימה מהמערכת)
@@ -1061,38 +1060,31 @@
     submitBtn.textContent = SUBMIT_TXT();
   }
 
-  // מעבר לדף הסליקה המאובטח של טרנזילה - עסקה חד-פעמית בלבד
-  // (tranmode=A), בלי הוראת קבע: המרתון הוא אירוע חד-פעמי ולא
-  // פעילות שוטפת, ולכן אין פה תשלום חודשי חוזר.
-  function goToTranzila({ contactName, phone, email, amount, orderId, description }){
-    const t = CONFIG.tranzila;
-    const url = "https://directng.tranzila.com/" + t.terminalName + "/iframenew.php";
-
-    const fields = {
-      sum: amount,
-      currency: CONFIG.currency,
-      contact: contactName,
-      email: email,
-      phone: phone,
-      tranmode: "A",
-      success_url_address: t.successUrl,
-      fail_url_address: t.failUrl,
-      order_id: orderId,     // מספר ההרשמה למרתון ב-DB
-      pdesc: description
-    };
-
-    const f = document.createElement("form");
-    f.method = "POST";
-    f.action = url;
-    Object.keys(fields).forEach(function(key){
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = fields[key];
-      f.appendChild(input);
-    });
-    document.body.appendChild(f);
-    f.submit();
+  // ----------------------------------------------------------------
+  // מעבר לתשלום באיקרדיט. הדפדפן שולח רק את מספר ההזמנה והסוד שלה;
+  // הסכום נקבע בשרת (Edge Function icredit-pay) לפי מה שנשמר ב-DB.
+  // אם פתיחת עמוד התשלום נכשלה - ההרשמה כבר שמורה, ו"לנסות שוב" רק
+  // פותח שוב את עמוד התשלום (לא שולח את הטופס פעם נוספת).
+  // ----------------------------------------------------------------
+  var pendingPay = null;
+  function goToPayment(kind, orderId, secret){
+    pendingPay = { kind: kind, id: String(orderId), secret: secret };
+    try { sessionStorage.setItem("pay_pending", JSON.stringify(pendingPay)); } catch (e) {}
+    const s = CONFIG.supabase;
+    submitBtn.disabled = true; submitBtn.textContent = "מעביר לתשלום…";
+    return fetch(s.url + "/functions/v1/icredit-pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": s.anonKey },
+      body: JSON.stringify(pendingPay)
+    }).then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
+      .then(function(b){ location.href = b.url; })
+      .catch(function(err){
+        console.error("icredit-pay failed:", err);
+        topError.textContent = "ההרשמה נשמרה, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - צרו איתנו קשר.";
+        topError.style.display = "block";
+        topError.scrollIntoView({ behavior: "smooth", block: "center" });
+        submitBtn.disabled = false; submitBtn.textContent = "לנסות שוב לעבור לתשלום";
+      });
   }
 
   form.addEventListener("submit", function(e){
@@ -1157,6 +1149,7 @@
     topError.style.display = valid ? "none" : "block";
     if (!valid) return;
 
+    if (pendingPay) { goToPayment(pendingPay.kind, pendingPay.id, pendingPay.secret); return; }
     submitBtn.disabled = true;
     submitBtn.textContent = isPhonePay() ? "שולח…" : "מעביר לתשלום…";
 
@@ -1192,12 +1185,7 @@
         sessionStorage.setItem("reg_form_url", location.href);
       } catch (err) {}
       if (CONFIG.provider === "none" || isPhonePay()) { location.href = new URL("thank-you.html?pending=1" + (isPhonePay() ? "&phone=1" : ""), location.href).href; return; }
-      goToTranzila({
-        contactName: (parentFirst + " " + parentLast).trim(), phone: phone, email: email,
-        amount: Number(res.amount),
-        orderId: "M" + res.order_id,
-        description: "מרתון מתמטיקה - " + studentFirst + " " + studentLast
-      });
+      goToPayment("marathon", res.order_id, res.pay_secret);
     }).catch(function(err){
       console.error("submit_marathon failed:", err);
       if (/group full/.test(err && err.message)) {

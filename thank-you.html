@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://oulivucqbpmbavbavfvy.supabase.co; base-uri 'self'; object-src 'none'">
 <title>תלם - הטופס נשלח בהצלחה</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@700;800;900&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
@@ -47,6 +47,7 @@
     <div class="check">✅</div>
     <h1>הטופס נשלח בהצלחה</h1>
     <p id="pendingMsg" hidden>ניצור איתכם קשר בימים הקרובים להסדרת התשלום.</p>
+    <p id="payMsg" hidden></p>
     <div class="sum" id="sum" hidden></div>
     <div class="contact">לשאלות: <a href="tel:0529067101">052-9067101</a> · <a href="mailto:telem.tr@gmail.com">telem.tr@gmail.com</a></div>
   </div>
@@ -67,6 +68,26 @@
       if (x.amount != null && !isNaN(x.amount)) row(pending ? "סכום לתשלום" : "סכום ששולם", "₪" + Number(x.amount).toFixed(2));
       box.hidden = false;
     } catch (e) {}
+  })();
+
+  // חזרה מעמוד התשלום של איקרדיט (?ref=...): בודקים מול השרת שהתשלום באמת אושר
+  (function(){
+    var m = /[?&]ref=([A-Za-z0-9]{32,64})/.exec(location.search);
+    if (!m) return;
+    var msg = document.getElementById("payMsg"); msg.hidden = false; msg.textContent = "בודקים את אישור התשלום…";
+    var tries = 0;
+    function check(){
+      tries++;
+      fetch("https://oulivucqbpmbavbavfvy.supabase.co/functions/v1/icredit-ipn", {
+        method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" },
+        body: JSON.stringify({ ref: m[1] })
+      }).then(function(r){ return r.json(); }).then(function(b){
+        if (b && b.paid) { msg.textContent = "✔ התשלום התקבל. חשבונית תישלח אליכם במייל."; try { sessionStorage.removeItem("pay_pending"); } catch (e) {} return; }
+        if (tries < 5) { setTimeout(check, 3000); return; }
+        msg.textContent = "אישור התשלום עוד לא הגיע אלינו. אם חויבתם - הכול בסדר, האישור יתעדכן אצלנו בדקות הקרובות.";
+      }).catch(function(){ if (tries < 5) setTimeout(check, 3000); else msg.textContent = "לא הצלחנו לבדוק כרגע את אישור התשלום. אם חויבתם - הכול בסדר."; });
+    }
+    check();
   })();
   </script>
 </body>

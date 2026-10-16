@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://oulivucqbpmbavbavfvy.supabase.co; form-action 'self' https://directng.tranzila.com; frame-src https://challenges.cloudflare.com; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://oulivucqbpmbavbavfvy.supabase.co; form-action 'self'; frame-src https://challenges.cloudflare.com; base-uri 'self'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>הרשמה לתרגולים - תלם</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -596,16 +596,14 @@
   // 1) הגדרות כלליות — לשנות לפי הצורך
   // ----------------------------------------------------------------
   const CONFIG = {
-    // 'tranzila'  — מעבר מלא (redirect) לדף הסליקה המאובטח של טרנזילה.
-    //               אפשר לפעול ישירות מהאתר הסטטי, בלי שרת, כי רק
-    //               "שם המסוף" (ציבורי) נשלח מהדפדפן — אין כאן סוד.
-    // 'rivhit'    — מעבר לדף סליקה קבוע (סטטי) שהוגדר מראש בריווחית/iCredit.
-    //               ריווחית/iCredit לא מאפשרים ליצור קישור תשלום דינמי
-    //               בבטחה מתוך קוד שרץ בדפדפן (זה מחייב "טוקן" סודי
-    //               שחייב להישאר בשרת) — לכן כאן מפנים לעמוד קבוע.
-    // "tranzila" = מעבר לתשלום. ("none" = שמירה בלי תשלום - לא בשימוש)
+    // "icredit" = מעבר לעמוד תשלום מאובטח של איקרדיט (ריווחית). ("none" = שמירה בלי תשלום - לא בשימוש)
     // תצוגה מקדימה: מוסיפים לקישור ?preview=1 - שום דבר לא נשמר ולא עובר לתשלום.
-    provider: "tranzila",
+    provider: "icredit",
+    // תשלום באשראי באיקרדיט. enabled: false = כרגע רק תשלום טלפוני.
+    // לבדיקה לפני שמדליקים: מוסיפים לקישור ?cardtest=1 - יופיע גם "אשראי עכשיו".
+    // אין כאן שום סוד: פרטי המסוף נמצאים רק ב-Supabase Secrets.
+    creditCard: { enabled: false },
+
     // קישור "חזרה לאתר תלם" בראש הטופס - false כל עוד האתר לא עלה
     showSiteLink: false,
 
@@ -712,63 +710,6 @@
       }
     },
 
-    tranzila: {
-      terminalName: "YOUR_TERMINAL_NAME", // שם המסוף שקיבלת מטרנזילה
-      successUrl: new URL("thank-you.html", location.href).href,
-      failUrl: new URL("payment-failed.html", location.href).href,
-
-      // -----------------------------------------------------------
-      // הוראת קבע (חיוב חודשי חוזר) - מוגדרת באותה עסקה שגם גובה את
-      // הסכום החד-פעמי (דמי הרשמה + חומרי לימוד). מבוסס על תיעוד
-      // טרנזילה עבור tranmode=J ("Standing order initiation
-      // transaction") ושדות recur_*.
-      //
-      // ⚠️ חשוב מאוד - יש לבדוק/לאמת מול טרנזילה (או בסביבת בדיקות
-      // שלהם) לפני עליית הטופס לאוויר: התיעוד הציבורי של טרנזילה לא
-      // מבהיר במפורש איך בדיוק "sum" (הסכום החד-פעמי) מתפקד כשהוא
-      // משולב עם שדות recur_* באותה עסקה - כלומר האם זה באמת גובה את
-      // "sum" מיידית *וגם* פותח הוראת קבע נפרדת שמתחילה במועד עתידי
-      // (recur_start_date), כפי שמתוכנן כאן. מומלץ לבצע עסקת בדיקה
-      // אמיתית (סכום קטן) ולוודא בדוח העסקאות של טרנזילה שזה אכן קרה
-      // כמצופה - שני חיובים נפרדים, לא חיוב כפול/שגוי.
-      //
-      // למה התשלום עבור החודש הראשון נגבה כאן בתוך "sum" (התשלום
-      // המיידי) ולא כמחזור הראשון של הוראת הקבע עצמה (עודכן 23.9,
-      // לפי בקשת הלקוחה: החודש הראשון נגבה במלואו, לא באופן יחסי/
-      // פרו-רטה - ראו getRecurInfo/getAmount): גם עכשיו,
-      // כשהחודש הראשון הוא כבר בסכום המלא (זהה לחודשים הבאים), הוא
-      // עדיין נגבה כחלק מהעסקה המיידית ולא כמחזור עצמו של הוראת
-      // הקבע, כי הוראת קבע בטרנזילה (recur_start_date) מתחילה במועד
-      // עתידי (ה-1 לחודש שאחרי), ולא יכולה לחייב "עכשיו" את המחזור
-      // הראשון שלה. בפועל: הסכום שנגבה מיידית = דמי הרשמה + חומרי
-      // לימוד (אם יש) + שכר הלימוד המלא של חודש ההרשמה. הוראת הקבע
-      // (recur_sum, recur_start_date) ממשיכה מה-1 לחודש שאחרי, באותו
-      // סכום חודשי מלא, עד יוני (כולל) - כך שסך כל התשלומים (המיידי +
-      // כל מחזורי הוראת הקבע) הוא בדיוק מספר החודשים מחודש ההרשמה
-      // ועד יוני (כולל) - למשל 9 תשלומים למי שנרשם/ת באוקטובר, ופחות
-      // ממי שמצטרף/ת מאוחר יותר.
-      // -----------------------------------------------------------
-      recurTransaction: "4_approved" // הוראת קבע חודשית, בתדירות נעולה (לא ניתנת לשינוי ע"י הלקוח/ה)
-    },
-
-    rivhit: {
-      // חשוב: עמוד סליקה קבוע (Static Payment Page) של ריווחית/iCredit
-      // שומר מחיר אחד קבוע בכל עמוד. מכיוון שדמי ההרשמה משתנים לפי
-      // עיר בלבד (לא לפי מקצוע), יש להכין ב-iCredit עמוד נפרד לכל
-      // עיר עם מחיר שונה, ולמפות כאן כל עיר לקישור העמוד המתאים לה.
-      // ⚠️ שימו לב: מנגנון הוראת הקבע (חיוב חודשי אוטומטי) שהוגדר עבור
-      // טרנזילה למטה אינו נתמך כאן - דפי סליקה קבועים של ריווחית/
-      // iCredit לא מציעים דרך בטוחה להקים הוראת קבע דרך קוד סטטי בדפדפן.
-      // אם תעברו לריווחית, יש לבדוק אצלם איך להקים חיוב חוזר בנפרד.
-      staticPaymentPageUrls: {
-        // "הוד השרון": "https://icredit.rivhit.co.il/PAGE_ID_1",
-        // "כפר סבא": "https://icredit.rivhit.co.il/PAGE_ID_2",
-        // "ראש העין": "https://icredit.rivhit.co.il/PAGE_ID_3",
-      },
-      // ישמש אם העיר הנבחרת לא נמצאת במפה למעלה
-      defaultStaticPaymentPageUrl: "https://icredit.rivhit.co.il/PAGE_ID_DEFAULT"
-    },
-
     // מסד הנתונים (Supabase). כל הרשמה נשמרת שם לפני המעבר לתשלום.
     // anonKey = המפתח הציבורי (publishable / anon) מ-Project Settings > API Keys.
     // לעולם לא לשים כאן את המפתח הסודי (secret / service_role).
@@ -798,8 +739,8 @@
   paymentConsentEl.addEventListener("change", updateSubmitAvailability);
   updateSubmitAvailability();
   if (CONFIG.showSiteLink) document.getElementById("siteBackLink").hidden = false;
-  // תצוגה מקדימה: ?preview=1 בקישור, או אוטומטית כל עוד אין מסוף טרנזילה אמיתי
-  const NO_TERMINAL = !CONFIG.tranzila || !CONFIG.tranzila.terminalName || /^YOUR_/.test(CONFIG.tranzila.terminalName);
+  // תצוגה מקדימה: ?preview=1 בקישור. כל עוד האשראי כבוי (creditCard.enabled) - רק תשלום טלפוני
+  const NO_TERMINAL = !(CONFIG.creditCard && CONFIG.creditCard.enabled) && !/[?&]cardtest=1(&|$)/.test(location.search);
   const EXPLICIT_PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   const PREVIEW = EXPLICIT_PREVIEW || NO_TERMINAL;
   // תשלום טלפוני: נשמר גם כשהאשראי באתר עוד לא מחובר (רק לא בתצוגה מקדימה מהמערכת)
@@ -1583,6 +1524,7 @@
     topError.style.display = valid ? "none" : "block";
     if (!valid) return;
 
+    if (pendingPay) { goToPayment(pendingPay.kind, pendingPay.id, pendingPay.secret); return; }
     submitBtn.disabled = true;
     submitBtn.textContent = isPhonePay() ? "שולח…" : "מעביר לתשלום…";
 
@@ -1625,25 +1567,8 @@
         sessionStorage.setItem("reg_summary", JSON.stringify({ name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
         sessionStorage.setItem("reg_form_url", location.href);
       } catch (err) {}
-      const localRecur = getRecurInfo();
-      let recurInfo = null;
-      if (localRecur && res.recurring_payments > 0) {
-        recurInfo = {
-          recurStartDate: localRecur.recurStartDate,
-          monthlySum: Number(res.monthly_amount),
-          payments: res.recurring_payments
-        };
-      }
-      const contactName = (parentFirst + " " + parentLast).trim();
       if (CONFIG.provider === "none" || isPhonePay()) { location.href = new URL("thank-you.html?pending=1" + (isPhonePay() ? "&phone=1" : ""), location.href).href; return; }
-      if (CONFIG.provider === "rivhit") { goToRivhit(); return; }
-      goToTranzila({
-        contactName: contactName, phone: phone, email: email,
-        amount: Number(res.first_charge_amount),
-        recurInfo: recurInfo,
-        orderId: res.order_id,
-        description: "הרשמה לתרגולים - " + studentFirst + " " + studentLast
-      });
+      goToPayment("registration", res.order_id, res.pay_secret);
     }).catch(function(err){
       console.error("submit_registration failed:", err);
       showSubmitError();
@@ -1688,61 +1613,31 @@
     submitBtn.textContent = SUBMIT_TXT();
   }
 
-  // מעבר לדף הסליקה המאובטח של טרנזילה. שולחים POST (מומלץ ע"י
-  // טרנזילה) עם פרטי הסכום והלקוח/ה — בלי שום מפתח סודי בצד הלקוח.
-  function goToTranzila({ contactName, phone, email, amount, recurInfo, orderId, description }){
-    const t = CONFIG.tranzila;
-    const url = "https://directng.tranzila.com/" + t.terminalName + "/iframenew.php";
-
-    const fields = {
-      sum: amount,           // הסכום החד-פעמי (דמי הרשמה + חומרי לימוד אם יש) - נגבה מיידית
-      currency: CONFIG.currency,
-      contact: contactName,
-      email: email,
-      phone: phone,
-      success_url_address: t.successUrl,
-      fail_url_address: t.failUrl,
-      order_id: orderId,     // מספר ההזמנה ב-DB - חוזר מטרנזילה לצורך אימות התשלום
-      pdesc: description
-    };
-
-    if (recurInfo){
-      // tranmode=J: עסקה שגם גובה את "sum" באופן מיידי, וגם מקימה
-      // הוראת קבע (חיוב חודשי חוזר) לפי שדות recur_* - ראו הערת
-      // האזהרה המפורטת ב-CONFIG.tranzila בנוגע לצורך באימות מול
-      // טרנזילה לפני עלייה לאוויר.
-      fields.tranmode = "J";
-      fields.recur_transaction = t.recurTransaction;
-      fields.recur_start_date = recurInfo.recurStartDate;
-      fields.recur_sum = recurInfo.monthlySum;
-      fields.recur_payments = recurInfo.payments;
-    } else {
-      // גיבוי - אם משום מה לא ניתן לחשב את פרטי ההוראת קבע (למשל אם
-      // עיר/מקצוע לא זוהו), נופלים לעסקה רגילה חד-פעמית בלבד ולא
-      // מנסים להקים הוראת קבע עם נתונים חסרים.
-      fields.tranmode = "A";
-    }
-
-    const f = document.createElement("form");
-    f.method = "POST";
-    f.action = url;
-    Object.keys(fields).forEach(function(key){
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = fields[key];
-      f.appendChild(input);
-    });
-    document.body.appendChild(f);
-    f.submit();
-  }
-
-  // מעבר לדף סליקה קבוע של ריווחית/iCredit, לפי העיר שנבחרה
-  // (ראו הערה ב-CONFIG.rivhit על הצורך בעמוד נפרד לכל עיר).
-  function goToRivhit(){
-    const city = cityEl.value;
-    const url = CONFIG.rivhit.staticPaymentPageUrls[city] || CONFIG.rivhit.defaultStaticPaymentPageUrl;
-    location.href = url;
+  // ----------------------------------------------------------------
+  // מעבר לתשלום באיקרדיט. הדפדפן שולח רק את מספר ההזמנה והסוד שלה;
+  // הסכום נקבע בשרת (Edge Function icredit-pay) לפי מה שנשמר ב-DB.
+  // אם פתיחת עמוד התשלום נכשלה - ההרשמה כבר שמורה, ו"לנסות שוב" רק
+  // פותח שוב את עמוד התשלום (לא שולח את הטופס פעם נוספת).
+  // ----------------------------------------------------------------
+  var pendingPay = null;
+  function goToPayment(kind, orderId, secret){
+    pendingPay = { kind: kind, id: String(orderId), secret: secret };
+    try { sessionStorage.setItem("pay_pending", JSON.stringify(pendingPay)); } catch (e) {}
+    const s = CONFIG.supabase;
+    submitBtn.disabled = true; submitBtn.textContent = "מעביר לתשלום…";
+    return fetch(s.url + "/functions/v1/icredit-pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": s.anonKey },
+      body: JSON.stringify(pendingPay)
+    }).then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
+      .then(function(b){ location.href = b.url; })
+      .catch(function(err){
+        console.error("icredit-pay failed:", err);
+        topError.textContent = "ההרשמה נשמרה, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - צרו איתנו קשר.";
+        topError.style.display = "block";
+        topError.scrollIntoView({ behavior: "smooth", block: "center" });
+        submitBtn.disabled = false; submitBtn.textContent = "לנסות שוב לעבור לתשלום";
+      });
   }
 
 })();

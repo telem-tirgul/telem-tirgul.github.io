@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://oulivucqbpmbavbavfvy.supabase.co; base-uri 'self'; object-src 'none'">
 <title>תלם - התשלום לא הושלם</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@700;800;900&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
@@ -53,6 +53,21 @@
   </div>
   <script>
   try { var u = sessionStorage.getItem("reg_form_url"); if (u && new URL(u).origin === location.origin) document.getElementById("retry").href = u; } catch (e) {}
+  // הטופס כבר נשמר - "לנסות שוב" פותח שוב את עמוד התשלום לאותה הרשמה (בלי למלא את הטופס מחדש)
+  (function(){
+    var p = null; try { p = JSON.parse(sessionStorage.getItem("pay_pending") || "null"); } catch (e) {}
+    if (!p || !p.kind || !p.id) return;
+    var btn = document.getElementById("retry");
+    btn.addEventListener("click", function(ev){
+      ev.preventDefault(); btn.textContent = "פותח את עמוד התשלום…";
+      fetch("https://oulivucqbpmbavbavfvy.supabase.co/functions/v1/icredit-pay", {
+        method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" }, body: JSON.stringify(p)
+      }).then(function(r){ return r.json(); }).then(function(b){
+        if (b && b.url) location.href = b.url; else { btn.textContent = "לנסות שוב"; alertBox(); }
+      }).catch(function(){ btn.textContent = "לנסות שוב"; alertBox(); });
+    });
+    function alertBox(){ var d = document.createElement("p"); d.textContent = "לא הצלחנו לפתוח את עמוד התשלום. נסו שוב בעוד רגע, או צרו איתנו קשר."; btn.parentNode.insertBefore(d, btn); }
+  })();
   </script>
 </body>
 </html>
