@@ -1041,7 +1041,7 @@
     var tx = W - M - tileW - (tileW ? 34 : 0);
     put("תלם - המרכז לשיעורי תרגול", tx, 44, F(20, 700), C.goldL);
     put(opts.title || "טופס הרשמה", tx, 74, F(40, 900), "#fff");
-    put(ev && ev.name ? ev.name : "", tx, 128, F(24, 700), "#fff");
+    put(ev ? (ev.sub || ev.name || "") : "", tx, 128, F(24, 700), "#fff");
     put("נחתם ב-" + opts.signedAt, M, 52, F(18, 700), C.goldL, "left");
     put("052-9067101 · telem.tr@gmail.com", M, 82, F(17, 400), "#fff", "left");
     y = HB + 6 + 34;
@@ -1051,17 +1051,20 @@
     if (ev) {
       card(M, W - 2 * M, 28, C.cream, C.line, function(xR, w){
         var priceW = price ? 300 : 0, colW = w - priceW - (price ? 30 : 0), y0 = y;
-        head("פרטי המרתון", xR);
+        head(ev.head || "פרטי המרתון", xR);
         if (ev.desc) { para(ev.desc, xR, colW, 18, 400, C.soft, 1.5); y += 10; }
         (ev.meetings || []).forEach(function(m){
           if (!DRY) { ctx.beginPath(); ctx.arc(xR - 7, y + 15, 6, 0, Math.PI * 2); ctx.fillStyle = C.gold; ctx.fill(); }
           put(m, xR - 24, y + 2, F(22, 700), C.ink); y += 38;
         });
+        // 5.19.42: פירוט התשלום (בטופס ההרשמה השוטף - דמי הרשמה, חומרים וכו')
+        (pay.breakdown || []).forEach(function(r, i){ if (!i) y += 4; put(r[0], xR, y, F(16, 400), C.soft); ctx.font = F(16, 400); var bw = ctx.measureText(r[0] + "  ").width; put(r[1], xR - bw, y, F(16, 700), C.ink); y += 24; });
         if (ev.payMethod) { y += 4; put("אופן התשלום: ", xR, y, F(18, 700), C.soft); ctx.font = F(18, 700); var pw = ctx.measureText("אופן התשלום: ").width; put(ev.payMethod, xR - pw - 4, y, F(18, 400), C.ink); y += 28; }
         if (price) {
-          var bx = xR - w, bh = 130, by = y0 + 6; rr(bx, by, priceW, bh, 16, C.red);
+          var more = pay.main.slice(1), bx = xR - w, bh = 130 + more.length * 52, by = y0 + 6; rr(bx, by, priceW, bh, 16, C.red);
           put(price[0], bx + priceW - 24, by + 22, F(19, 700), C.goldL);
           put(String(price[1]).replace(/\s+/g, ""), bx + priceW - 24, by + 54, F(46, 900), "#fff");
+          more.forEach(function(r, i){ var yy = by + 124 + i * 52; put(r[0], bx + priceW - 24, yy, F(16, 700), C.goldL); put(String(r[1]).replace(/\s+/g, " "), bx + priceW - 24, yy + 22, F(22, 800), "#fff"); });
           y = Math.max(y, by + bh);
         }
       });
