@@ -52,6 +52,17 @@
   .ph-big{ display:block; width:max-content; margin-top:8px; font-family:'Heebo',sans-serif; font-size:22px; font-weight:900; letter-spacing:.5px; color:var(--maroon); background:#fff; border:1.5px solid #E8CFA0; border-radius:10px; padding:4px 14px; text-decoration:none; white-space:nowrap; unicode-bidi:isolate; }   /* 5.19.41 */
   .status{ justify-content:center; text-align:center; } .status .ph-big{ margin-inline:auto; } .status .ic{ display:none; }   /* 5.19.42: תיבות הזהב/הירוק במרכז */
   [hidden]{ display:none !important; }
+  /* ===== תלם 5.19.46: עיצוב הטפסים - ראש בהיר (בלי הפס הבורדו הגדול), רקע קרם עדין, לוגו בלי מסגרת לבנה. רק מראה ===== */
+  body{ background:#FAF8F5; }
+  .top{ background:var(--paper) !important; color:var(--ink) !important; border-bottom:1px solid var(--border); padding:20px 20px 18px !important; }
+  .logo-tile{ background:none !important; box-shadow:none !important; padding:0 !important; }
+  .logo-tile .brand-logo, .top .brand-logo, .top img{ mix-blend-mode:multiply; }
+  .tick{ background:#F6EDEC !important; box-shadow:0 0 0 7px rgba(90,18,22,.06) !important; }
+  h1{ color:#2E1C19 !important; }
+  .top .lead, .top p{ color:var(--ink-soft) !important; }
+  .sec-t::after{ content:""; display:block; width:34px; height:3px; border-radius:3px; background:var(--gold-deep, #C9A45C); margin-top:5px; }
+  /* תלם 5.19.46: מסגרת בורדו ושורה צהובה בכותרת, כמו שאר הטפסים */
+  .card{ border:1.5px solid #5A1216 !important; box-shadow:none !important; }
 </style>
 </head>
 <body>

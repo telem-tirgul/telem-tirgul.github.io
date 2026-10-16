@@ -329,6 +329,76 @@
   .sig-tools{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:13px; color:var(--ink-soft); }
   .sig-tools button{ background:none; border:1px solid var(--border); border-radius:8px; padding:4px 12px; font:inherit; color:var(--ink); cursor:pointer; }
   .hp-field{ position:absolute !important; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; opacity:0; pointer-events:none; }
+  /* ===== תלם 5.19.46: עיצוב חדש לטפסים - קרם, בורדו וזהב (כמו מסך המאגר). רק מראה, בלי שינוי בלוגיקה ===== */
+  /* רק במצב בהיר (במצב כהה של הטלפון - נשאר העיצוב הכהה הקיים) */
+  @media not all and (prefers-color-scheme: dark){
+  @media not all and (prefers-color-scheme: dark){
+    :root:not([data-theme="dark"]){ --bg:#FBF8F3; --border:#E6E0D8; --hl:#C9A45C; --ink-dark:#2E1C19; }
+  }
+  :root[data-theme="light"]{ --bg:#FBF8F3; --border:#E6E0D8; --hl:#C9A45C; --ink-dark:#2E1C19; }
+  .wrap{ max-width:600px; }
+  h1{ display:block; width:fit-content; margin:4px auto 10px; padding:0 8px; color:var(--ink-dark, var(--ink)); }
+  h1 .line{ display:none; }
+  .subtitle{ display:table; margin:0 auto 22px; background:var(--accent); color:#fff; border-radius:999px; padding:7px 22px; font-size:17px; letter-spacing:0; }
+  .intro{ border-radius:18px; border:1px solid var(--border); border-inline-start:5px solid var(--accent); box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  fieldset{ background:var(--paper); border:1px solid var(--border); border-radius:20px; padding:18px 20px 8px; margin-bottom:18px; box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  legend{ float:right; width:100%; border-bottom:none; padding:0 0 4px; margin-bottom:14px; font-size:18px; }
+  legend::after{ content:""; display:block; width:36px; height:3px; border-radius:5px; background:var(--hl, var(--gold)); margin-top:6px; }
+  legend + *, fieldset > *:not(legend){ clear:both; }
+  input[type=text], input[type=email], input[type=tel], select, textarea{ border-radius:12px; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ border-color:var(--gold-deep); box-shadow:0 0 0 3px rgba(90,18,22,.12); outline:none; }
+  .track-info{ border-radius:16px; }
+  .terms-box{ border-radius:16px; }
+  button#submitBtn{ box-shadow:0 6px 18px rgba(90,18,22,.22); }
+  /* שדה שנקבע בקישור (נעול) - רקע בהיר, כיתוב רגיל (לא מודגש) */
+  select.locked, input.locked, select:disabled, input:disabled{ background-color:#F8F6F3 !important; color:var(--ink) !important; font-weight:600 !important; box-shadow:none; }
+  .lock-note::before{ content:"🔒 "; font-size:11px; }
+  .terms-box{ background:var(--paper); }
+  .amount-breakdown{ background:var(--paper); border:1px solid var(--border); border-radius:14px; padding:4px 0; margin-bottom:8px; }
+  .amount-row{ background:var(--paper); border-radius:14px; }
+  .amount-row:not(.amount-row-recur){ background:var(--paper); border-color:var(--accent); border-width:1.5px; }
+  .sig-box{ border-radius:14px; }
+  .pm-lock{ display:flex; gap:6px; align-items:flex-start; margin:8px 0 2px; font-size:13px; color:var(--accent); font-weight:700; }
+  #pmOpts[hidden] ~ .pm-lock{ display:none; }
+  :root{ --bg:#FBF8F3; } body{ background:#F8F4ED; }
+  /* תלם 5.19.46: הטופס בחלקים ממוספרים (כמו המרתון) */
+  form{ counter-reset:step; }
+  fieldset > legend, .sec-card > .sec-h{ display:flex; align-items:center; gap:10px; }
+  fieldset > legend::before, .sec-card > .sec-h::before{ counter-increment:step; content:counter(step); flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:14px; font-weight:800; font-family:'Heebo',sans-serif; }
+  fieldset > legend::after{ display:none !important; } fieldset > legend{ border-bottom:1px solid var(--border); padding-bottom:12px !important; }
+  .sec-card > .sec-h{ border-bottom:1px solid var(--border); padding-bottom:12px; }
+  .sec-card{ background:var(--paper); border:1px solid var(--border); border-radius:20px; padding:18px 20px 14px; margin-bottom:18px; box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  .sec-card > .sec-h{ font-family:'Heebo',sans-serif; font-weight:800; font-size:18px; color:var(--accent); margin-bottom:16px; flex-wrap:wrap; }
+
+  .sec-card .terms-box{ background:#FBF9F5; }
+  @media (min-width:900px){ .wrap{ max-width:640px; } }
+  /* הלקוחה: השדות למילוי ברקע אפור-בהיר, שדה שנקבע בקישור (עיר) - לבן */
+  input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{ background-color:#FFFAEE; border-color:#EADFC8; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff; }
+  select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]{ background-color:#fff !important; border-color:var(--border) !important; color:var(--ink) !important; font-weight:600 !important; }
+  /* הלוגו בלי "מסגרת" לבנה - הרקע הלבן של התמונה מתמזג ברקע הדף */
+  @media not all and (prefers-color-scheme: dark){ :root:not([data-theme="dark"]) .brand-logo{ mix-blend-mode:multiply; } }
+  :root[data-theme="light"] .brand-logo{ mix-blend-mode:multiply; }
+
+  }
+  @media not all and (prefers-color-scheme: dark){
+    /* מסגרת פנימית בתוך כרטיס - תמיד עם שוליים */
+    fieldset .track-info, fieldset .ti-box, fieldset .terms-box, .sec-card .terms-box, fieldset .amount-row, fieldset .pm-only{ margin-inline:0; }
+    .ti-box, .track-info{ padding:14px 16px !important; }
+  }
+  /* ===== תלם 5.19.46 (המשך): מסגרת בורדו לכל חלק, רקע ניטרלי, ריווח צפוף, שני שדות בשורה גם בנייד, שורה צהובה מתחת לכותרת ===== */
+  @media not all and (prefers-color-scheme: dark){
+    :root{ --bg:#FAF8F5; } body{ background:#FAF8F5 !important; padding-inline:10px !important; padding-top:18px !important; }
+    fieldset, .sec-card{ border:1.5px solid var(--accent) !important; box-shadow:none !important; margin-bottom:10px !important; padding:14px 14px 4px !important; border-radius:16px !important; }
+    .sec-card{ padding-bottom:12px !important; }
+    fieldset > legend, .sec-card > .sec-h{ border-bottom-color:#E9DCDC !important; margin-bottom:10px !important; padding-bottom:10px !important; }
+    .field{ margin-bottom:10px; }
+    input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{ background-color:#FAF8F5 !important; border-color:#E3DDD4 !important; }
+    input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff !important; }
+    select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]{ background-color:#fff !important; }
+  }
+  .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
+  @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -350,21 +420,22 @@
   <form id="intForm" novalidate>
     <div class="top-error form-error" id="topError" style="display:none;">יש לתקן את השדות המסומנים לפני שממשיכים.</div>
     <fieldset>
-      <legend>מקום</legend>
+      <legend>פרטי התלמיד/ה</legend>
+      <div class="row">
+        <div class="field" id="field-sfirst"><label for="f-sfirst">שם פרטי תלמיד/ה <span class="req">*</span></label><input type="text" id="f-sfirst" maxlength="60"><div class="error-msg">שדה חובה</div></div>
+        <div class="field"><label for="f-slast">שם משפחה תלמיד/ה</label><input type="text" id="f-slast" maxlength="60"></div>
+      </div>
+      <div class="field" id="field-sphone"><label for="f-sphone">נייד תלמיד/ה</label><input type="text" id="f-sphone" type="tel" inputmode="numeric" maxlength="15"><div class="error-msg">מספר לא תקין</div></div>
+    </fieldset>
+    <fieldset>
+      <legend>בית הספר</legend>
       <div class="row">
         <div class="field" id="field-city"><label for="f-city">עיר <span class="req">*</span></label><select id="f-city"><option value="" disabled selected>בחרו עיר</option><option>הוד השרון</option><option>כפר סבא</option><option>ראש העין</option><option value="אחר">עיר אחרת</option></select><div class="error-msg">שדה חובה</div></div>
         <div class="field" id="field-school"><label for="f-school">בית ספר</label><select id="f-school"><option value="">בחרו עיר תחילה</option></select></div>
       </div>
-    </fieldset>
-    <fieldset>
-      <legend>פרטי התלמיד/ה</legend>
       <div class="row">
-        <div class="field" id="field-sfirst"><label for="f-sfirst">שם פרטי <span class="req">*</span></label><input type="text" id="f-sfirst" maxlength="60"><div class="error-msg">שדה חובה</div></div>
-        <div class="field"><label for="f-slast">שם משפחה</label><input type="text" id="f-slast" maxlength="60"></div>
-      </div>
-      <div class="row">
-        <div class="field" id="field-sphone"><label for="f-sphone">טלפון התלמיד/ה</label><input type="text" id="f-sphone" type="tel" inputmode="numeric" maxlength="15"><div class="error-msg">מספר לא תקין</div></div>
-        <div class="field"><label for="f-grade">כיתה</label><select id="f-grade"><option value="">בחרו</option><option>ו'</option><option>ז'</option><option>ח'</option><option>ט'</option><option>י'</option><option>יא'</option><option>יב'</option></select></div>
+        <div class="field"><label for="f-grade">שכבת לימוד</label><select id="f-grade"><option value="">בחרו</option><option>ו'</option><option>ז'</option><option>ח'</option><option>ט'</option><option>י'</option><option>יא'</option><option>יב'</option></select></div>
+        <div></div>
       </div>
       <div class="row">
         <div class="field"><label for="f-math">רמה במתמטיקה</label><select id="f-math"><option value="">בחרו</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option>לא מחולק להקבצות</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select></div>
@@ -374,11 +445,11 @@
     <fieldset>
       <legend>פרטי ההורה</legend>
       <div class="row">
-        <div class="field" id="field-pfirst"><label for="f-pfirst">שם פרטי <span class="req">*</span></label><input type="text" id="f-pfirst" maxlength="60"><div class="error-msg">שדה חובה</div></div>
-        <div class="field"><label for="f-plast">שם משפחה</label><input type="text" id="f-plast" maxlength="60"></div>
+        <div class="field" id="field-pfirst"><label for="f-pfirst">שם פרטי הורה <span class="req">*</span></label><input type="text" id="f-pfirst" maxlength="60"><div class="error-msg">שדה חובה</div></div>
+        <div class="field"><label for="f-plast">שם משפחה הורה</label><input type="text" id="f-plast" maxlength="60"></div>
       </div>
       <div class="row">
-        <div class="field" id="field-pphone"><label for="f-pphone">טלפון <span class="req">*</span></label><input type="text" id="f-pphone" type="tel" inputmode="numeric" maxlength="15"><div class="error-msg">מספר טלפון לא תקין</div></div>
+        <div class="field" id="field-pphone"><label for="f-pphone">טלפון הורה <span class="req">*</span></label><input type="text" id="f-pphone" type="tel" inputmode="numeric" maxlength="15"><div class="error-msg">מספר טלפון לא תקין</div></div>
         <div class="field" id="field-email"><label for="f-email">אימייל (לא חובה)</label><input type="text" id="f-email" type="email" dir="ltr" maxlength="120"><div class="error-msg">כתובת לא תקינה</div></div>
       </div>
       <div class="field"><label for="f-filled">מי ממלא/ת את הטופס?</label><select id="f-filled"><option>הורה</option><option>תלמיד</option></select></div>

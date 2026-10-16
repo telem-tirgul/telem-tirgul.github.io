@@ -335,6 +335,76 @@
   .sig-tools{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:13px; color:var(--ink-soft); }
   .sig-tools button{ background:none; border:1px solid var(--border); border-radius:8px; padding:4px 12px; font:inherit; color:var(--ink); cursor:pointer; }
   .hp-field{ position:absolute !important; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; opacity:0; pointer-events:none; }
+  /* ===== תלם 5.19.46: עיצוב חדש לטפסים - קרם, בורדו וזהב (כמו מסך המאגר). רק מראה, בלי שינוי בלוגיקה ===== */
+  /* רק במצב בהיר (במצב כהה של הטלפון - נשאר העיצוב הכהה הקיים) */
+  @media not all and (prefers-color-scheme: dark){
+  @media not all and (prefers-color-scheme: dark){
+    :root:not([data-theme="dark"]){ --bg:#FBF8F3; --border:#E6E0D8; --hl:#C9A45C; --ink-dark:#2E1C19; }
+  }
+  :root[data-theme="light"]{ --bg:#FBF8F3; --border:#E6E0D8; --hl:#C9A45C; --ink-dark:#2E1C19; }
+  .wrap{ max-width:600px; }
+  h1{ display:block; width:fit-content; margin:4px auto 10px; padding:0 8px; color:var(--ink-dark, var(--ink)); }
+  h1 .line{ display:none; }
+  .subtitle{ display:table; margin:0 auto 22px; background:var(--accent); color:#fff; border-radius:999px; padding:7px 22px; font-size:17px; letter-spacing:0; }
+  .intro{ border-radius:18px; border:1px solid var(--border); border-inline-start:5px solid var(--accent); box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  fieldset{ background:var(--paper); border:1px solid var(--border); border-radius:20px; padding:18px 20px 8px; margin-bottom:18px; box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  legend{ float:right; width:100%; border-bottom:none; padding:0 0 4px; margin-bottom:14px; font-size:18px; }
+  legend::after{ content:""; display:block; width:36px; height:3px; border-radius:5px; background:var(--hl, var(--gold)); margin-top:6px; }
+  legend + *, fieldset > *:not(legend){ clear:both; }
+  input[type=text], input[type=email], input[type=tel], select, textarea{ border-radius:12px; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ border-color:var(--gold-deep); box-shadow:0 0 0 3px rgba(90,18,22,.12); outline:none; }
+  .track-info{ border-radius:16px; }
+  .terms-box{ border-radius:16px; }
+  button#submitBtn{ box-shadow:0 6px 18px rgba(90,18,22,.22); }
+  /* שדה שנקבע בקישור (נעול) - רקע בהיר, כיתוב רגיל (לא מודגש) */
+  select.locked, input.locked, select:disabled, input:disabled{ background-color:#F8F6F3 !important; color:var(--ink) !important; font-weight:600 !important; box-shadow:none; }
+  .lock-note::before{ content:"🔒 "; font-size:11px; }
+  .terms-box{ background:var(--paper); }
+  .amount-breakdown{ background:var(--paper); border:1px solid var(--border); border-radius:14px; padding:4px 0; margin-bottom:8px; }
+  .amount-row{ background:var(--paper); border-radius:14px; }
+  .amount-row:not(.amount-row-recur){ background:var(--paper); border-color:var(--accent); border-width:1.5px; }
+  .sig-box{ border-radius:14px; }
+  .pm-lock{ display:flex; gap:6px; align-items:flex-start; margin:8px 0 2px; font-size:13px; color:var(--accent); font-weight:700; }
+  #pmOpts[hidden] ~ .pm-lock{ display:none; }
+  :root{ --bg:#FBF8F3; } body{ background:#F8F4ED; }
+  /* תלם 5.19.46: הטופס בחלקים ממוספרים (כמו המרתון) */
+  form{ counter-reset:step; }
+  fieldset > legend, .sec-card > .sec-h{ display:flex; align-items:center; gap:10px; }
+  fieldset > legend::before, .sec-card > .sec-h::before{ counter-increment:step; content:counter(step); flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:14px; font-weight:800; font-family:'Heebo',sans-serif; }
+  fieldset > legend::after{ display:none !important; } fieldset > legend{ border-bottom:1px solid var(--border); padding-bottom:12px !important; }
+  .sec-card > .sec-h{ border-bottom:1px solid var(--border); padding-bottom:12px; }
+  .sec-card{ background:var(--paper); border:1px solid var(--border); border-radius:20px; padding:18px 20px 14px; margin-bottom:18px; box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  .sec-card > .sec-h{ font-family:'Heebo',sans-serif; font-weight:800; font-size:18px; color:var(--accent); margin-bottom:16px; flex-wrap:wrap; }
+
+  .sec-card .terms-box{ background:#FBF9F5; }
+  @media (min-width:900px){ .wrap{ max-width:640px; } }
+  /* הלקוחה: השדות למילוי ברקע אפור-בהיר, שדה שנקבע בקישור (עיר) - לבן */
+  input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{ background-color:#FFFAEE; border-color:#EADFC8; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff; }
+  select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]{ background-color:#fff !important; border-color:var(--border) !important; color:var(--ink) !important; font-weight:600 !important; }
+  /* הלוגו בלי "מסגרת" לבנה - הרקע הלבן של התמונה מתמזג ברקע הדף */
+  @media not all and (prefers-color-scheme: dark){ :root:not([data-theme="dark"]) .brand-logo{ mix-blend-mode:multiply; } }
+  :root[data-theme="light"] .brand-logo{ mix-blend-mode:multiply; }
+
+  }
+  @media not all and (prefers-color-scheme: dark){
+    /* מסגרת פנימית בתוך כרטיס - תמיד עם שוליים */
+    fieldset .track-info, fieldset .ti-box, fieldset .terms-box, .sec-card .terms-box, fieldset .amount-row, fieldset .pm-only{ margin-inline:0; }
+    .ti-box, .track-info{ padding:14px 16px !important; }
+  }
+  /* ===== תלם 5.19.46 (המשך): מסגרת בורדו לכל חלק, רקע ניטרלי, ריווח צפוף, שני שדות בשורה גם בנייד, שורה צהובה מתחת לכותרת ===== */
+  @media not all and (prefers-color-scheme: dark){
+    :root{ --bg:#FAF8F5; } body{ background:#FAF8F5 !important; padding-inline:10px !important; padding-top:18px !important; }
+    fieldset, .sec-card{ border:1.5px solid var(--accent) !important; box-shadow:none !important; margin-bottom:10px !important; padding:14px 14px 4px !important; border-radius:16px !important; }
+    .sec-card{ padding-bottom:12px !important; }
+    fieldset > legend, .sec-card > .sec-h{ border-bottom-color:#E9DCDC !important; margin-bottom:10px !important; padding-bottom:10px !important; }
+    .field{ margin-bottom:10px; }
+    input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{ background-color:#FAF8F5 !important; border-color:#E3DDD4 !important; }
+    input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff !important; }
+    select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]{ background-color:#fff !important; }
+  }
+  .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
+  @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
 </style>
 </head>
 <body>
@@ -348,18 +418,38 @@
   <h1><span class="line"></span> תלם - המרכז לשיעורי תרגול <span class="line right"></span></h1>
   <div class="subtitle">טופס הרשמה ותשלום<span id="subtitleLocation"></span></div>
 
-  <div class="intro">
-    <div>מלאו את פרטי התלמיד/ה וההורה כדי להשלים את ההרשמה. בסיום מילוי הטופס תועברו לעמוד תשלום מאובטח של חברת הסליקה.</div>
-    <div class="lock-line">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
-  </div>
+  <!-- תלם 5.19.46: ההסבר על התשלום והאבטחה עבר למטה, ל"אופן התשלום" (כמו בטופס המרתון) -->
 
   <div class="top-error form-error" id="topError" style="display:none;">יש לתקן את השדות המסומנים לפני שממשיכים.</div>
 
   <form id="regForm" novalidate>
 
     <fieldset>
-      <legend>פרטי ההרשמה</legend>
+      <legend>פרטי התלמיד/ה</legend>
 
+      <div class="row">
+        <div class="field" id="field-student-first">
+          <label for="f-student-first">שם פרטי תלמיד/ה <span class="req">*</span></label>
+          <input type="text" id="f-student-first" name="studentFirst" autocomplete="given-name" required>
+          <div class="error-msg">שדה חובה</div>
+        </div>
+        <div class="field" id="field-student-last">
+          <label for="f-student-last">שם משפחה תלמיד/ה <span class="req">*</span></label>
+          <input type="text" id="f-student-last" name="studentLast" autocomplete="family-name" required>
+          <div class="error-msg">שדה חובה</div>
+        </div>
+      </div>
+        <div class="field" id="field-student-phone">
+          <label for="f-student-phone">נייד תלמיד/ה <span class="req">*</span></label>
+          <input type="tel" id="f-student-phone" name="studentPhone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
+          <div class="error-msg">מספר טלפון לא תקין (10 ספרות)</div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>בית הספר</legend>
+
+      <div class="row">
       <div class="field" id="field-city">
         <label for="f-city">עיר <span class="req">*</span></label>
         <select id="f-city" name="city" required>
@@ -370,7 +460,6 @@
         </select>
         <div class="error-msg">שדה חובה</div>
       </div>
-
       <div class="field" id="field-school">
         <label for="f-school">בית ספר <span class="req">*</span></label>
         <select id="f-school" name="school" required>
@@ -378,15 +467,14 @@
         </select>
         <div class="error-msg">שדה חובה</div>
       </div>
-
+      </div>
       <div class="field" id="field-school-other" style="display:none;">
         <label for="f-school-other">שם בית הספר</label>
         <input type="text" id="f-school-other" name="schoolOther">
       </div>
-
       <div class="row">
         <div class="field" id="field-grade">
-          <label for="f-grade">שכבה <span class="req">*</span></label>
+          <label for="f-grade">שכבת לימוד <span class="req">*</span></label>
           <select id="f-grade" name="grade" required>
             <option value="" disabled selected>בחרו שכבה</option>
             <option value="ה'">ה'</option>
@@ -417,6 +505,10 @@
           <div class="error-msg">שדה חובה</div>
         </div>
       </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>מסלול ומקצוע</legend>
 
       <div class="field" id="field-subject">
         <label for="f-subject">מסלול <span class="req">*</span></label>
@@ -437,30 +529,6 @@
           <option value="אנגלית">אנגלית</option>
         </select>
         <div class="error-msg">שדה חובה</div>
-      </div>
-
-      <div class="track-info empty" id="trackInfo">
-        <div class="track-info-title" id="trackInfoTitle">פרטים על המסלול כולל המחירים יופיעו לאחר בחירת המסלול</div>
-        <div class="track-info-body" id="trackInfoBody"></div>
-        <div class="track-info-prices" id="trackInfoPrices"></div>
-        <div class="track-info-note" id="trackInfoNote"></div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>פרטי התלמיד/ה וההורה</legend>
-
-      <div class="row">
-        <div class="field" id="field-student-first">
-          <label for="f-student-first">שם פרטי (תלמיד/ה) <span class="req">*</span></label>
-          <input type="text" id="f-student-first" name="studentFirst" autocomplete="given-name" required>
-          <div class="error-msg">שדה חובה</div>
-        </div>
-        <div class="field" id="field-student-last">
-          <label for="f-student-last">שם משפחה (תלמיד/ה) <span class="req">*</span></label>
-          <input type="text" id="f-student-last" name="studentLast" autocomplete="family-name" required>
-          <div class="error-msg">שדה חובה</div>
-        </div>
       </div>
 
       <div class="field" id="field-math-level" style="display:none;">
@@ -493,6 +561,16 @@
         </select>
       </div>
 
+      <div class="track-info empty" id="trackInfo">
+        <div class="track-info-title" id="trackInfoTitle">פרטים על המסלול כולל המחירים יופיעו לאחר בחירת המסלול</div>
+        <div class="track-info-body" id="trackInfoBody"></div>
+        <div class="track-info-prices" id="trackInfoPrices"></div>
+        <div class="track-info-note" id="trackInfoNote"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>פרטי ההורה</legend>
       <div class="row">
         <div class="field" id="field-parent-first">
           <label for="f-parent-first">שם פרטי הורה <span class="req">*</span></label>
@@ -500,11 +578,12 @@
           <div class="error-msg">שדה חובה</div>
         </div>
         <div class="field" id="field-parent-last">
-          <label for="f-parent-last">שם משפחה הורה</label>
+          <label for="f-parent-last">שם משפחה הורה <span class="req">*</span></label>
           <input type="text" id="f-parent-last" name="parentLast" autocomplete="family-name">
         </div>
       </div>
 
+      <div class="row">
       <div class="field" id="field-phone">
         <label for="f-phone">טלפון הורה <span class="req">*</span></label>
         <input type="tel" id="f-phone" name="phone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
@@ -517,8 +596,10 @@
         <input type="email" id="f-email" name="email" autocomplete="email" required>
         <div class="error-msg">כתובת אימייל לא תקינה</div>
       </div>
+      </div>
     </fieldset>
 
+    <section class="sec-card"><div class="sec-h">תשלום ואישור</div>
     <div class="terms-box" id="termsBox">
       <h4>תנאים כלליים</h4>
       <p>על התלמיד/ה להגיע לתרגולים עם כל הציוד הלימודי הנדרש (ספר + מחברת הלימוד, כלי כתיבה וכו'). במהלך המפגש ניתן לצאת מהכיתה לצורך שירותים, שתייה והתרעננות בתחומי בית הספר בלבד.</p>
@@ -557,11 +638,12 @@
     </div>
 
     <div class="pay-method" id="field-payphone">
-      <div class="pm-title">אופן התשלום</div>
+      <div class="pm-title">איך תרצו לשלם?</div>
       <div class="pm-opts" id="pmOpts">
-        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b>אשראי עכשיו</b><small>מעבר לעמוד תשלום מאובטח</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b>תשלום טלפוני</b><small>ניצור איתכם קשר לתשלום בכרטיס אשראי</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b>💳 תשלום באשראי עכשיו</b><small>אחרי השליחה עוברים לעמוד תשלום מאובטח של חברת הסליקה</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b>📞 תשלום טלפוני</b><small>שולחים את טופס ההרשמה, וניצור איתכם קשר לתשלום בכרטיס אשראי</small></span></label>
       </div>
+      <div class="lock-line pm-lock">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
       <div class="pm-only" id="payPhoneOnly" hidden><b>📞 התשלום טלפוני</b> - אחרי שליחת ההרשמה ניצור איתכם קשר לתשלום בכרטיס אשראי.</div>
     </div>
     <label class="consent" id="field-consent">
@@ -576,6 +658,7 @@
       <div class="sig-tools"><span id="sigHint">החתימה נשמרת יחד עם טופס ההרשמה.</span><button type="button" id="sigClear">ניקוי</button></div>
       <div class="error-msg" id="sigError"></div>
     </div>
+    </section>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></label></div>
 
     <div class="submit-wrap">
@@ -996,9 +1079,13 @@
   }
   function pdfSplit(data){
     var out = [], reg = [];
+    // תלם 5.19.46: "בית הספר" ו"מסלול ומקצוע" (אחרי התלמיד וההורה) - השורות נכנסות לכרטיס התלמיד/ה ב-PDF
+    data.sections = data.sections.filter(function(sec){ if (/^(בית הספר|מסלול ומקצוע)$/.test(sec.title)) { reg = reg.concat(sec.rows.filter(function(r){ return !/^(מסלול|עיר|בית ספר)/.test(r[0]); })); return false; } return true; });
     data.sections.forEach(function(sec){
       // עיר ובית ספר - בכותרת; המסלול - בכרטיס המסלול; שכבה, כיתה ומקצוע - בכרטיס התלמיד/ה
       if (/פרטי ההרשמה/.test(sec.title)) { reg = sec.rows.filter(function(r){ return !/^(מסלול|עיר|בית ספר)/.test(r[0]); }); return; }
+      if (/^פרטי התלמיד/.test(sec.title) && !/ההורה/.test(sec.title)) { sec.rows = sec.rows.filter(function(r){ return !/^(עיר|בית ספר)$/.test(r[0]); }).map(function(r){ return [r[0].replace(/\s*\(?תלמיד\/ה\)?\s*$/, ""), r[1]]; }); sec.rows = sec.rows.slice(0, 2).concat(reg, sec.rows.slice(2)); reg = []; out.push(sec); return; }
+      if (/^פרטי ההורה/.test(sec.title)) { sec.rows = sec.rows.map(function(r){ return [r[0].replace(/\s+הורה$/, ""), r[1]]; }); out.push(sec); return; }
       if (!/התלמיד.*ההורה/.test(sec.title)) { out.push(sec); return; }
       var st = { title: "פרטי התלמיד/ה", rows: [] }, pa = { title: "פרטי ההורה", rows: [] };
       sec.rows.forEach(function(r){ var isP = /הורה|אימייל|דוא"ל/.test(r[0]); (isP ? pa : st).rows.push([r[0].replace(/\s*\((תלמיד\/ה|הורה)\)\s*$/, "").replace(/\s+הורה$/, ""), r[1]]); });
@@ -1153,6 +1240,8 @@
     return /^\d{10}$/.test(v);
   }
 
+  var studentPhoneEl = document.getElementById("f-student-phone");   // תלם 5.19.46: נייד תלמיד/ה - חובה, כמו בטופס המרתון
+  studentPhoneEl.addEventListener("input", function(){ studentPhoneEl.value = studentPhoneEl.value.replace(/\D/g, "").slice(0, 10); });
   var phoneEl = document.getElementById("f-phone");
   phoneEl.addEventListener("input", function(){
     phoneEl.value = phoneEl.value.replace(/\D/g, "").slice(0, 10);
@@ -1511,8 +1600,15 @@
     setInvalid("field-student-last", !studentLast);
     if (!studentLast) valid = false;
 
+    const studentPhone = studentPhoneEl.value.trim(), sPhoneOk = isValidPhone(studentPhone);
+    setInvalid("field-student-phone", !sPhoneOk);
+    if (!sPhoneOk) valid = false;
+
     setInvalid("field-parent-first", !parentFirst);
     if (!parentFirst) valid = false;
+
+    setInvalid("field-parent-last", !parentLast);
+    if (!parentLast) valid = false;
 
     const phoneOk = isValidPhone(phone);
     setInvalid("field-phone", !phoneOk);
@@ -1569,7 +1665,7 @@
       details_confirmed: consent,
       pay_by_phone: isPhonePay(),
       student: {
-        first_name: studentFirst, last_name: studentLast,
+        first_name: studentFirst, last_name: studentLast, phone: studentPhoneEl.value.trim(),
         school: school, grade: grade, class_num: classNum,
         math_level: mathLevel, english_level: englishLevel
       },

@@ -439,7 +439,7 @@
   .consents-box .consent{ margin:0; font-size:14px; color:var(--ink); line-height:1.55; cursor:pointer; }
   .consents-box .consent input{ width:20px; height:20px; flex:0 0 auto; margin-top:1px; accent-color:var(--accent-light); }
   .consents-box .error-msg:empty{ display:none; }
-  #marInfoDesc .tot{ font-family:'Heebo',sans-serif; font-weight:900; font-size:1.25em; color:var(--accent); }
+  #marInfoDesc .tot{ font-weight:700; }   /* הלקוחה: רק מודגש, בלי צבע והגדלה */
   #marInfoDesc .mar-extra{ display:block; margin-top:6px; color:var(--ink-soft); font-size:.92em; }   /* 5.19.41: הלקוחה - מוצנע, בלי מסגרת וצבע */
 
   /* תלם 5.19.41: במחשב - התיאור והמפגשים למעלה לרוחב (זה לצד זה), והטופס מתחתיהם ברוחב מלא */
@@ -453,6 +453,35 @@
   }
   /* תלם 5.19.41: בלי הכוכבית בכרטיס התיאור (הלקוחה) */
   .mar-info::before{ display:none !important; } .mar-info{ padding-inline-start:16px !important; }
+  /* ===== תלם 5.19.46: עיצוב הטפסים - כמו טופס ההרשמה: ראש בהיר (בלי הפס הבורדו הגדול), רקע קרם עדין, שדות למילוי באפור-בהיר. רק מראה ===== */
+  @media not all and (prefers-color-scheme: dark){
+    :root:not([data-theme="dark"]){ --bg:#FAF8F5; --border:#E6E0D8; --ink-dark:#2E1C19; }
+    body{ background:#FAF8F5 !important; }
+    .hero{ background:none !important; box-shadow:none !important; color:inherit; display:block !important; text-align:center !important; padding:8px 0 0 !important; margin:0 0 20px !important; border-radius:0 !important; }
+    .hero-logo{ background:none !important; box-shadow:none !important; padding:0 !important; display:block !important; margin:0 auto 6px !important; }
+    .hero .brand{ justify-content:center; display:flex; }
+    .hero .brand-logo{ max-width:230px !important; mix-blend-mode:multiply; }
+    .hero h1{ color:var(--ink-dark) !important; font-family:'Heebo','Segoe UI',sans-serif; font-weight:900 !important; font-size:clamp(22px,4.5vw,30px) !important; justify-content:center !important; letter-spacing:0 !important; margin:4px auto 10px !important; }
+    .hero h1 .line{ display:none; }
+    .hero .subtitle{ display:table !important; margin:0 auto !important; background:var(--accent); color:#fff !important; border-radius:999px; padding:7px 22px !important; font-size:17px !important; font-weight:700 !important; line-height:1.4 !important; }
+    input[type=text], input[type=email], input[type=tel], select, textarea{ background-color:#FAF8F5; border-color:#E3DDD4; border-radius:12px; }
+    input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff; border-color:var(--gold-deep); box-shadow:0 0 0 3px rgba(90,18,22,.12); outline:none; }
+    select.locked, input.locked, select:disabled, input:disabled{ background-color:#fff !important; color:var(--ink) !important; font-weight:600 !important; }
+    .layout-main > fieldset > legend, .pay-card .card-title{ border-bottom:1px solid var(--border); padding-bottom:12px !important; width:100%; }
+  }
+  /* ===== תלם 5.19.46 (המשך): מסגרת בורדו לכל חלק, רקע ניטרלי, ריווח צפוף, שני שדות בשורה גם בנייד, שורה צהובה מתחת לכותרת ===== */
+  @media not all and (prefers-color-scheme: dark){
+    :root{ --bg:#FAF8F5; } body{ background:#FAF8F5 !important; padding-inline:10px !important; padding-top:18px !important; }
+    fieldset, .sec-card, .pay-card, .mar-info{ border:1.5px solid var(--accent) !important; box-shadow:none !important; margin-bottom:10px !important; padding:14px 14px 4px !important; border-radius:16px !important; }
+    .sec-card, .pay-card, .mar-info{ padding-bottom:12px !important; }
+    fieldset > legend, .sec-card > .sec-h{ border-bottom-color:#E9DCDC !important; margin-bottom:10px !important; padding-bottom:10px !important; }
+    .field{ margin-bottom:10px; }
+    input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{ background-color:#FAF8F5 !important; border-color:#E3DDD4 !important; }
+    input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff !important; }
+    select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]{ background-color:#fff !important; }
+  }
+  .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
+  @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
 </style>
 </head>
 <body>
@@ -500,12 +529,6 @@
     <fieldset>
       <legend>פרטי התלמיד/ה</legend>
 
-      <div class="field" id="field-school">
-        <label for="f-school">בית ספר <span class="req">*</span></label>
-        <input type="text" id="f-school" name="school" autocomplete="off" required>
-        <div class="error-msg">שדה חובה</div>
-      </div>
-
       <div class="row keep2">
         <div class="field" id="field-student-first">
           <label for="f-student-first">שם פרטי תלמיד/ה <span class="req">*</span></label>
@@ -540,6 +563,12 @@
           <div class="error-msg">יש להזין 10 ספרות</div>
         </div>
 
+      </div>
+
+      <div class="field" id="field-school">
+        <label for="f-school">בית ספר <span class="req">*</span></label>
+        <input type="text" id="f-school" name="school" autocomplete="off" required>
+        <div class="error-msg">שדה חובה</div>
       </div>
 
       <div class="field" id="field-hakbatsa" hidden>

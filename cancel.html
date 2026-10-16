@@ -328,6 +328,76 @@
   .sig-tools{ display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:13px; color:var(--ink-soft); }
   .sig-tools button{ background:none; border:1px solid var(--border); border-radius:8px; padding:4px 12px; font:inherit; color:var(--ink); cursor:pointer; }
   .hp-field{ position:absolute !important; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; opacity:0; pointer-events:none; }
+  /* ===== תלם 5.19.46: עיצוב חדש לטפסים - קרם, בורדו וזהב (כמו מסך המאגר). רק מראה, בלי שינוי בלוגיקה ===== */
+  /* רק במצב בהיר (במצב כהה של הטלפון - נשאר העיצוב הכהה הקיים) */
+  @media not all and (prefers-color-scheme: dark){
+  @media not all and (prefers-color-scheme: dark){
+    :root:not([data-theme="dark"]){ --bg:#FBF8F3; --border:#E6E0D8; --hl:#C9A45C; --ink-dark:#2E1C19; }
+  }
+  :root[data-theme="light"]{ --bg:#FBF8F3; --border:#E6E0D8; --hl:#C9A45C; --ink-dark:#2E1C19; }
+  .wrap{ max-width:600px; }
+  h1{ display:block; width:fit-content; margin:4px auto 10px; padding:0 8px; color:var(--ink-dark, var(--ink)); }
+  h1 .line{ display:none; }
+  .subtitle{ display:table; margin:0 auto 22px; background:var(--accent); color:#fff; border-radius:999px; padding:7px 22px; font-size:17px; letter-spacing:0; }
+  .intro{ border-radius:18px; border:1px solid var(--border); border-inline-start:5px solid var(--accent); box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  fieldset{ background:var(--paper); border:1px solid var(--border); border-radius:20px; padding:18px 20px 8px; margin-bottom:18px; box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  legend{ float:right; width:100%; border-bottom:none; padding:0 0 4px; margin-bottom:14px; font-size:18px; }
+  legend::after{ content:""; display:block; width:36px; height:3px; border-radius:5px; background:var(--hl, var(--gold)); margin-top:6px; }
+  legend + *, fieldset > *:not(legend){ clear:both; }
+  input[type=text], input[type=email], input[type=tel], select, textarea{ border-radius:12px; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ border-color:var(--gold-deep); box-shadow:0 0 0 3px rgba(90,18,22,.12); outline:none; }
+  .track-info{ border-radius:16px; }
+  .terms-box{ border-radius:16px; }
+  button#submitBtn{ box-shadow:0 6px 18px rgba(90,18,22,.22); }
+  /* שדה שנקבע בקישור (נעול) - רקע בהיר, כיתוב רגיל (לא מודגש) */
+  select.locked, input.locked, select:disabled, input:disabled{ background-color:#F8F6F3 !important; color:var(--ink) !important; font-weight:600 !important; box-shadow:none; }
+  .lock-note::before{ content:"🔒 "; font-size:11px; }
+  .terms-box{ background:var(--paper); }
+  .amount-breakdown{ background:var(--paper); border:1px solid var(--border); border-radius:14px; padding:4px 0; margin-bottom:8px; }
+  .amount-row{ background:var(--paper); border-radius:14px; }
+  .amount-row:not(.amount-row-recur){ background:var(--paper); border-color:var(--accent); border-width:1.5px; }
+  .sig-box{ border-radius:14px; }
+  .pm-lock{ display:flex; gap:6px; align-items:flex-start; margin:8px 0 2px; font-size:13px; color:var(--accent); font-weight:700; }
+  #pmOpts[hidden] ~ .pm-lock{ display:none; }
+  :root{ --bg:#FBF8F3; } body{ background:#F8F4ED; }
+  /* תלם 5.19.46: הטופס בחלקים ממוספרים (כמו המרתון) */
+  form{ counter-reset:step; }
+  fieldset > legend, .sec-card > .sec-h{ display:flex; align-items:center; gap:10px; }
+  fieldset > legend::before, .sec-card > .sec-h::before{ counter-increment:step; content:counter(step); flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:14px; font-weight:800; font-family:'Heebo',sans-serif; }
+  fieldset > legend::after{ display:none !important; } fieldset > legend{ border-bottom:1px solid var(--border); padding-bottom:12px !important; }
+  .sec-card > .sec-h{ border-bottom:1px solid var(--border); padding-bottom:12px; }
+  .sec-card{ background:var(--paper); border:1px solid var(--border); border-radius:20px; padding:18px 20px 14px; margin-bottom:18px; box-shadow:0 1px 3px rgba(60,30,20,.05); }
+  .sec-card > .sec-h{ font-family:'Heebo',sans-serif; font-weight:800; font-size:18px; color:var(--accent); margin-bottom:16px; flex-wrap:wrap; }
+
+  .sec-card .terms-box{ background:#FBF9F5; }
+  @media (min-width:900px){ .wrap{ max-width:640px; } }
+  /* הלקוחה: השדות למילוי ברקע אפור-בהיר, שדה שנקבע בקישור (עיר) - לבן */
+  input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{ background-color:#FFFAEE; border-color:#EADFC8; }
+  input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff; }
+  select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]{ background-color:#fff !important; border-color:var(--border) !important; color:var(--ink) !important; font-weight:600 !important; }
+  /* הלוגו בלי "מסגרת" לבנה - הרקע הלבן של התמונה מתמזג ברקע הדף */
+  @media not all and (prefers-color-scheme: dark){ :root:not([data-theme="dark"]) .brand-logo{ mix-blend-mode:multiply; } }
+  :root[data-theme="light"] .brand-logo{ mix-blend-mode:multiply; }
+
+  }
+  @media not all and (prefers-color-scheme: dark){
+    /* מסגרת פנימית בתוך כרטיס - תמיד עם שוליים */
+    fieldset .track-info, fieldset .ti-box, fieldset .terms-box, .sec-card .terms-box, fieldset .amount-row, fieldset .pm-only{ margin-inline:0; }
+    .ti-box, .track-info{ padding:14px 16px !important; }
+  }
+  /* ===== תלם 5.19.46 (המשך): מסגרת בורדו לכל חלק, רקע ניטרלי, ריווח צפוף, שני שדות בשורה גם בנייד, שורה צהובה מתחת לכותרת ===== */
+  @media not all and (prefers-color-scheme: dark){
+    :root{ --bg:#FAF8F5; } body{ background:#FAF8F5 !important; padding-inline:10px !important; padding-top:18px !important; }
+    fieldset, .sec-card{ border:1.5px solid var(--accent) !important; box-shadow:none !important; margin-bottom:10px !important; padding:14px 14px 4px !important; border-radius:16px !important; }
+    .sec-card{ padding-bottom:12px !important; }
+    fieldset > legend, .sec-card > .sec-h{ border-bottom-color:#E9DCDC !important; margin-bottom:10px !important; padding-bottom:10px !important; }
+    .field{ margin-bottom:10px; }
+    input[type=text], input[type=email], input[type=tel], input[type=number], select, textarea{ background-color:#FAF8F5 !important; border-color:#E3DDD4 !important; }
+    input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus{ background-color:#fff !important; }
+    select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]{ background-color:#fff !important; }
+  }
+  .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
+  @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -349,25 +419,36 @@
     <div class="intro"><div>לאחר שקיבלנו הסבר מפורט מנציגי 'תלם - המרכז לשיעורי תרגול' על מהות שיעורי התרגול, אנו מבקשים לבטל את הרישום של בננו/בתנו לשיעורי התרגול, בהתאם למדיניות ולתנאי ההתקשרות המפורטים למטה.</div></div>
     <div class="top-error form-error" id="topError" style="display:none;"></div>
     <fieldset>
-      <legend>פרטי הביטול</legend>
-      <div class="row">
-        <div class="field"><label>עיר</label><input type="text" class="ro-val" id="v-city" readonly></div>
-        <div class="field"><label>בית ספר</label><input type="text" class="ro-val" id="v-school" readonly></div>
-      </div>
-      <div class="field"><label>מסלול</label><input type="text" class="ro-val" id="v-track" readonly></div>
-      <div class="field"><label>מקצוע</label><input type="text" class="ro-val" id="v-subject" readonly></div>
-      <div class="field"><label>תשלום חודשי</label><input type="text" class="ro-val" id="v-price" readonly></div>
-      <div class="field" id="field-fees"><label>תשלומים חד-פעמיים</label><input type="text" class="ro-val" id="v-fees" readonly></div>
-      <div class="ti-box" id="priceBox"></div>
-    </fieldset>
-    <fieldset>
-      <legend>פרטי התלמיד/ה וההורה</legend>
+      <legend>פרטי התלמיד/ה</legend>
       <div class="row">
         <div class="field"><label>שם התלמיד/ה</label><input type="text" class="ro-val" id="v-student" readonly></div>
         <div class="field"><label>שכבה</label><input type="text" class="ro-val" id="v-grade" readonly></div>
       </div>
-      <div class="field" id="field-signer"><label for="f-signer">שם מלא של ההורה החותם/ת <span class="req">*</span></label><input type="text" id="f-signer" maxlength="80"><div class="error-msg">שדה חובה</div></div>
     </fieldset>
+    <fieldset>
+      <legend>בית הספר</legend>
+      <div class="row">
+        <div class="field"><label>עיר</label><input type="text" class="ro-val" id="v-city" readonly></div>
+        <div class="field"><label>בית ספר</label><input type="text" class="ro-val" id="v-school" readonly></div>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>המסלול</legend>
+      <div class="row">
+        <div class="field"><label>מסלול</label><input type="text" class="ro-val" id="v-track" readonly></div>
+        <div class="field"><label>מקצוע</label><input type="text" class="ro-val" id="v-subject" readonly></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>תשלום חודשי</label><input type="text" class="ro-val" id="v-price" readonly></div>
+        <div class="field" id="field-fees"><label>תשלומים חד-פעמיים</label><input type="text" class="ro-val" id="v-fees" readonly></div>
+      </div>
+      <div class="ti-box" id="priceBox"></div>
+    </fieldset>
+    <fieldset>
+      <legend>סיבת הביטול</legend>
+      <div class="field"><label for="f-reason">סיבת הביטול (לא חובה)</label><textarea id="f-reason" maxlength="1000" rows="3"></textarea></div>
+    </fieldset>
+    <section class="sec-card"><div class="sec-h">אישור וחתימה</div>
     <div class="terms-box" id="termsBox">
       <h4>תנאים כלליים</h4>
       <p>על התלמיד/ה להגיע לתרגולים עם כל הציוד הלימודי הנדרש (ספר + מחברת הלימוד, כלי כתיבה וכו'). במהלך המפגש ניתן לצאת מהכיתה לצורך שירותים, שתייה והתרעננות בתחומי בית הספר בלבד.</p>
@@ -389,10 +470,7 @@
         <p>חומרי התרגול ועזרי התרגול הדיגיטליים יסופקו ע"י חברת 'תלם' ו/או חברה אחרת שתיבחר מטעמה. עלות חומרי הלימוד ועזרי התרגול מקוזזת מעלות חודש יוני, כמפורט למעלה. תלמיד/ה שיבטל/תבטל את השתתפותו/ה לפני תחילת הפעילות - עלות חומרי הלימוד תקוזז באופן יחסי.</p>
       </div>
     </div>
-    <fieldset>
-      <legend>סיבת הביטול</legend>
-      <div class="field"><label for="f-reason">סיבת הביטול (לא חובה)</label><textarea id="f-reason" maxlength="1000" rows="3"></textarea></div>
-    </fieldset>
+      <div class="field" id="field-signer"><label for="f-signer">שם מלא של ההורה החותם/ת <span class="req">*</span></label><input type="text" id="f-signer" maxlength="80"><div class="error-msg">שדה חובה</div></div>
     <label class="consent" id="field-consent">
       <input type="checkbox" id="f-consent" required>
       <span>הנני מצהיר/ה כי קראתי את תנאי ההתקשרות ומדיניות הביטול, וכי חתימתי על מסמך זה מהווה אישור להסכמתי לתוכן המסמך ולבקשת הביטול.</span>
@@ -404,6 +482,7 @@
       <div class="sig-tools"><span id="sigHint">החתימה נשמרת יחד עם טופס הביטול.</span><button type="button" id="sigClear">ניקוי</button></div>
       <div class="error-msg" id="sigError"></div>
     </div>
+    </section>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></label></div>
     <p style="font-size:13px; color:var(--ink-soft);">* תאריך ביטול ההרשמה ייחשב לתאריך קבלת הטופס החתום, ובכפוף לאישור הנהלת תלם.</p>
     <div class="submit-wrap"><button type="submit" id="submitBtn" disabled>שליחת טופס הביטול</button></div>
