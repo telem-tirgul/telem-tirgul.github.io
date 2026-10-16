@@ -49,6 +49,7 @@
   .dl-note{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
   .contact{ margin-top:20px; padding-top:16px; border-top:1px solid var(--border); text-align:center; font-size:13.5px; color:var(--ink-soft); line-height:1.8; }
   .contact a{ color:var(--maroon); font-weight:700; text-decoration:none; }
+  .ph-big{ display:block; width:max-content; margin-top:8px; font-family:'Heebo',sans-serif; font-size:22px; font-weight:900; letter-spacing:.5px; color:var(--maroon); background:#fff; border:1.5px solid #E8CFA0; border-radius:10px; padding:4px 14px; text-decoration:none; white-space:nowrap; unicode-bidi:isolate; }   /* 5.19.41 */
   [hidden]{ display:none !important; }
 </style>
 </head>
@@ -67,7 +68,7 @@
       <div class="sum" id="sum" hidden></div>
       <div class="sec-t" id="meetT" hidden>מועדי המפגשים</div>
       <ul class="meet" id="meet" hidden></ul>
-      <div class="sec-t" id="nextT" hidden>מה הלאה?</div>
+      <div class="sec-t" id="nextT" hidden>לקראת המרתון</div>
       <ul class="next" id="next" hidden></ul>
       <button type="button" class="dl-btn" id="dlPdf" hidden>⬇ הורדת הטופס החתום (PDF)</button>
       <div class="dl-note" id="dlNote" hidden>מומלץ לשמור את הקובץ - הוא זמין להורדה רק מהדף הזה.</div>
@@ -84,7 +85,13 @@
     var box = $("sum");
     function row(label, value, cls){ var d = document.createElement("div"); if (cls) d.className = cls; var a = document.createElement("span"); a.textContent = label; var b = document.createElement("b"); b.textContent = value; d.appendChild(a); d.appendChild(b); box.appendChild(d); }
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
-    if (x && x.kind === "marathon") {   // בינתיים רק בטופס המרתון; שאר הטפסים - כמו קודם
+    // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
+    if (phone && pending && !preview) {
+      $("title").textContent = "טופס ההרשמה התקבל";
+      var tk = document.querySelector(".tick"); if (tk) tk.innerHTML = '<span style="font-size:30px;line-height:1">📝</span>';
+      var pm0 = $("pendingMsg"); pm0.innerHTML = '<span class="ic">📞</span><span>טופס ההרשמה התקבל אך ההרשמה טרם הושלמה.<br>אנא צרו איתנו קשר בטלפון לצורך השלמת הרישום:<a class="ph-big" href="tel:0529067101" dir="ltr">052-9067101</a></span>';
+    }
+    if (x && x.kind === "marathon" && !(phone && pending && !preview)) {   // בינתיים רק בטופס המרתון; שאר הטפסים - כמו קודם
       $("title").textContent = preview ? "כך ייראה האישור" : "ההרשמה התקבלה!";
       var first = String(x.name || "").trim().split(/\s+/)[0];
       if (x.name && (x.event || x.track)) { $("lead").textContent = first + " רשום/ה ל" + (x.event || x.track).replace(/^ל/, ""); $("lead").hidden = false; }
@@ -99,10 +106,10 @@
     if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false; }
     var steps = [];
     if (paidRef) steps.push("חשבונית על התשלום תישלח אליכם במייל.");
-    else if (pending && phone) steps.push("נתקשר אליכם להסדרת התשלום. המקום נשמר סופית אחרי התשלום.");
+    else if (pending && phone) steps.push("אנא צרו עימנו קשר להסדרת התשלום, ההרשמה תאושר רק לאחר מכן.");
     if (x.kind === "marathon") {
       steps.push("שמרו את מועדי המפגשים ביומן.");
-      steps.push("להביא למפגש: ספר ומחברת הלימוד וכלי כתיבה.");
+      steps.push("להביא למפגש: ספר ומחברת הלימוד, כלי כתיבה ומחשבון (לתלמידי כיתות ח' ומעלה).");
       steps.push("ביטול אפשרי עד 24 שעות לפני תחילת המרתון, בפנייה בכתב.");
     }
     if (steps.length) { var nl = $("next"); steps.forEach(function(t, i){ var li = document.createElement("li"); var n = document.createElement("span"); n.className = "n"; n.textContent = i + 1; var s2 = document.createElement("span"); s2.textContent = t; li.appendChild(n); li.appendChild(s2); nl.appendChild(li); }); nl.hidden = false; $("nextT").hidden = false; }
