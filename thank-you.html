@@ -90,6 +90,22 @@
   </div>
 
   <script>
+  // אבטחה 5.19.53: הטופס החתום ופרטי ההרשמה נשמרים בדפדפן (בלשונית הזו) רק 30 דקות מרגע השליחה
+  (function(){
+    var KEYS = ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at"], TTL = 30 * 60 * 1000;
+    function wipe(){ KEYS.forEach(function(k){ try { sessionStorage.removeItem(k); } catch (e) {} }); }
+    try {
+      var t = Number(sessionStorage.getItem("reg_saved_at"));
+      if (!t && sessionStorage.getItem("reg_pdf")) { t = Date.now(); sessionStorage.setItem("reg_saved_at", String(t)); }
+      if (t) {
+        var left = t + TTL - Date.now();
+        if (left <= 0) wipe();
+        else setTimeout(function(){ wipe(); var b = document.getElementById("dlPdf"), n = document.getElementById("dlNote"); if (b) b.hidden = true; if (n) n.hidden = true; }, left);
+      }
+    } catch (e) {}
+  })();
+</script>
+<script>
   // הפרטים נשמרו בדפדפן בעת מילוי הטופס - לתצוגה בלבד.
   // תלם 5.19.40: "ההרשמה התקבלה" + שם התלמיד/ה, סטטוס תשלום, פרטים, מועדי המפגשים (מרתון) ו"מה הלאה"
   (function(){

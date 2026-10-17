@@ -1266,6 +1266,53 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // המפתח כאן הוא המפתח הציבורי (publishable/anon) - מותר שיהיה גלוי.
   // הוא מאפשר רק להפעיל את פונקציות ההרשמה, ולא לקרוא נתונים.
   // ----------------------------------------------------------------
+  // 5.19.53: הגנה מספאם - Cloudflare Turnstile במצב בלתי נראה (ההורים לא רואים ולא לוחצים על כלום).
+  // פעיל רק כש-endpoint מוגדר: Edge Function שמאמתת את הטוקן בשרת ואז שומרת (שיחת איקרדיט). כל עוד ריק - השליחה כמו היום.
+  var TS = { siteKey: "0x4AAAAAAFZTWNO6VX3e-dpO", endpoint: "form-submit", id: null };
+  function tsLoad(cb, fail){
+    if (window.turnstile) { cb(); return; }
+    var sc = document.getElementById("ts-script");
+    if (!sc) { sc = document.createElement("script"); sc.id = "ts-script"; sc.async = true; sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"; document.head.appendChild(sc); }
+    sc.addEventListener("load", cb); sc.addEventListener("error", fail);
+  }
+  function tsToken(){
+    return new Promise(function(resolve, reject){
+      var done = false, to = setTimeout(function(){ end(null, new Error("bot_check_timeout")); }, 20000);
+      function end(t, err){ if (done) return; done = true; clearTimeout(to); if (t) resolve(t); else reject(err); }
+      tsLoad(function(){
+        try {
+          var el = document.getElementById("ts-box"); if (!el) { el = document.createElement("div"); el.id = "ts-box"; document.body.appendChild(el); }
+          if (TS.id != null) { try { window.turnstile.remove(TS.id); } catch (e) {} TS.id = null; }
+          TS.id = window.turnstile.render(el, { sitekey: TS.siteKey, execution: "execute", appearance: "interaction-only", language: "he",
+            callback: function(t){ end(t); }, "error-callback": function(){ end(null, new Error("bot_check_failed")); }, "timeout-callback": function(){ end(null, new Error("bot_check_timeout")); } });
+          window.turnstile.execute(TS.id);
+        } catch (e) { end(null, e); }
+      }, function(){ end(null, new Error("bot_check_unavailable")); });
+    });
+  }
+  if (TS.endpoint) tsLoad(function(){}, function(){});   // טעינה מראש, כדי שהשליחה לא תתעכב
+  // שליחת ההרשמה: עם endpoint - דרך הבדיקה בשרת; בלי - ישירות לפונקציה כמו היום
+  function submitPayload(fnName, kind, payload){
+    if (!TS.endpoint) return callSupabase(fnName, payload);
+    const s = CONFIG.supabase;
+    return tsToken().then(function(token){
+      return fetch(s.url + "/functions/v1/" + TS.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": s.anonKey, "Authorization": "Bearer " + s.anonKey },
+        body: JSON.stringify({ kind: kind, payload: payload, turnstile_token: token })
+      });
+    }).then(function(res){
+      return res.json().catch(function(){ return null; }).then(function(body){
+        if (!res.ok) throw new Error((body && (body.error || body.message || body.hint)) || ("HTTP " + res.status));
+        return body;
+      });
+    }, function(err){ throw err; }).catch(function(err){
+      // הפונקציה בשרת עוד לא הועלתה (404) - שולחים ישירות כמו קודם, כדי שאף הרשמה לא תיחסם בזמן המעבר
+      if (/^HTTP 404$|not found/i.test(String(err && err.message))) return callSupabase(fnName, payload);
+      throw err;
+    });
+  }
+
   function callSupabase(fnName, payload){
     const s = CONFIG.supabase;
     if (!s || !s.url || !s.anonKey) {
@@ -1289,8 +1336,14 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     });
   }
 
-  function showSubmitError(){
+  function showSubmitError(err){
     topError.textContent = "לא הצלחנו לשמור את ההרשמה. אפשר לנסות שוב בעוד רגע, ואם זה חוזר - ליצור איתנו קשר.";
+    // 5.19.53: הודעות מהבדיקה בשרת (form-submit)
+    var m = String((err && err.message) || "");
+    if (/bot_check/.test(m)) topError.textContent = "לא הצלחנו לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה.";
+    else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
+    else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
+    else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
     topError.style.display = "block";
     topError.scrollIntoView({ behavior: "smooth", block: "center" });
     submitBtn.disabled = false;
@@ -1420,7 +1473,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     function saveRegPdf(pdf, isPreview){
       try { sessionStorage.removeItem("reg_pdf"); sessionStorage.removeItem("reg_pdf_name"); } catch (e) {}
       if (!pdf) return;
-      try { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", ("טופס הרשמה למרתון - " + String(studentFirst + " " + studentLast).replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim() + (isPreview ? " (תצוגה מקדימה)" : "")).trim() + ".pdf"); } catch (e) {}   // תלם 5.19.48: שם הקובץ בעברית
+      try { sessionStorage.setItem("reg_saved_at", String(Date.now())); sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", ("טופס הרשמה למרתון - " + String(studentFirst + " " + studentLast).replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim() + (isPreview ? " (תצוגה מקדימה)" : "")).trim() + ".pdf"); } catch (e) {}   // תלם 5.19.48: שם הקובץ בעברית
     }
     makeSignedPdf("טופס הרשמה למרתון", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
     if (isPreviewNow()) {
@@ -1443,7 +1496,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       parent: { first_name: parentFirst, last_name: parentLast, phone: phone, email: email }
     };
 
-    callSupabase("submit_marathon_v2", payload).then(function(res){
+    submitPayload("submit_marathon_v2", "marathon", payload).then(function(res){
       saveRegPdf(signedPdf, false);
       try {
         sessionStorage.setItem("reg_studentFullName", studentFirst + " " + studentLast);
@@ -1460,7 +1513,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         loadMarathon();
         return;
       }
-      showSubmitError();
+      showSubmitError(err);
     });
     });
   });
