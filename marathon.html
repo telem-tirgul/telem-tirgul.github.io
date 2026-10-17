@@ -428,7 +428,7 @@
   .m-bar.off{ transform:translateY(130%); opacity:0; pointer-events:none; }
   .m-bar-txt{ display:flex; flex-direction:column; line-height:1.15; } .m-bar-txt span{ font-size:12.5px; color:#F1D9A6; font-weight:700; } .m-bar-txt strong{ font-family:'Heebo',sans-serif; font-size:22px; font-weight:900; }
   .m-bar button{ font-family:'Heebo',sans-serif; font-weight:800; font-size:15.5px; background:#fff; color:var(--hero1); border:none; border-radius:999px; padding:11px 20px; cursor:pointer; }
-  @media (min-width:900px){ .m-bar{ display:none !important; } }
+  .m-bar{ display:none !important; }   /* 5.19.55 (הלקוחה): בלי פס המחיר שקופץ למטה בגלילה - המחיר מופיע באזור התשלום */
   @media (max-width:899px){ body{ padding-bottom:96px; } }
   @media (max-width:520px){ button#submitBtn{ font-size:16.5px; padding:15px 14px; white-space:nowrap; } }
 
@@ -491,6 +491,18 @@
   #groupOptions .mt2 .md{ font-weight:700; }
   #groupOptions .mt2 .mtm{ grid-column:3; font-weight:700; direction:ltr; text-align:left; white-space:nowrap; }
   #groupOptions .mt2 .mr{ grid-column:2 / 4; font-size:13px; font-weight:600; color:var(--ink-soft); }
+
+  /* 5.19.55 (הלקוחה): שדות שהדפדפן מילא אוטומטית - בלי הרקע הכחול, באותו צבע כמו שאר השדות */
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, select:-webkit-autofill{
+    -webkit-box-shadow:0 0 0 1000px var(--af-bg, #FAF8F5) inset !important; box-shadow:0 0 0 1000px var(--af-bg, #FAF8F5) inset !important;
+    -webkit-text-fill-color:currentColor !important; transition:background-color 99999s ease 0s; }
+  input:-webkit-autofill:focus{ --af-bg:#fff; }
+  input:autofill{ background-color:var(--af-bg, #FAF8F5) !important; }
+  @media (prefers-color-scheme: dark){ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill{ --af-bg:var(--card, #2a2522); } }
+  /* 5.19.55: שדה חסר / לא תקין - מסגרת אדומה בולטת והודעה גדולה יותר */
+  .field.invalid input, .field.invalid select, .field.invalid textarea{ border:1.5px solid #C9554F !important; }   /* הלקוחה: פחות אדום - רק מסגרת */
+  .field.invalid .error-msg, .consent .error-msg:not(:empty), #sigError:not(:empty){ font-size:13.5px !important; font-weight:700 !important; color:#B8463F !important; margin-top:4px; }
+  .field.invalid .error-msg::before{ content:"⚠ "; }
 </style>
 </head>
 <body>
@@ -507,7 +519,7 @@
 
   <div class="intro" hidden><div id="marIntro"></div></div>
 
-  <div class="top-error" id="topError" style="display:none;">יש לתקן את השדות המסומנים לפני שממשיכים.</div>
+  <div class="top-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
 
   <form id="marathonForm" novalidate>
 
@@ -892,6 +904,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         lockSchool(MARATHON.school || "");
         // תלם 5.19.38: בית הספר והשכבה קבועים לפי המרתון - לא שואלים את ההורה (השם של המרתון בכותרת אומר את זה)
         document.getElementById("field-school").hidden = true;
+        // 5.19.55 (הלקוחה): כל מרתון הוא לשכבה אחת - אם אין שכבה במרתון, לוקחים אותה מהשם ("שכבת ז'" / "מרתון ז'")
+        if (!MARATHON.grade) { var gm = String(MARATHON.name || "").match(/(?:שכבת|מרתון(?:\s+\S+)?)\s+(יב|יא|[הוזחטי])['׳"]?(?=\s|$|·|-)/); if (gm) MARATHON.grade = gm[1]; }
         if (MARATHON.grade) { var gsel = document.getElementById("f-grade"), gv = String(MARATHON.grade).replace(/['"׳]/g, "") + "'";
           if (![].some.call(gsel.options, function(o){ return o.value === gv; })) { var go = document.createElement("option"); go.value = gv; go.textContent = gv; gsel.appendChild(go); }
           gsel.value = gv; document.getElementById("field-grade").hidden = true; }
@@ -1463,7 +1477,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     submitBtn.disabled = true;
     submitBtn.textContent = isPhonePay() ? "שולח…" : "מעביר לתשלום…";
 
-    topError.textContent = "יש לתקן את השדות המסומנים לפני שממשיכים.";
+    topError.textContent = "נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.";
 
     const signature = signatureImage();
     if (!signature) { document.getElementById("sigError").textContent = "יש לחתום כדי להמשיך."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); return; }

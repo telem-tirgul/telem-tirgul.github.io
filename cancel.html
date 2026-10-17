@@ -407,6 +407,18 @@
   .ti-box{ border:1.5px solid #E2C98F; background:#FBF5E8; border-radius:12px; padding:12px 14px; margin-bottom:10px; }
   .ti-box h3{ margin:0 0 4px; font-size:16px; } .ti-box p{ margin:0 0 6px; font-size:14.5px; } .ti-box ul{ margin:0; padding-inline-start:18px; font-size:14.5px; }
   .preview-banner{ position:sticky; top:0; z-index:50; background:#C9A45C; color:#2B2320; font-weight:800; text-align:center; padding:8px 12px; font-size:14px; }
+
+  /* 5.19.55 (הלקוחה): שדות שהדפדפן מילא אוטומטית - בלי הרקע הכחול, באותו צבע כמו שאר השדות */
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, select:-webkit-autofill{
+    -webkit-box-shadow:0 0 0 1000px var(--af-bg, #FAF8F5) inset !important; box-shadow:0 0 0 1000px var(--af-bg, #FAF8F5) inset !important;
+    -webkit-text-fill-color:currentColor !important; transition:background-color 99999s ease 0s; }
+  input:-webkit-autofill:focus{ --af-bg:#fff; }
+  input:autofill{ background-color:var(--af-bg, #FAF8F5) !important; }
+  @media (prefers-color-scheme: dark){ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill{ --af-bg:var(--card, #2a2522); } }
+  /* 5.19.55: שדה חסר / לא תקין - מסגרת אדומה בולטת והודעה גדולה יותר */
+  .field.invalid input, .field.invalid select, .field.invalid textarea{ border:1.5px solid #C9554F !important; }   /* הלקוחה: פחות אדום - רק מסגרת */
+  .field.invalid .error-msg, .consent .error-msg:not(:empty), #sigError:not(:empty){ font-size:13.5px !important; font-weight:700 !important; color:#B8463F !important; margin-top:4px; }
+  .field.invalid .error-msg::before{ content:"⚠ "; }
 </style>
 </head>
 <body>

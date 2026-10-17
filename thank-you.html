@@ -64,6 +64,11 @@
   .sec-t::after{ content:""; display:block; width:34px; height:3px; border-radius:3px; background:var(--gold-deep, #C9A45C); margin-top:5px; }
   /* תלם 5.19.46: מסגרת בורדו ושורה צהובה בכותרת, כמו שאר הטפסים */
   .card{ border:1.5px solid #5A1216 !important; box-shadow:none !important; }
+  /* 5.19.55 (הלקוחה): מספר הטלפון קטן ועדין יותר (כפתור חיוג), ואייקון טלפון במקום האימוג'י */
+  .ph-big{ display:inline-flex !important; align-items:center; gap:8px; width:auto !important; margin:10px auto 0 !important; font-size:17px !important; font-weight:800 !important; letter-spacing:.3px !important;
+    color:#fff !important; background:#8B1E23 !important; border:0 !important; border-radius:999px !important; padding:8px 18px !important; }
+  .ph-big:hover{ background:#6E161A !important; } .ph-big svg{ flex:none; }
+  .tick.tick-ph{ width:54px !important; height:54px !important; margin:14px auto 8px !important; background:#F6EDEC !important; box-shadow:none !important; }
 </style>
 </head>
 <body>
@@ -117,8 +122,8 @@
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
     if (phone && pending && !preview) {
       $("title").textContent = "טופס ההרשמה התקבל";
-      var tk = document.querySelector(".tick"); if (tk) tk.innerHTML = '<span style="font-size:30px;line-height:1">📝</span>';
-      var pm0 = $("pendingMsg"); pm0.innerHTML = '<span class="ic">📞</span><span>טופס ההרשמה התקבל אך ההרשמה טרם הושלמה.<br>אנא צרו איתנו קשר בטלפון לצורך השלמת הרישום:<a class="ph-big" href="tel:0529067101" dir="ltr">052-9067101</a></span>';
+      var tk = document.querySelector(".tick"); if (tk) { tk.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#8B1E23" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>'; tk.classList.add("tick-ph"); }   // 5.19.55: אייקון טלפון נקי במקום אימוג'י
+      var pm0 = $("pendingMsg"); pm0.innerHTML = '<span class="ic">📞</span><span>טופס ההרשמה התקבל אך ההרשמה טרם הושלמה.<br>אנא צרו איתנו קשר בטלפון לצורך השלמת הרישום:<a class="ph-big" href="tel:0529067101" dir="ltr"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><span>052-9067101</span></a></span>';
     }
     var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
     if (regLike && !(phone && pending && !preview)) {
