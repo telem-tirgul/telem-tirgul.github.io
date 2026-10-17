@@ -1268,7 +1268,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // ----------------------------------------------------------------
   // 5.19.53: הגנה מספאם - Cloudflare Turnstile במצב בלתי נראה (ההורים לא רואים ולא לוחצים על כלום).
   // פעיל רק כש-endpoint מוגדר: Edge Function שמאמתת את הטוקן בשרת ואז שומרת (שיחת איקרדיט). כל עוד ריק - השליחה כמו היום.
-  var TS = { siteKey: "0x4AAAAAAFZTWNO6VX3e-dpO", endpoint: "form-submit", id: null };
+  var TS = { siteKey: "0x4AAAAAAFZTWNO6VX3e-dpO", endpoint: "form-submit", id: null };   // לכיבוי זמני: endpoint ""
   function tsLoad(cb, fail){
     if (window.turnstile) { cb(); return; }
     var sc = document.getElementById("ts-script");
@@ -1308,7 +1308,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       });
     }, function(err){ throw err; }).catch(function(err){
       // הפונקציה בשרת עוד לא הועלתה (404) - שולחים ישירות כמו קודם, כדי שאף הרשמה לא תיחסם בזמן המעבר
-      if (/^HTTP 404$|not found/i.test(String(err && err.message))) return callSupabase(fnName, payload);
+      // 5.19.54: גם אם הפונקציה דוחה את המפתח (401) או שהדפדפן לא הצליח להגיע אליה (רשת / CORS)
+      if (/^HTTP 40[14]$|not found|jwt|authorization|failed to fetch|load failed|networkerror/i.test(String(err && err.message))) { console.warn("form-submit fallback:", err && err.message); return callSupabase(fnName, payload); }
       throw err;
     });
   }
@@ -1344,6 +1345,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
     else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
+    else if (m) topError.textContent += " (קוד: " + m.slice(0, 60) + ")";
     topError.style.display = "block";
     topError.scrollIntoView({ behavior: "smooth", block: "center" });
     submitBtn.disabled = false;
