@@ -616,6 +616,26 @@
     </fieldset>
 
     <section class="sec-card"><div class="sec-h">תשלום ואישור</div>
+    <div class="amount-breakdown" id="amountBreakdown"></div>
+    <div class="amount-row">
+      <span>סכום לתשלום מיידי</span>
+      <strong id="amountDisplay"></strong>
+    </div>
+    <div class="amount-row amount-row-recur">
+      <span id="recurLabel">תשלום חודשי</span>
+      <strong id="recurAmountDisplay"></strong>
+    </div>
+
+    <div class="pay-method" id="field-payphone">
+      <div class="pm-title">איך תרצו לשלם?</div>
+      <div class="pm-opts" id="pmOpts">
+        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b>💳 תשלום באשראי עכשיו</b><small>אחרי השליחה עוברים לעמוד תשלום מאובטח של חברת הסליקה</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b>📞 תשלום טלפוני</b><small>שולחים את טופס ההרשמה, וניצור איתכם קשר לתשלום בכרטיס אשראי</small></span></label>
+      </div>
+      <div class="lock-line pm-lock">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
+      <div class="pm-only" id="payPhoneOnly" hidden><b>📞 התשלום טלפוני</b> - אחרי שליחת ההרשמה ניצור איתכם קשר לתשלום בכרטיס אשראי.</div>
+    </div>
+    <!-- 5.19.62: כמו במרתון - קודם הסכום ואופן התשלום, אחר כך התנאים ושתי תיבות האישור יחד -->
     <div class="terms-box" id="termsBox">
       <h4>תנאים כלליים</h4>
       <p>על התלמיד/ה להגיע לתרגולים עם כל הציוד הלימודי הנדרש (ספר + מחברת הלימוד, כלי כתיבה וכו'). במהלך המפגש ניתן לצאת מהכיתה לצורך שירותים, שתייה והתרעננות בתחומי בית הספר בלבד.</p>
@@ -637,36 +657,18 @@
         <p>חומרי התרגול ועזרי התרגול הדיגיטליים יסופקו ע"י חברת 'תלם' ו/או חברה אחרת שתיבחר מטעמה. עלות חומרי הלימוד ועזרי התרגול מקוזזת מעלות חודש יוני, כמפורט למעלה. תלמיד/ה שיבטל/תבטל את השתתפותו/ה לפני תחילת הפעילות - עלות חומרי הלימוד תקוזז באופן יחסי.</p>
       </div>
     </div>
+    <div class="consents-box">
     <label class="consent" id="field-terms-consent">
       <input type="checkbox" id="f-terms-consent" required>
       <span>קראתי את תנאי ההתקשרות (לרבות מדיניות הביטול) המפורטים למעלה, ואני מסכים/ה להם.</span>
     </label>
     <div class="error-msg" id="termsConsentError"></div>
-
-    <div class="amount-breakdown" id="amountBreakdown"></div>
-    <div class="amount-row">
-      <span>סכום לתשלום מיידי</span>
-      <strong id="amountDisplay"></strong>
-    </div>
-    <div class="amount-row amount-row-recur">
-      <span id="recurLabel">תשלום חודשי</span>
-      <strong id="recurAmountDisplay"></strong>
-    </div>
-
-    <div class="pay-method" id="field-payphone">
-      <div class="pm-title">איך תרצו לשלם?</div>
-      <div class="pm-opts" id="pmOpts">
-        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b>💳 תשלום באשראי עכשיו</b><small>אחרי השליחה עוברים לעמוד תשלום מאובטח של חברת הסליקה</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b>📞 תשלום טלפוני</b><small>שולחים את טופס ההרשמה, וניצור איתכם קשר לתשלום בכרטיס אשראי</small></span></label>
-      </div>
-      <div class="lock-line pm-lock">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
-      <div class="pm-only" id="payPhoneOnly" hidden><b>📞 התשלום טלפוני</b> - אחרי שליחת ההרשמה ניצור איתכם קשר לתשלום בכרטיס אשראי.</div>
-    </div>
     <label class="consent" id="field-consent">
       <input type="checkbox" id="f-consent" required>
       <span id="consentText" data-card="אני מאשר/ת שהפרטים נכונים, מסכים/ה להמשך לעמוד התשלום המאובטח, ומאשר/ת בזאת חיוב מיידי של הסכום החד-פעמי בכרטיס האשראי, וכן הקמת הוראת קבע לחיוב חודשי אוטומטי באותו כרטיס בסכום ובמועדים המפורטים למעלה, עד ליוני (כולל)." data-phone="אני מאשר/ת שהפרטים נכונים, ושתלם תיצור איתי קשר בטלפון לתשלום בכרטיס אשראי של הסכום החד-פעמי ושל התשלום החודשי בסכום ובמועדים המפורטים למעלה, עד ליוני (כולל).">אני מאשר/ת שהפרטים נכונים, מסכים/ה להמשך לעמוד התשלום המאובטח, ומאשר/ת בזאת חיוב מיידי של הסכום החד-פעמי בכרטיס האשראי, וכן הקמת הוראת קבע לחיוב חודשי אוטומטי באותו כרטיס בסכום ובמועדים המפורטים למעלה, עד ליוני (כולל).</span>
     </label>
     <div class="error-msg" id="consentError"></div>
+    </div>
 
     <div class="sig-wrap" id="field-signature">
       <span class="sig-lbl">חתימת ההורה <span class="req">*</span></span>
@@ -1197,10 +1199,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       hasEnglish = choice === "אנגלית";
     }
 
-    mathLevelField.style.display = hasMath ? "" : "none";
+    mathLevelField.style.display = "none"; // 5.19.62: הקבצה / רמת לימוד הוסרה מהטופס (נועה) - נשלח ריק
     if (!hasMath) mathLevelEl.value = "";
 
-    englishLevelField.style.display = hasEnglish ? "" : "none";
+    englishLevelField.style.display = "none"; // 5.19.62: הקבצה / רמת לימוד הוסרה מהטופס (נועה) - נשלח ריק
     if (!hasEnglish) englishLevelEl.value = "";
   }
 

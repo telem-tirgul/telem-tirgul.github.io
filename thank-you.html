@@ -165,7 +165,8 @@
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
     if (!x || (x.kind !== "marathon" && x.kind !== "register")) return;
     document.getElementById("title").textContent = "ההרשמה אושרה";
-    var chq = document.getElementById("stChip"); chq.className = "st-chip ok"; chq.textContent = "✓ שולם";
+    // 5.19.62: אחרי תשלום - בלי תגית "שולם" למעלה (התיבה הירוקה "התשלום התקבל בהצלחה" מספיקה)
+    document.getElementById("stChip").hidden = true;
     var ld = document.getElementById("lead"), inv = "חשבונית תישלח אליכם במייל";
     if (ld.hidden || !ld.textContent) ld.textContent = inv; else ld.innerHTML = ld.textContent.replace(/[<>&]/g, "") + "<br>" + inv;
     ld.hidden = false;
