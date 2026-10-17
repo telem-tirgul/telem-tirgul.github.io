@@ -1353,6 +1353,15 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
   // 5.19.57: "הצטרפות מאוחרת בחודש" ממסך חוקי חיוב - לעיר הזו, או לכל הערים (city ריק). null = אין חוק.
   var LATE_RULES = [];
+  // 5.19.58: קיזוז ביוני לפי מסך חוקי החיוב (icredit-20: june_offset + city_offsets). ברירת מחדל: חומרי תרגול, ואם אין - דמי הרשמה.
+  var JUNE = { on: true, cities: {}, known: false };
+  function juneOffset(city){
+    var t = CONFIG.trackPricing[city] || {}, mat = Number(t.materialsFee || 0), reg = Number(t.registrationFee || 0);
+    if (!JUNE.on) return { materials: false, registration: false, sum: 0 };
+    var c = JUNE.cities[city], m, r;
+    if (c && typeof c === "object") { m = !!c.materials && mat > 0; r = !!c.registration; } else { m = mat > 0; r = !m; }
+    return { materials: m, registration: r, sum: (m ? mat : 0) + (r ? reg : 0) };
+  }
   function lateJoinRule(city){
     var m = null;
     LATE_RULES.forEach(function(r){ if (r.city === city) m = r; });
@@ -1361,9 +1370,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
   function firstMonthText(city){
     var r = lateJoinRule(city), full = "שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו)";
-    if (!r) return "<li>שכר הלימוד עבור חודש ההרשמה - " + full + ".</li>";
+    // 5.19.58: השרת מחשב רק apply="first" (icredit-18) - חוק "last" לא מוצג
+    if (!r || r.apply !== "first") return "<li>שכר הלימוד עבור חודש ההרשמה - " + full + ".</li>";
     return "<li>שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-" + (r.from_day - 1) + " לחודש - " + full + ". הרשמה מה-" + r.from_day + " לחודש ואילך - " + r.percent + "% מהתשלום החודשי" +
-      (r.apply === "first" ? "" : " (ההפרש יקוזז מתשלום חודש יוני)") + ".</li>";
+      ".</li>";
   }
   function firstOfNextMonth(dateStr){
     var d = new Date(dateStr + "T00:00:00");
@@ -1432,6 +1442,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // שאחרי החודש הראשון (שכבר נגבה מיידית) ועד יוני (כולל).
     var recurStartDate = firstOfNextMonth(effectiveStartDate);
     var payments = countMonthlyPayments(recurStartDate);
+    // קיזוז ≥ התשלום החודשי - אין חיוב ביוני (חיוב אחד פחות), כמו בשרת
+    var jo = juneOffset(city), juneFree = payments > 0 && jo.sum > 0 && jo.sum >= monthlySum;
+    if (juneFree) payments -= 1;
 
     return {
       monthlySum: monthlySum,
@@ -1443,7 +1456,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       firstMonthPct: lj ? lj.percent : 100,
       recurStartDate: recurStartDate,
       recurStartDateHe: formatDateHe(recurStartDate),
-      payments: payments
+      payments: payments,
+      juneFree: juneFree
     };
   }
 
@@ -1456,7 +1470,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     }
     // 5.19.57: בלי "× 8" ליד הסכום - מספר התשלומים והתאריכים בשורה קטנה מתחת
     recurAmountDisplay.textContent = "₪" + info.monthlySum.toFixed(2);
-    var sub = info.payments + " תשלומים חודשיים, החל מ-" + info.recurStartDateHe + " ועד חודש יוני כולל";
+    var sub = info.payments + " תשלומים חודשיים, החל מ-" + info.recurStartDateHe + (info.juneFree ? " ועד חודש מאי כולל (אין תשלום על יוני)" : " ועד חודש יוני כולל");
     recurLabel.innerHTML = "";
     recurLabel.appendChild(document.createTextNode("תשלום חודשי"));
     var sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = sub; recurLabel.appendChild(sm);
@@ -1490,8 +1504,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     trackInfoPrices.innerHTML =
       "<div class=\"track-info-label\">תשלום חודשי:</div>" +
       "<ul class=\"track-info-list\">" +
-        "<li><b>" + prices.early + " ₪</b> להרשמה מוקדמת (עד " + shortDate(earlyCutoff()) + ")</li>" +
-        "<li><b>" + prices.regular + " ₪</b> להרשמה רגילה (מ-" + shortDate(earlyCutoff()) + " ואילך)</li>" +
+        // 5.19.58: אחרי שההרשמה המוקדמת הסתיימה - רק המחיר הרגיל, בלי הטקסט על הרשמה מוקדמת
+        (isEarlyRegistration() ? "<li><b>" + prices.early + " ₪</b> להרשמה מוקדמת (עד " + shortDate(earlyCutoff()) + ")</li>" +
+        "<li><b>" + prices.regular + " ₪</b> להרשמה רגילה (מ-" + shortDate(earlyCutoff()) + " ואילך)</li>" : "<li><b>" + prices.regular + " ₪</b> לחודש</li>") +
       "</ul>";
 
     // תשלומים חד-פעמיים שנגבים בהרשמה: בעיר שאין בה חומרי תרגול (ראש
@@ -1499,17 +1514,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // עצמם; בערים שיש בהן חומרי תרגול (כפר סבא/הוד השרון) מה שמקוזז
     // הוא עלות חומרי התרגול, ודמי ההרשמה שם אינם מקוזזים. שכר הלימוד
     // של חודש ההרשמה נגבה במלואו (לא באופן יחסי) - ראו getRecurInfo.
-    var oneTimeItems;
-    if (cityTable.materialsFee){
-      oneTimeItems = [
-        "<li><b>" + cityTable.registrationFee + " ₪</b> דמי שיבוץ והרשמה</li>",
-        "<li><b>" + cityTable.materialsFee + " ₪</b> חומרי תרגול ועזרי לימוד דיגיטליים - סכום זה יקוזז מתשלום חודש יוני.</li>"
-      ];
-    } else {
-      oneTimeItems = [
-        "<li><b>" + cityTable.registrationFee + " ₪</b> דמי שיבוץ והרשמה - סכום זה יקוזז מתשלום חודש יוני.</li>"
-      ];
-    }
+    var oneTimeItems, jo = juneOffset(city), juneTxt = " - סכום זה יקוזז מתשלום חודש יוני.";
+    oneTimeItems = ["<li><b>" + cityTable.registrationFee + " ₪</b> דמי שיבוץ והרשמה" + (jo.registration ? juneTxt : "") + "</li>"];
+    if (cityTable.materialsFee) oneTimeItems.push("<li><b>" + cityTable.materialsFee + " ₪</b> חומרי תרגול ועזרי לימוד דיגיטליים" + (jo.materials ? juneTxt : "") + "</li>");
     var recurInfo = getRecurInfo();
     if (recurInfo){
       oneTimeItems.push(
@@ -1518,7 +1525,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     }
     trackInfoNote.innerHTML =
       "<div class=\"track-info-label\">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div>" +
-      "<ul class=\"track-info-list\">" + oneTimeItems.join("") + "</ul>";
+      "<ul class=\"track-info-list\">" + oneTimeItems.join("") + ((getRecurInfo() || {}).juneFree ? "<li>הקיזוז גדול מהתשלום החודשי - לכן אין תשלום על חודש יוני.</li>" : "") + "</ul>";
     trackInfoBox.style.display = "block";
   }
 
@@ -1571,6 +1578,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // 5.19.57: חוקי חיוב לטופס (שיחת התשלומים: billing_rules_public). אין פונקציה / שגיאה = אין חוק (חודש מלא).
   callSupabase("billing_rules_public", null).then(function(x){
     var list = x && Array.isArray(x.late_join) ? x.late_join : [];
+    JUNE = { on: !(x && x.june_offset === false), cities: (x && x.city_offsets && typeof x.city_offsets === "object") ? x.city_offsets : {}, known: !!(x && "june_offset" in x) };
     LATE_RULES = list.map(function(r){ return { city: typeof r.city === "string" ? r.city : "", from_day: Math.round(Number(r.from_day)), percent: Number(r.percent), apply: r.apply === "first" ? "first" : "last" }; })
       .filter(function(r){ return r.from_day >= 2 && r.from_day <= 31 && isFinite(r.percent) && r.percent >= 0 && r.percent <= 100; });
     updateAmountDisplay(); updateRecurDisplay(); updateTrackInfo();

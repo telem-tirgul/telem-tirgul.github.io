@@ -400,6 +400,14 @@
   .row{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
   @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
   .row > .field:last-child:nth-child(odd){ grid-column:1 / -1; }
+  /* 5.19.58: קישור מהיר */
+  .quick-box{ margin:6px 0 10px; } .q-card{ background:#fff; border:1.5px solid var(--accent, #8B1E23); border-radius:14px; padding:6px 16px; }
+  .q-row{ display:flex; justify-content:space-between; gap:12px; padding:10px 0; font-size:15.5px; } .q-row + .q-row{ border-top:1px solid #EEE7DF; }
+  .q-row span{ color:#6B5F55; } .q-row.q-amt b{ font-size:20px; color:var(--accent, #8B1E23); } .q-row small{ font-weight:400; color:#6B5F55; }
+  .q-go{ display:block; width:100%; margin:14px 0 8px; padding:14px; border:0; border-radius:12px; background:var(--accent, #8B1E23); color:#fff; font:inherit; font-size:17px; font-weight:800; cursor:pointer; }
+  .q-go:disabled{ opacity:.7; cursor:default; } .q-err{ color:#A33A35; margin-top:10px; font-weight:600; } .q-lock{ color:#6B5F55; font-size:13px; text-align:center; }
+  .recur-sub{ display:block; font-size:12.5px; color:#6B5F55; font-weight:400; margin-top:3px; line-height:1.45; }
+  #recurRow{ align-items:flex-start; gap:12px; } #recurRow strong{ white-space:nowrap; } .q-row b{ text-align:left; }
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -789,13 +797,17 @@ function fill(d){
   $("loadBox").hidden = true;
   if (d.status === "paid") { showDone("התשלום כבר התקבל. תודה!"); return; }
   if (d.status === "cancelled") { showBad("הקישור בוטל. לפרטים: 052-9067101"); return; }
+  if (d.quick) { showQuick(d); return; }   // 5.19.58: קישור להרשמה שכבר נחתמה (icredit-18) - בלי שדות, חתימה ותקנון
   $("payForm").hidden = false;
   $("v-desc").textContent = d.description || "תשלום לתלם";
   $("v-amount").textContent = money(d.one_time_amount);
   if (d.monthly_amount) {
     $("recurRow").hidden = false;
-    $("v-recur").textContent = money(d.monthly_amount) + " × " + d.monthly_count;
-    $("v-recur-lbl").textContent = "תשלום חודשי" + (d.first_monthly_date ? " (החל מ-" + dateHe(d.first_monthly_date) + ")" : "") + " - באותו כרטיס";
+    // 5.19.58 (הלקוחה): בלי "× 8" - הסכום לבד, ומתחת בטקסט קטן: מספר התשלומים, מאיזה תאריך ועד יוני כולל
+    $("v-recur").textContent = money(d.monthly_amount);
+    $("v-recur-lbl").innerHTML = "";
+    $("v-recur-lbl").appendChild(document.createTextNode("תשלום חודשי - באותו כרטיס"));
+    const sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = recurTxt(d); $("v-recur-lbl").appendChild(sm);
     $("consentText").textContent = "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של הסכום המיידי בכרטיס האשראי בעמוד התשלום המאובטח, וכן חיוב חודשי אוטומטי באותו כרטיס בסכום ובמספר החיובים המפורטים למעלה.";
   }
   const box = $("fieldsBox"), f = d.fields || {}; let shown = 0;
@@ -829,6 +841,29 @@ if (PREVIEW && !CODE) fill(SAMPLE);
 else if (CODE.length < 32) showBad("הקישור לא תקין. לפרטים: 052-9067101");
 else rpcRaw("pay_link_public", { p_code: CODE }).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא הצלחנו לטעון את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101"));
 
+function recurTxt(d){ return d.monthly_count + " תשלומים חודשיים" + (d.first_monthly_date ? ", החל מ-" + dateHe(d.first_monthly_date) : "") + " ועד חודש יוני כולל"; }
+// 5.19.58: קישור "מהיר" - רק סיכום + כפתור לתשלום (ישר ל-icredit-pay; השרת מסמן את הקישור בעצמו)
+function showQuick(d){
+  const box = document.createElement("div"); box.className = "quick-box"; box.id = "quickBox";
+  const row = (l, v, cls) => '<div class="q-row' + (cls ? " " + cls : "") + '"><span>' + l + '</span><b>' + v + '</b></div>';
+  const esc2 = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  box.innerHTML = '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם"))
+    + row("לתשלום עכשיו", esc2(money(d.one_time_amount)), "q-amt")
+    + (d.monthly_amount ? row("ואחר כך תשלום חודשי", esc2(money(d.monthly_amount)) + '<small class="recur-sub">' + esc2(recurTxt(d)) + '</small>') : "")
+    + '</div><div class="q-err" id="qErr" hidden></div><button type="button" class="q-go" id="qGo">לתשלום מאובטח ←</button>'
+    + '<div class="q-lock">🔒 פרטי האשראי מוזנים בעמוד המאובטח של חברת הסליקה ולא נשמרים אצלנו.</div>';
+  $("payForm").parentNode.insertBefore(box, $("payForm"));
+  $("qGo").onclick = function(){
+    const s = CONFIG.supabase, p = { kind: "pay_link", id: CODE }, btn = this;
+    try { sessionStorage.setItem("pay_pending", JSON.stringify(p)); sessionStorage.setItem("reg_form_url", location.href);
+          sessionStorage.setItem("reg_summary", JSON.stringify({ name: d.student_name || "", track: d.description, amount: Number(d.one_time_amount) })); } catch (e) {}
+    btn.disabled = true; btn.textContent = "מעביר לתשלום…";
+    fetch(s.url + "/functions/v1/icredit-pay", { method: "POST", headers: { "Content-Type": "application/json", "apikey": s.anonKey }, body: JSON.stringify(p) })
+      .then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
+      .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); location.href = u; })
+      .catch(function(){ $("qErr").hidden = false; $("qErr").textContent = "לא הצלחנו לפתוח את עמוד התשלום. נסו שוב, ואם זה חוזר - התקשרו: 052-9067101"; btn.disabled = false; btn.textContent = "לנסות שוב ←"; });
+  };
+}
 function goToPayment(){
   const s = CONFIG.supabase, p = { kind: "pay_link", id: CODE };
   try { sessionStorage.setItem("pay_pending", JSON.stringify(p)); sessionStorage.setItem("reg_form_url", location.href);

@@ -571,19 +571,40 @@ function renderTracks(){
     const info = CONFIG.trackInfo[t], cityT = CONFIG.trackPricing[city], pr = cityT && cityT[t];
     // תלם 5.19.42: כמו בטופס ההרשמה - כרטיס המסלול (צבע רק בפס בצד ובכותרת), תשלום חודשי ותשלומים חד-פעמיים
     const sd = (iso) => { const p = String(iso || "").split("-"); return p.length === 3 ? Number(p[2]) + "." + Number(p[1]) + "." + p[0].slice(2) : ""; };
-    const cut = sd(CONFIG.earlyRegistrationCutoff);
+    // 5.19.58: תאריך ההרשמה המוקדמת של העיר (מהמערכת); אחרי שעבר - רק המחיר הרגיל
+    const cutIso = (cityT && cityT.earlyUntil) || CONFIG.earlyRegistrationCutoff, cut = sd(cutIso), earlyOn = new Date() < new Date(cutIso + "T23:59:59");
     d.className = "track-info " + (info.color || "");
     d.innerHTML = '<div class="track-info-title"></div><div class="track-info-body"></div>' + (pr ? '<div class="track-info-label">תשלום חודשי:</div><ul class="track-info-list">'
-        + '<li><b>' + pr.early + ' ₪</b> להרשמה מוקדמת' + (cut ? ' (עד ' + cut + ')' : '') + '</li><li><b>' + pr.regular + ' ₪</b> להרשמה רגילה' + (cut ? ' (מ-' + cut + ' ואילך)' : '') + '</li></ul>'
-        + '<div class="track-info-label">בנוסף, בעת ההרשמה יגבו תשלומים חד-פעמיים:</div><ul class="track-info-list">'
-        + (cityT.materialsFee ? '<li><b>' + cityT.registrationFee + ' ₪</b> דמי שיבוץ והרשמה</li><li><b>' + cityT.materialsFee + ' ₪</b> חומרי תרגול ועזרי לימוד דיגיטליים - סכום זה יקוזז מתשלום חודש יוני.</li>'
-          : '<li><b>' + cityT.registrationFee + ' ₪</b> דמי שיבוץ והרשמה - סכום זה יקוזז מתשלום חודש יוני.</li>') + '</ul>' : '');
+        + (earlyOn ? '<li><b>' + pr.early + ' ₪</b> להרשמה מוקדמת' + (cut ? ' (עד ' + cut + ')' : '') + '</li><li><b>' + pr.regular + ' ₪</b> להרשמה רגילה' + (cut ? ' (מ-' + cut + ' ואילך)' : '') + '</li>' : '<li><b>' + pr.regular + ' ₪</b> לחודש</li>') + '</ul>'
+        + '<div class="track-info-label">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div><ul class="track-info-list">'
+        + intFeesLi(city, cityT) + intMonthLi(city) + '</ul>' : '');
     d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; box.appendChild(d);
   });
   $("introText").textContent = tracks.length ? "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה." : "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.";
 }
 renderTracks();
 if (P_MAR) callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){});
+// 5.19.58: כמו בטופס ההרשמה - שכר הלימוד של חודש ההרשמה לפי חוק "הצטרפות מאוחרת" ממסך חוקי החיוב (billing_rules_public)
+var LATE_RULES = [], JUNE = { on: true, cities: {} };
+// 5.19.58: מה מקוזז ביוני - לפי מסך חוקי החיוב (june_offset + city_offsets); ברירת מחדל: חומרי תרגול, ואם אין - דמי הרשמה
+function intFeesLi(city, t){
+  var J = JUNE || { on: true, cities: {} }, c = J.cities[city], mat = Number(t.materialsFee || 0), m, r, jt = ' - סכום זה יקוזז מתשלום חודש יוני.';
+  if (!J.on) { m = false; r = false; } else if (c && typeof c === "object") { m = !!c.materials && mat > 0; r = !!c.registration; } else { m = mat > 0; r = !m; }
+  return '<li><b>' + t.registrationFee + ' ₪</b> דמי שיבוץ והרשמה' + (r ? jt : '') + '</li>' + (mat ? '<li><b>' + mat + ' ₪</b> חומרי תרגול ועזרי לימוד דיגיטליים' + (m ? jt : '') + '</li>' : '');
+}
+function intMonthLi(city){
+  var m = null, LR = LATE_RULES || []; LR.forEach(function(r){ if (r.city === city) m = r; }); if (!m) LR.forEach(function(r){ if (!r.city && !m) m = r; });
+  var full = "שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו)";
+  if (!m || m.apply !== "first") return "<li>שכר הלימוד עבור חודש ההרשמה - " + full + ".</li>";
+  return "<li>שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-" + (m.from_day - 1) + " לחודש - " + full + ". הרשמה מה-" + m.from_day + " לחודש ואילך - " + m.percent + "% מהתשלום החודשי.</li>";
+}
+callSupabase("billing_rules_public", null).then(function(x){
+  var list = x && Array.isArray(x.late_join) ? x.late_join : [];
+  JUNE = { on: !(x && x.june_offset === false), cities: (x && x.city_offsets && typeof x.city_offsets === "object") ? x.city_offsets : {} };
+  LATE_RULES = list.map(function(r){ return { city: typeof r.city === "string" ? r.city : "", from_day: Math.round(Number(r.from_day)), percent: Number(r.percent), apply: r.apply === "first" ? "first" : "last" }; })
+    .filter(function(r){ return r.from_day >= 2 && r.from_day <= 31 && isFinite(r.percent) && r.percent >= 0 && r.percent <= 100; });
+  renderTracks();
+}).catch(function(){});
 // מחירים מהמערכת (נערכים במערכת הניהול). אם אין חיבור - נשארים המחירים שכתובים למעלה.
 callSupabase("reg_prices_public", null).then(function(all){
   if (!all || typeof all !== "object") return;
