@@ -452,6 +452,8 @@
     <span class="contact">טלפון: <a href="tel:0529067101">052-9067101</a> · אימייל: <a href="mailto:telem.tr@gmail.com">telem.tr@gmail.com</a></span></footer>
 </div>
 <script>
+function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:" ? x.href : null; } catch(e) { return null; } }   // אבטחה 5.19.52: מעבר לתשלום רק לכתובת https
+
 (function(){
 "use strict";
 const CONFIG = {
@@ -822,7 +824,7 @@ function goToPayment(){
   submitBtn.disabled = true; submitBtn.textContent = "מעביר לתשלום…";
   return fetch(s.url + "/functions/v1/icredit-pay", { method: "POST", headers: { "Content-Type": "application/json", "apikey": s.anonKey }, body: JSON.stringify(p) })
     .then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
-    .then(function(b){ location.href = b.url; })
+    .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); location.href = u; })
     .catch(function(err){
       console.error("icredit-pay failed:", err);
       topError.textContent = "הפרטים נשמרו, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - התקשרו: 052-9067101";

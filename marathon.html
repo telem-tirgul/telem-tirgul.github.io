@@ -541,12 +541,12 @@
       <div class="row keep2">
         <div class="field" id="field-student-first">
           <label for="f-student-first">שם פרטי תלמיד/ה <span class="req">*</span></label>
-          <input type="text" id="f-student-first" name="studentFirst" autocomplete="given-name" required>
+          <input type="text" id="f-student-first" maxlength="40" name="studentFirst" autocomplete="given-name" required>
           <div class="error-msg">שדה חובה</div>
         </div>
         <div class="field" id="field-student-last">
           <label for="f-student-last">שם משפחה תלמיד/ה <span class="req">*</span></label>
-          <input type="text" id="f-student-last" name="studentLast" autocomplete="family-name" required>
+          <input type="text" id="f-student-last" maxlength="40" name="studentLast" autocomplete="family-name" required>
           <div class="error-msg">שדה חובה</div>
         </div>
       </div>
@@ -576,7 +576,7 @@
 
       <div class="field" id="field-school">
         <label for="f-school">בית ספר <span class="req">*</span></label>
-        <input type="text" id="f-school" name="school" autocomplete="off" required>
+        <input type="text" id="f-school" maxlength="60" name="school" autocomplete="off" required>
         <div class="error-msg">שדה חובה</div>
       </div>
 
@@ -593,12 +593,12 @@
       <div class="row keep2">
         <div class="field" id="field-parent-first">
           <label for="f-parent-first">שם פרטי הורה <span class="req">*</span></label>
-          <input type="text" id="f-parent-first" name="parentFirst" autocomplete="given-name" required>
+          <input type="text" id="f-parent-first" maxlength="40" name="parentFirst" autocomplete="given-name" required>
           <div class="error-msg">שדה חובה</div>
         </div>
         <div class="field" id="field-parent-last">
           <label for="f-parent-last">שם משפחה הורה <span class="req">*</span></label>
-          <input type="text" id="f-parent-last" name="parentLast" autocomplete="family-name" required>
+          <input type="text" id="f-parent-last" maxlength="40" name="parentLast" autocomplete="family-name" required>
           <div class="error-msg">שדה חובה</div>
         </div>
       </div>
@@ -612,7 +612,7 @@
         </div>
         <div class="field" id="field-email">
           <label for="f-email">אימייל <span class="req">*</span></label>
-          <input type="email" id="f-email" name="email" autocomplete="email" required>
+          <input type="email" id="f-email" maxlength="100" name="email" autocomplete="email" required>
           <div class="error-msg">כתובת אימייל לא תקינה</div>
         </div>
       </div>
@@ -706,6 +706,8 @@
 </div>
 
 <script>
+function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:" ? x.href : null; } catch(e) { return null; } }   // אבטחה 5.19.52: מעבר לתשלום רק לכתובת https
+
 
 (function(){
 
@@ -1312,7 +1314,7 @@
       headers: { "Content-Type": "application/json", "apikey": s.anonKey },
       body: JSON.stringify(pendingPay)
     }).then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
-      .then(function(b){ location.href = b.url; })
+      .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); location.href = u; })
       .catch(function(err){
         console.error("icredit-pay failed:", err);
         topError.textContent = "ההרשמה נשמרה, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - צרו איתנו קשר.";

@@ -2,6 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://oulivucqbpmbavbavfvy.supabase.co; base-uri 'self'; object-src 'none'">
@@ -56,6 +57,8 @@
     <div class="contact">לשאלות: <a href="tel:0529067101">052-9067101</a> · <a href="mailto:telem.tr@gmail.com">telem.tr@gmail.com</a></div>
   </div>
   <script>
+function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:" ? x.href : null; } catch(e) { return null; } }   // אבטחה 5.19.52: מעבר לתשלום רק לכתובת https
+
   try { var u = sessionStorage.getItem("reg_form_url"); if (u && new URL(u).origin === location.origin) document.getElementById("retry").href = u; } catch (e) {}
   // הטופס כבר נשמר - "לנסות שוב" פותח שוב את עמוד התשלום לאותה הרשמה (בלי למלא את הטופס מחדש)
   (function(){
@@ -67,7 +70,7 @@
       fetch("https://oulivucqbpmbavbavfvy.supabase.co/functions/v1/icredit-pay", {
         method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" }, body: JSON.stringify(p)
       }).then(function(r){ return r.json(); }).then(function(b){
-        if (b && b.url) location.href = b.url; else { btn.textContent = "לנסות שוב"; alertBox(); }
+        var u = safePayUrl(b && b.url); if (u) location.href = u; else { btn.textContent = "לנסות שוב"; alertBox(); }
       }).catch(function(){ btn.textContent = "לנסות שוב"; alertBox(); });
     });
     function alertBox(){ var d = document.createElement("p"); d.textContent = "לא הצלחנו לפתוח את עמוד התשלום. נסו שוב בעוד רגע, או צרו איתנו קשר."; btn.parentNode.insertBefore(d, btn); }
