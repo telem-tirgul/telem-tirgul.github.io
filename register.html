@@ -245,6 +245,8 @@
   .bd-row b{ color:var(--ink); font-weight:600; white-space:nowrap; }
   .amount-row-recur{ margin-bottom:20px; }
   .amount-row-recur strong{ font-size:18px; }
+  .recur-sub{ display:block; font-size:12.5px; color:var(--ink-soft); font-weight:400; margin-top:3px; line-height:1.45; }
+  .amount-row-recur{ align-items:flex-start; gap:12px; } .amount-row-recur strong{ white-space:nowrap; }
 
   /* אופן התשלום: שתי אפשרויות (כשהאשראי באתר מחובר), או הודעה אחת (כל עוד התשלום טלפוני בלבד) */
   .pay-method{ margin-bottom:12px; } .pm-title{ font-weight:800; margin-bottom:6px; }
@@ -1080,7 +1082,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     });
     var payment = { main: [], breakdown: [] };
     document.querySelectorAll("#amountBreakdown .bd-row").forEach(function(r){ var a = r.querySelector("span"), b = r.querySelector("b"); if (a && b) payment.breakdown.push([a.textContent.trim(), b.textContent.trim()]); });
-    document.querySelectorAll(".amount-row").forEach(function(r){ if (!vis(r)) return; var a = r.querySelector("span"), b = r.querySelector("strong"); if (a && b && b.textContent.trim()) payment.main.push([a.textContent.trim(), b.textContent.trim()]); });
+    document.querySelectorAll(".amount-row").forEach(function(r){ if (!vis(r)) return; var a = r.querySelector("span"), b = r.querySelector("strong"); if (a && b && b.textContent.trim()) payment.main.push([(a.getAttribute("data-pdf") || a.textContent).trim(), b.textContent.trim()]); });
 
     var consents = []; form.querySelectorAll("label.consent").forEach(function(l){ var cb = l.querySelector("input[type=checkbox]"); if (cb && cb.checked) consents.push(l.textContent.replace(/\s+/g, " ").trim()); });
     return { sections: sections, terms: terms, payment: payment, consents: consents };
@@ -1296,7 +1298,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (cityTable && recurInfo){
       var parts = [ ["דמי שיבוץ והרשמה", cityTable.registrationFee] ];
       if (cityTable.materialsFee) parts.push(["חומרי לימוד", cityTable.materialsFee]);
-      parts.push(["שכר לימוד חודש " + recurInfo.firstMonthName, recurInfo.firstMonthAmount]);
+      parts.push([recurInfo.firstMonthHalf ? "שכר לימוד חודש נוכחי (" + recurInfo.firstMonthPct + "%)" : "שכר לימוד חודש נוכחי", recurInfo.firstMonthAmount]);
       amountBreakdown.textContent = "";
       parts.forEach(function(p){
         var d = document.createElement("div"); d.className = "bd-row";
@@ -1344,6 +1346,25 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // ה-1 לחודש שאחרי החודש של התאריך הנתון (yyyy-mm-dd) - משמש כתאריך
   // ההתחלה של המחזורים החודשיים המלאים בהוראת הקבע (אחרי החודש
   // הראשון, שנגבה בתשלום המיידי - ראו getRecurInfo).
+  // היום לפי שעון ישראל (yyyy-mm-dd)
+  function ilTodayISO(){
+    try { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+    catch(e){ return toISODate(new Date()); }
+  }
+  // 5.19.57: "הצטרפות מאוחרת בחודש" ממסך חוקי חיוב - לעיר הזו, או לכל הערים (city ריק). null = אין חוק.
+  var LATE_RULES = [];
+  function lateJoinRule(city){
+    var m = null;
+    LATE_RULES.forEach(function(r){ if (r.city === city) m = r; });
+    if (!m) LATE_RULES.forEach(function(r){ if (!r.city && !m) m = r; });
+    return m;
+  }
+  function firstMonthText(city){
+    var r = lateJoinRule(city), full = "שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו)";
+    if (!r) return "<li>שכר הלימוד עבור חודש ההרשמה - " + full + ".</li>";
+    return "<li>שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-" + (r.from_day - 1) + " לחודש - " + full + ". הרשמה מה-" + r.from_day + " לחודש ואילך - " + r.percent + "% מהתשלום החודשי" +
+      (r.apply === "first" ? "" : " (ההפרש יקוזז מתשלום חודש יוני)") + ".</li>";
+  }
   function firstOfNextMonth(dateStr){
     var d = new Date(dateStr + "T00:00:00");
     var y = d.getFullYear();
@@ -1402,7 +1423,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // הכללית של העיר) וה"חודש הראשון" שנובע ממנו - נגבה תמיד במחיר
     // החודשי המלא (monthlySum), לא באופן יחסי.
     var effectiveStartDate = getEffectiveStartDate(cityTable.activityStartDate);
-    var firstMonthAmount = monthlySum;
+    // 5.19.57: החוק מגיע ממסך "חוקי חיוב" (billing_rules_public) - לא קבוע בקוד. רק כשההנחה יורדת מהתשלום בהרשמה (apply=first).
+    var lj = lateJoinRule(city), dayIL = Number(ilTodayISO().slice(8, 10));
+    var firstMonthHalf = !!(lj && lj.apply === "first" && effectiveStartDate === ilTodayISO() && dayIL >= lj.from_day);
+    var firstMonthAmount = firstMonthHalf ? Math.round(monthlySum * lj.percent) / 100 : monthlySum;
 
     // הוראת הקבע עצמה רצה על החודשים המלאים הנותרים, מה-1 לחודש
     // שאחרי החודש הראשון (שכבר נגבה מיידית) ועד יוני (כולל).
@@ -1415,6 +1439,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       effectiveStartDateHe: formatDateHe(effectiveStartDate),
       firstMonthName: hebrewMonthName(effectiveStartDate),
       firstMonthAmount: firstMonthAmount,
+      firstMonthHalf: firstMonthHalf,
+      firstMonthPct: lj ? lj.percent : 100,
       recurStartDate: recurStartDate,
       recurStartDateHe: formatDateHe(recurStartDate),
       payments: payments
@@ -1425,11 +1451,16 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var info = getRecurInfo();
     if (!info){
       recurAmountDisplay.textContent = "";
-      recurLabel.textContent = "תשלום חודשי";
+      recurLabel.textContent = "תשלום חודשי"; recurLabel.removeAttribute("data-pdf");
       return;
     }
-    recurAmountDisplay.textContent = "₪" + info.monthlySum.toFixed(2) + " × " + info.payments;
-    recurLabel.textContent = "תשלום חודשי (החל מ-" + info.recurStartDateHe + ", ועד יוני כולל)";
+    // 5.19.57: בלי "× 8" ליד הסכום - מספר התשלומים והתאריכים בשורה קטנה מתחת
+    recurAmountDisplay.textContent = "₪" + info.monthlySum.toFixed(2);
+    var sub = info.payments + " תשלומים חודשיים, החל מ-" + info.recurStartDateHe + " ועד חודש יוני כולל";
+    recurLabel.innerHTML = "";
+    recurLabel.appendChild(document.createTextNode("תשלום חודשי"));
+    var sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = sub; recurLabel.appendChild(sm);
+    recurLabel.setAttribute("data-pdf", "תשלום חודשי (" + sub + ")");
   }
 
   function updateTrackInfo(){
@@ -1482,11 +1513,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var recurInfo = getRecurInfo();
     if (recurInfo){
       oneTimeItems.push(
-        "<li>שכר הלימוד החודשי המלא עבור חודש ההרשמה - חודש ההרשמה נחשב חודש מלא ונגבה במחיר החודשי המלא, ללא חישוב יחסי.</li>"
+        firstMonthText(city)
       );
     }
     trackInfoNote.innerHTML =
-      "<div class=\"track-info-label\">בנוסף, בעת ההרשמה יגבו תשלומים חד-פעמיים:</div>" +
+      "<div class=\"track-info-label\">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div>" +
       "<ul class=\"track-info-list\">" + oneTimeItems.join("") + "</ul>";
     trackInfoBox.style.display = "block";
   }
@@ -1536,6 +1567,13 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     });
     updateAmountDisplay(); updateRecurDisplay(); updateTrackInfo(); updateTermsBox();
     REG_OPEN = all; regClosedCheck();
+  }).catch(function(){});
+  // 5.19.57: חוקי חיוב לטופס (שיחת התשלומים: billing_rules_public). אין פונקציה / שגיאה = אין חוק (חודש מלא).
+  callSupabase("billing_rules_public", null).then(function(x){
+    var list = x && Array.isArray(x.late_join) ? x.late_join : [];
+    LATE_RULES = list.map(function(r){ return { city: typeof r.city === "string" ? r.city : "", from_day: Math.round(Number(r.from_day)), percent: Number(r.percent), apply: r.apply === "first" ? "first" : "last" }; })
+      .filter(function(r){ return r.from_day >= 2 && r.from_day <= 31 && isFinite(r.percent) && r.percent >= 0 && r.percent <= 100; });
+    updateAmountDisplay(); updateRecurDisplay(); updateTrackInfo();
   }).catch(function(){});
   // תלם 5.19.48 (קובץ 68): טופס ההרשמה בעיר סגור - הודעה במקום הטופס (בתצוגה מקדימה מהמערכת - הטופס מוצג)
   var REG_OPEN = null;
