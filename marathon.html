@@ -840,7 +840,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var dm = Number(m.date.slice(8, 10)) + "." + Number(m.date.slice(5, 7));
     // תלם 5.19.41: כיתה למפגש (אם הוגדרה)
     var rm = m.room ? String(m.room).trim() : "", rt = !rm ? "" : " · " + (/^(כיתה|חדר|אולם|מעבדה|ספרייה)/.test(rm) ? rm : "כיתה " + rm);
-    return "יום " + dow + ", " + dm + " · ⁦" + hm(m.start) + "–" + hm(m.end) + "⁩" + rt;
+    // תלם 5.19.72: מפגש בלי שעות - רק התאריך
+    return "יום " + dow + ", " + dm + (m.start ? " · ⁦" + hm(m.start) + (m.end ? "–" + hm(m.end) : "") + "⁩" : "") + rt;
   }
   function renderGroups(){
     var box = document.getElementById("groupOptions"), gs = (MARATHON && MARATHON.groups) || [];
