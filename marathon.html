@@ -925,14 +925,19 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         // תלם 5.19.38: הכותרת = שם המרתון בלבד (בית הספר והשכבה כבר בשם)
         document.querySelector(".subtitle").firstChild.textContent = MARATHON.name || ("מרתון מתמטיקה" + (MARATHON.school ? " · " + MARATHON.school : ""));
         document.title = (MARATHON.name || "מרתון מתמטיקה") + " - תלם";
-        // הקבצה (תלם 5.19.35): האפשרויות מוגדרות במרתון במערכת. אם יש - שדה חובה.
+        // הקבצה: (1) מה שהוגדר במרתון (5.19.35), (2) אחרת - הרשימה של בית הספר (מסך "בתי ספר", קובץ 78, תלם 5.19.70), (3) אחרת - ברירת המחדל. שדה חובה.
         var hk = Array.isArray(MARATHON.hakbatsa_options) ? MARATHON.hakbatsa_options.filter(Boolean) : [];
         var hkSel = document.getElementById("f-hakbatsa");
-        if (hk.length) {
-          hk.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
+        var HAK_DEFAULT = ["הקבצה א'", "הקבצה ב'", "הקבצה ג'", "לא מחולק להקבצות", '3 יח"ל', '4 יח"ל', '5 יח"ל'];
+        var hkShow = function(list){
+          list.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
           document.getElementById("field-hakbatsa").hidden = false; hkSel.required = true;
           hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); });
-        }
+        };
+        if (hk.length) hkShow(hk);
+        else fetch(s.url + "/rest/v1/rpc/school_hakbatsa_public", { method: "POST", headers: headers, body: JSON.stringify({ p_city: MARATHON.city || "", p_school: MARATHON.school || "" }) })
+          .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+          .then(function(r){ hkShow(r && Array.isArray(r.options) && r.options.length ? r.options : HAK_DEFAULT); });
         updateAmountDisplay(); renderGroups();
       });
   }
