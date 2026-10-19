@@ -513,6 +513,36 @@
   }
   :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea){ border-radius:8px !important; }
   :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select){ min-height:44px !important; height:44px; padding-block:8px !important; box-sizing:border-box; }
+  /* 5.19.84 (נועה): שדה נעול / לקריאה בלבד – דהוי: מסגרת חלשה מאוד, טקסט אפור, בלי רקע ובלי חץ */
+  body .field :is(select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]):not(.q1):not(.q2):not(.q3){
+    background-color:transparent !important; background-image:none !important; border:1.5px solid #EFEAE3 !important; box-shadow:none !important;
+    color:#6B5F55 !important; -webkit-text-fill-color:#6B5F55; font-weight:400 !important; opacity:1; cursor:default; }
+
+  /* 5.19.84 (נועה): רקע הדף כמו במערכת הניהול – המסגרות הלבנות בולטות עליו */
+  @media not all and (prefers-color-scheme: dark){ body{ background:#F6F3EF !important; } }
+
+
+  /* ===== 5.19.84 (נועה): כמו במערכת – שם השדה צמוד לשדה ומיושר לטקסט שבתוכו; כוכבית חובה באדום ===== */
+  .field > label, .field > .field-title{ display:block; padding-inline-start:11px !important; margin-bottom:-3px !important; line-height:1.3; }
+  .sig-lbl, .pm-title{ padding-inline-start:0; }
+  :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select){ padding-inline:10px !important; }
+  select{ padding-inline-end:36px !important; }
+  .req, label .req, .sig-lbl .req{ color:#B3241F !important; font-weight:800; }
+
+  /* 5.19.84 (נועה): "המרתון הראשון שלך?" – מתג של שתי אפשרויות זו לצד זו, כמו במערכת */
+  #fsFirstTime .price-options{ display:grid !important; grid-template-columns:1fr 1fr; gap:0 !important; border:1.5px solid var(--border); border-radius:14px; overflow:hidden; background:var(--paper); }
+  #fsFirstTime .price-option{ order:0; border:0 !important; border-radius:0 !important; margin:0 !important; padding:12px 12px !important; background:transparent; justify-content:center; text-align:center; transition:background .15s, color .15s; }
+  #fsFirstTime #opt-first{ order:-1; }
+  #fsFirstTime .price-option + .price-option{ border-inline-end:1.5px solid var(--border) !important; }
+  #fsFirstTime #opt-first{ border-inline-start:1.5px solid var(--border) !important; } #fsFirstTime #opt-returning{ border-inline-end:0 !important; }
+  #fsFirstTime .price-option input{ position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }
+  #fsFirstTime .price-option > div{ width:100%; }
+  #fsFirstTime .opt-title{ font-size:13.5px !important; font-weight:700; line-height:1.4; color:var(--ink); }
+  #fsFirstTime .opt-price{ margin-top:4px; }
+  #fsFirstTime .price-option:is(.selected, :has(input:checked)){ background:var(--accent) !important; }
+  #fsFirstTime .price-option:is(.selected, :has(input:checked)) :is(.opt-title, .opt-price){ color:#fff !important; }
+  #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
+  #field-first-time.invalid .price-options{ border-color:#C9554F; }
 </style>
 </head>
 <body>

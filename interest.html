@@ -432,6 +432,64 @@
   }
   :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea){ border-radius:8px !important; }
   :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select){ min-height:44px !important; height:44px; padding-block:8px !important; box-sizing:border-box; }
+
+  /* 5.19.84 (נועה): שדה נעול / לקריאה בלבד – דהוי: מסגרת חלשה מאוד, טקסט אפור, בלי רקע ובלי חץ */
+  body .field :is(select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]):not(.q1):not(.q2):not(.q3){
+    background-color:transparent !important; background-image:none !important; border:1.5px solid #EFEAE3 !important; box-shadow:none !important;
+    color:#6B5F55 !important; -webkit-text-fill-color:#6B5F55; font-weight:400 !important; opacity:1; cursor:default; }
+
+  /* 5.19.84 (נועה): רקע הדף כמו במערכת הניהול – המסגרות הלבנות בולטות עליו */
+  @media not all and (prefers-color-scheme: dark){ body{ background:#F6F3EF !important; } }
+
+  .track-info.mar{ --track-color:var(--accent); } .track-info .mar-extra{ display:block; margin-top:6px; color:var(--ink-soft); font-size:.92em; }
+
+  /* ===== 5.19.84 (נועה): כל הטפסים בעיצוב של טופס המרתון (המרתון = הטופס שסגרנו) ===== */
+  .intro{ background:var(--paper) !important; border:1px solid var(--accent) !important; border-radius:16px !important; box-shadow:none !important;
+    padding:14px 14px 12px !important; margin:0 0 10px !important; font-size:15.5px; line-height:1.7; color:var(--ink); }
+  fieldset, .sec-card{ border-width:1px !important; }
+  fieldset > legend, .sec-card > .sec-h{ font-size:17.5px !important; font-weight:800; color:var(--accent); padding-bottom:12px !important; margin-bottom:10px !important; }
+  fieldset > legend::before, .sec-card > .sec-h::before{ width:26px !important; height:26px !important; font-size:13.5px !important; }
+  .field > label, .field label{ font-size:14px !important; font-weight:700; color:var(--ink-soft) !important; }
+  @media (max-width:520px){ .field > label, .field label{ font-size:13.5px !important; } }
+  .amount-row:not(.amount-row-recur){ background:linear-gradient(135deg, rgba(90,18,22,.07), rgba(217,164,65,.10)) !important; border:1px solid rgba(90,18,22,.35) !important;
+    border-radius:14px !important; padding:14px 16px !important; }
+  .amount-row:not(.amount-row-recur) span{ font-weight:800; font-size:16px; color:var(--accent); } .amount-row:not(.amount-row-recur) strong{ font-size:22px !important; font-weight:900; color:var(--accent); }
+  .amount-row-recur{ border-radius:14px !important; padding:12px 16px !important; }
+  .consents-box{ background:#FAF8F5 !important; border:1px solid #E6E0D8 !important; border-radius:14px !important; padding:12px 14px !important; margin:10px 0 4px !important; display:grid !important; gap:10px; }
+  .consents-box .consent, .consent{ margin:0 !important; font-size:14px !important; color:var(--ink) !important; line-height:1.55; cursor:pointer; gap:8px; }
+  .consents-box .consent input, .consent input[type=checkbox]{ width:20px; height:20px; flex:0 0 auto; margin-top:1px !important; accent-color:#8B1E23; }
+  .consents-box .error-msg:empty{ display:none; }
+  .terms-box{ background:#FAF8F5 !important; border:1px solid #E6E0D8 !important; border-radius:12px !important; padding:14px 16px !important; margin:16px 0 10px !important;
+    font-size:12.5px; color:var(--ink-soft); max-height:190px; }
+  .sig-box{ background:#FDFBF8 !important; border:1px dashed #E6E0D8 !important; border-radius:14px !important; }
+  .pm-title{ font-family:'Heebo',sans-serif; font-size:16px; font-weight:800; color:var(--ink); margin:16px 0 6px; }
+  .submit-wrap{ margin-top:22px !important; }
+  button#submitBtn{ background:linear-gradient(160deg, #8B1E23, #5A1216) !important; font-size:16.5px !important; padding:15px 14px !important; max-width:380px !important; width:100%;
+    box-shadow:0 8px 22px rgba(90,18,22,.28) !important; border-radius:999px; }
+  footer{ margin-top:26px !important; }
+  /* מחשב – רוחב כמו בטופס המרתון */
+  @media (min-width:900px){
+    body{ padding-inline:28px; } .wrap{ max-width:1000px !important; }
+    button#submitBtn{ font-size:18px !important; padding:16px 24px !important; }
+    .field > label, .field label{ font-size:14px !important; }
+  }
+
+  /* ===== 5.19.84 (נועה): כמו במערכת – שם השדה צמוד לשדה ומיושר לטקסט שבתוכו; כוכבית חובה באדום ===== */
+  .field > label, .field > .field-title{ display:block; padding-inline-start:11px !important; margin-bottom:-3px !important; line-height:1.3; }
+  .sig-lbl, .pm-title{ padding-inline-start:0; }
+  :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select){ padding-inline:10px !important; }
+  select{ padding-inline-end:36px !important; }
+  .req, label .req, .sig-lbl .req{ color:#B3241F !important; font-weight:800; }
+  /* 5.19.84 (נועה): המסלולים בטופס ההתעניינות נפתחים – חץ כמו במערכת (עיגול בהיר, חץ בורדו; סגור = שמאלה, פתוח = למטה) */
+  details.ti-fold > summary{ list-style:none; cursor:pointer; display:flex; align-items:flex-start; gap:10px; }
+  details.ti-fold > summary::-webkit-details-marker{ display:none; }
+  details.ti-fold > summary .track-info-title{ margin:0 !important; flex:1; }
+  details.ti-fold > summary::after{ content:""; flex:none; width:24px; height:24px; border-radius:50%; margin-top:-1px;
+    background:color-mix(in srgb, var(--accent) 9%, #fff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14.5 6.5L9 12l5.5 5.5' fill='none' stroke='%235A1216' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 15px no-repeat;
+    border:1px solid color-mix(in srgb, var(--accent) 18%, #fff); transition:transform .2s; }
+  details.ti-fold[open] > summary::after{ transform:rotate(-90deg); }
+  details.ti-fold[open] > summary{ margin-bottom:10px; }
+  details.ti-fold:not([open]){ padding-block:12px !important; }
 </style>
 </head>
 <body>
@@ -567,6 +625,32 @@ if (P_CITY && CONFIG.citySchools[P_CITY]) { $("f-city").value = P_CITY; schoolOp
 if (P_SCHOOL) { if (![...$("f-school").options].some(o => o.value === P_SCHOOL)) { const o = document.createElement("option"); o.value = o.textContent = P_SCHOOL; $("f-school").appendChild(o); } $("f-school").value = P_SCHOOL; $("f-school").disabled = true; }
 if (P_CITY) $("subtitleLocation").textContent = [P_SCHOOL, P_CITY].filter(Boolean).join(", ");
 // התוכן לפי הקישור: המסלולים שנבחרו (ואם לא נבחרו - כל המסלולים כשיש עיר; בלי עיר - נוסח כללי)
+// 5.19.84: תיאור המרתון – אותו נוסח בדיוק כמו בטופס ההרשמה למרתון (marathon.html)
+function marDesc(){
+  const esc3 = (x) => String(x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const g = MAR && MAR.groups && MAR.groups[0];
+  const hm2 = (t) => String(t || "").slice(0, 5);
+  const ms = !g ? [] : (g.meetings && g.meetings.length ? g.meetings : (g.dates || []).map(x => ({ date: x, start: hm2(g.start_time), end: hm2(g.end_time) })));
+  if (!ms.length) return "שיעורי לימוד ותרגול אקדמיים.";
+  const mins = (m) => { const a = String(m.start || "").split(":"), z = String(m.end || "").split(":"); return (Number(z[0]) * 60 + Number(z[1] || 0)) - (Number(a[0]) * 60 + Number(a[1] || 0)); };
+  const durTxt = (d) => { const h = Math.floor(d / 60), m = d % 60, H = ["", "שעה", "שעתיים", "שלוש שעות", "ארבע שעות", "חמש שעות"][h] || (h + " שעות");
+    if (!h) return d + " דקות"; if (!m) return H; const M = m === 15 ? "ורבע" : m === 30 ? "וחצי" : m === 45 ? "ושלושה רבעים" : "ו-" + m + " דקות"; return H + " " + M; };
+  const ds = ms.map(mins).filter(x => x > 0), n = ms.length, nTxt = ["", "מפגש אחד", "שני מפגשים", "שלושה מפגשים", "ארבעה מפגשים", "חמישה מפגשים"][n] || (n + " מפגשים");
+  const same = ds.length === n && ds.every(x => x === ds[0]), k = same && ds[0] % 45 === 0 ? ds[0] / 45 : 0;
+  const kW = (x) => x === 1 ? "שיעור אקדמי אחד" : (["", "", "שני", "שלושה", "ארבעה", "חמישה", "שישה", "שבעה", "שמונה", "תשעה", "עשרה"][x] || String(x)) + " שיעורים אקדמיים";
+  const line1 = "המרתון כולל " + nTxt + (!same ? "" : k ? " של " + kW(k) + (n > 1 ? " כל אחד" : "") + " (" + durTxt(ds[0]) + ")" : " של " + durTxt(ds[0]) + (n > 1 ? " כל אחד" : ""))
+    + (k && n > 1 ? ", ובסך הכול <b>" + (n * k) + "</b> שיעורים אקדמיים" : "") + ".";
+  const line2 = (n > 1 ? "במפגשים" : "במפגש") + " אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.";
+  const extra = MAR.city === "ראש העין" ? '<span class="mar-extra">ניתן להגיע גם למועדי תרגול נוספים עד מועד המבחן, בתיאום מראש איתנו.</span>' : "";
+  return esc3(line1).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>") + "<br>" + esc3(line2) + extra;
+}
+// 5.19.84 (נועה): כל מסלול – מסגרת שנפתחת (סגורה: רק שם המסלול; לחיצה – הפרטים), עם החץ של המערכת
+function foldTrack(d){
+  const det = document.createElement("details"); det.className = d.className + " ti-fold";
+  const sum = document.createElement("summary"), t = d.querySelector(".track-info-title"); if (t) sum.appendChild(t);
+  const bd = document.createElement("div"); bd.className = "ti-fold-b"; while (d.firstChild) bd.appendChild(d.firstChild);
+  det.appendChild(sum); det.appendChild(bd); return det;
+}
 function renderTracks(){
   const city = $("f-city").value, box = $("tracksBox");
   const shutT = (city && typeof INT_OPEN !== "undefined" && INT_OPEN && INT_OPEN[city] && Array.isArray(INT_OPEN[city].interestClosedTracks)) ? INT_OPEN[city].interestClosedTracks : [];
@@ -574,10 +658,16 @@ function renderTracks(){
   box.innerHTML = "";
   tracks.forEach(t => {
     const d = document.createElement("div"); d.className = "ti-box";
-    if (t === "marathon") { d.innerHTML = "<h3></h3><p></p>"; d.querySelector("h3").textContent = MAR ? MAR.name : "מרתון מתמטיקה";
-      const dts = marDates();
-      d.querySelector("p").textContent = MAR ? ("מפגשי תרגול מרוכזים לקראת מבחנים" + (dts ? " · מועדים: " + dts : "") + (MAR.price_first ? " · מחיר: " + Number(MAR.price_first) + " ₪" : "") + ".") : "מפגשי תרגול מרוכזים לקראת מבחנים. המועדים והמחיר יישלחו אליכם.";
-      box.appendChild(d); return; }
+    if (t === "marathon") {   // 5.19.84 (נועה): הנוסח של המרתון – כמו בטופס ההרשמה למרתון
+      d.className = "track-info mar"; d.innerHTML = '<div class="track-info-title"></div><div class="track-info-body"></div>';
+      d.querySelector(".track-info-title").textContent = MAR ? MAR.name : "מרתון מתמטיקה";
+      d.querySelector(".track-info-body").innerHTML = marDesc();
+      if (MAR && MAR.price_first) { const pf = Number(MAR.price_first), pr = Number(MAR.price_repeat) || pf;
+        d.insertAdjacentHTML("beforeend", '<div class="track-info-label">מחיר (תשלום חד-פעמי):</div><ul class="track-info-list">' + (pf === pr ? '<li><b>' + pf + ' ₪</b></li>'
+          : '<li><b>' + pf + ' ₪</b> - מרתון ראשון בשנת הלימודים</li><li><b>' + pr + ' ₪</b> - למי שכבר השתתף/ה במרתון השנה</li>') + '</ul>'); }
+      const dts = marDates(); if (dts) d.insertAdjacentHTML("beforeend", '<div class="track-info-label">מועדים:</div><ul class="track-info-list"><li></li></ul>'), d.querySelector(".track-info-list:last-child li").textContent = dts;
+      if (!MAR) d.insertAdjacentHTML("beforeend", '<div class="track-info-note">המועדים והמחיר יישלחו אליכם.</div>');
+      box.appendChild(foldTrack(d)); return; }
     const info = CONFIG.trackInfo[t], cityT = CONFIG.trackPricing[city], pr = cityT && cityT[t];
     // תלם 5.19.42: כמו בטופס ההרשמה - כרטיס המסלול (צבע רק בפס בצד ובכותרת), תשלום חודשי ותשלומים חד-פעמיים
     const sd = (iso) => { const p = String(iso || "").split("-"); return p.length === 3 ? Number(p[2]) + "." + Number(p[1]) + "." + p[0].slice(2) : ""; };
@@ -588,7 +678,7 @@ function renderTracks(){
         + (earlyOn ? '<li><b>' + pr.early + ' ₪</b> להרשמה מוקדמת' + (cut ? ' (עד ' + cut + ')' : '') + '</li><li><b>' + pr.regular + ' ₪</b> להרשמה רגילה' + (cut ? ' (מ-' + cut + ' ואילך)' : '') + '</li>' : '<li><b>' + pr.regular + ' ₪</b> לחודש</li>') + '</ul>'
         + '<div class="track-info-label">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div><ul class="track-info-list">'
         + intFeesLi(city, cityT) + intMonthLi(city) + '</ul>' : '');
-    d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; box.appendChild(d);
+    d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; box.appendChild(foldTrack(d));
   });
   $("introText").textContent = tracks.length ? "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה." : "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.";
 }
