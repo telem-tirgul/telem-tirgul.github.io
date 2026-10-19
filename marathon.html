@@ -503,6 +503,16 @@
   .field.invalid input, .field.invalid select, .field.invalid textarea{ border:1.5px solid #C9554F !important; }   /* הלקוחה: פחות אדום - רק מסגרת */
   .field.invalid .error-msg, .consent .error-msg:not(:empty), #sigError:not(:empty){ font-size:13.5px !important; font-weight:700 !important; color:#B8463F !important; margin-top:4px; }
   .field.invalid .error-msg::before{ content:"⚠ "; }
+
+  /* ===== 5.19.83 (נועה): שדות לבנים כמו במערכת הניהול – לא שמנת. פינות 8, גובה 44 בכל הטפסים ===== */
+  @media not all and (prefers-color-scheme: dark){
+    :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea):not(.field.invalid *){ background-color:#fff !important; border:1.5px solid #E5DDD3 !important; }
+    :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea):not(.field.invalid *):focus{ border-color:#C9A45C !important; box-shadow:0 0 0 3px rgba(90,18,22,.10) !important; outline:none; }
+    input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill{ --af-bg:#fff; }
+    input:autofill{ --af-bg:#fff; }
+  }
+  :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea){ border-radius:8px !important; }
+  :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select){ min-height:44px !important; height:44px; padding-block:8px !important; box-sizing:border-box; }
 </style>
 </head>
 <body>
