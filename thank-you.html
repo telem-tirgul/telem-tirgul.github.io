@@ -72,6 +72,7 @@
   .tick.tick-ph{ width:54px !important; height:54px !important; margin:14px auto 8px !important; background:#F6EDEC !important; box-shadow:none !important; }
   /* 5.19.57: כותרת + תגית סטטוס מתחתיה (הלקוחה בחרה מתוך 3), בלי עיגול/אייקון */
   /* 5.19.91 (נועה): אישור "נקי" – עיגול ירוק עם וי מעל הכותרת, הכותרת בירוק, שורת התשלום כתגית ירוקה רכה */
+  .unpaid{ display:inline-block; margin-inline-start:8px; padding:2px 10px; border-radius:999px; background:#FFF3D6; color:#8A5A12; font-size:12.5px; font-weight:700; vertical-align:middle; }
   .ty-h.ty-ok{ color:#5A1216 !important; }   /* נועה 21.10: בבורדו כמו הכפתור */
   .ty-h.ty-ok::before{ content:""; display:block; width:62px; height:62px; margin:0 auto 12px; border-radius:50%; background:#E4EEE7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231D5631' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 32px 32px no-repeat; box-shadow:0 0 0 7px #F2F7F3; }   /* הוי הירוק שהיה לנו (5.19.56) */
   #lead{ color:#3B2A25 !important; font-weight:500 !important; }
@@ -164,6 +165,7 @@
     if (x.name) row("שם התלמיד/ה", x.name);
     if (x.event || x.track) row(x.event ? "מרתון" : "מסלול", x.event || x.track);
     if (x.amount != null && !isNaN(x.amount)) row(pending || preview ? "סכום לתשלום" : "סכום ששולם", Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
+    if (x.amount != null && !isNaN(x.amount) && pending && !preview) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = "לא שולם"; ab.appendChild(nt); } }   // 5.19.93 (נועה)
     $("sumT").hidden = false; box.hidden = false;
     if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false; }
     var steps = [];
