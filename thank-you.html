@@ -168,7 +168,7 @@
     if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false; }
     var steps = [];
     if (paidRef) steps.push("חשבונית על התשלום תישלח אליכם במייל.");
-    else if (pending && phone) steps.push("אנא צרו עימנו קשר להסדרת התשלום, ההרשמה תאושר רק לאחר מכן.");
+    // 5.19.93 (נועה): בתשלום טלפוני – "צרו קשר" כבר כתוב בתיבה הצהובה; לא חוזרים על זה ב"השלב הבא"
     if (x.kind === "marathon") {
       steps.push("שמרו את מועדי המפגשים ביומן.");
       steps.push("להביא למפגש: ספר ומחברת הלימוד, כלי כתיבה ומחשבון (לתלמידי כיתות ח' ומעלה).");
