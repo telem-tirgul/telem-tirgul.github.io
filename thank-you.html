@@ -153,7 +153,8 @@
     if (regLike && !(phone && pending && !preview)) {
       $("title").textContent = preview ? "כך ייראה האישור" : "ההרשמה התקבלה!";
       var first = String(x.name || "").trim().split(/\s+/)[0];
-      if (x.name && (x.event || x.track)) { $("lead").textContent = first + " רשום/ה ל" + (x.event || x.track).replace(/^ל/, ""); $("lead").hidden = false; }
+      if (x.kind === "register" && x.name) { $("lead").textContent = first + " רשום/ה לתרגולים השוטפים" + (x.city ? " · " + x.city : ""); $("lead").hidden = false; }   // 5.19.91 (נועה)
+      else if (x.name && (x.event || x.track)) { $("lead").textContent = first + " רשום/ה ל" + (x.event || x.track).replace(/^ל/, ""); $("lead").hidden = false; }
     }
     if (preview) { var chp = $("stChip"); chp.className = "st-chip info"; chp.textContent = "👁 תצוגה מקדימה"; var pm = $("pendingMsg"); pm.className = "status info"; pm.innerHTML = '<span class="ic">👁</span><span>תצוגה מקדימה - ההרשמה לא נשמרה ולא בוצע תשלום.</span>'; pm.hidden = false; }
     else if (pending) $("pendingMsg").hidden = false;
