@@ -71,6 +71,11 @@
   .ph-in{ font-weight:800; color:#8B1E23; text-decoration:none; white-space:nowrap; unicode-bidi:isolate; } .ph-in:hover{ text-decoration:underline; }
   .tick.tick-ph{ width:54px !important; height:54px !important; margin:14px auto 8px !important; background:#F6EDEC !important; box-shadow:none !important; }
   /* 5.19.57: כותרת + תגית סטטוס מתחתיה (הלקוחה בחרה מתוך 3), בלי עיגול/אייקון */
+  /* 5.19.91 (נועה): אישור "נקי" – עיגול ירוק עם וי מעל הכותרת, הכותרת בירוק, שורת התשלום כתגית ירוקה רכה */
+  .ty-h.ty-ok{ color:#2E7D46 !important; }
+  .ty-h.ty-ok::before{ content:"✓"; display:block; width:58px; height:58px; line-height:58px; margin:0 auto 12px; border-radius:50%; background:#E3F1E6; color:#2E7D46; font-size:30px; font-weight:800; box-shadow:0 0 0 6px #F1F8F2; }
+  #lead{ color:#3B2A25 !important; font-weight:500 !important; }
+  .top #paidLine, #paidLine{ color:#2E7D46 !important; } #paidLine small{ display:block; font-size:12.5px; font-weight:500; color:#4F7A59; margin-top:1px; } .paid-line{ display:inline-block; margin:12px auto 0 !important; color:#2E7D46 !important; background:#E9F4EB; border-radius:999px; padding:7px 16px; font-size:14px !important; font-weight:600 !important; line-height:1.45; }
   .ty-h{ margin:18px 0 8px !important; font-size:clamp(22px, 6.2vw, 30px) !important; line-height:1.25; }
   .st-chip{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 14px; font-weight:700; font-size:14.5px; margin:0 0 6px; }
   .st-chip.ok{ background:#E6F2E8; color:#2E6B3A; } .st-chip.wait{ background:#FFF3D6; color:#8A5A12; } .st-chip.info{ background:#F3EFEA; color:#6B5F55; }
@@ -152,6 +157,8 @@
     }
     if (preview) { var chp = $("stChip"); chp.className = "st-chip info"; chp.textContent = "👁 תצוגה מקדימה"; var pm = $("pendingMsg"); pm.className = "status info"; pm.innerHTML = '<span class="ic">👁</span><span>תצוגה מקדימה - ההרשמה לא נשמרה ולא בוצע תשלום.</span>'; pm.hidden = false; }
     else if (pending) $("pendingMsg").hidden = false;
+    // 5.19.91 (נועה): בלי תגית "✓ התקבל" באמצע – הכותרת עצמה בירוק עם וי ("✓ ההרשמה התקבלה")
+    { var chk = $("stChip"); if (chk && / ok/.test(" " + chk.className)) { chk.hidden = true; $("title").classList.add("ty-ok"); $("title").textContent = $("title").textContent.replace(/!$/, ""); } }
     if (!x) return;
     if (x.name) row("שם התלמיד/ה", x.name);
     if (x.event || x.track) row(x.event ? "מרתון" : "מסלול", x.event || x.track);
@@ -177,10 +184,12 @@
     if (!x || (x.kind !== "marathon" && x.kind !== "register")) return;
     document.getElementById("title").textContent = "ההרשמה אושרה";
     // 5.19.62: אחרי תשלום - בלי תגית "שולם" למעלה (התיבה הירוקה "התשלום התקבל בהצלחה" מספיקה)
-    document.getElementById("stChip").hidden = true;
-    var ld = document.getElementById("lead"), inv = "חשבונית תישלח אליכם במייל";
-    if (ld.hidden || !ld.textContent) ld.textContent = inv; else ld.innerHTML = ld.textContent.replace(/[<>&]/g, "") + "<br>" + inv;
-    ld.hidden = false;
+    document.getElementById("stChip").hidden = true; document.getElementById("title").classList.add("ty-ok");
+    // 5.19.91 (נועה): במקום התיבה הירוקה הגדולה – שורה ירוקה קטנה מתחת לשם: "✓ התשלום התקבל בהצלחה · חשבונית תישלח אליכם במייל"
+    var ld = document.getElementById("lead"), pm = document.getElementById("payMsg");
+    if (pm) pm.hidden = true;
+    var pl = document.getElementById("paidLine"); if (!pl) { pl = document.createElement("p"); pl.id = "paidLine"; pl.className = "paid-line"; ld.parentNode.insertBefore(pl, ld.nextSibling); }
+    pl.innerHTML = "✓ התשלום התקבל בהצלחה<small>חשבונית תישלח אליכם במייל</small>";
     var nl = document.getElementById("next");
     [].slice.call(nl.children).forEach(function(li){ if (/חשבונית/.test(li.textContent)) li.remove(); });
     [].slice.call(nl.children).forEach(function(li, i){ var n = li.querySelector(".n"); if (n) n.textContent = i + 1; });
