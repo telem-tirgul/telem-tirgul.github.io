@@ -624,7 +624,12 @@
           <input type="tel" id="f-student-phone" name="studentPhone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
           <div class="error-msg">יש להזין 10 ספרות</div>
         </div>
-
+        <!-- 5.19.92 (נועה): ההקבצה ליד הנייד של התלמיד/ה, באותה שורה -->
+        <div class="field" id="field-hakbatsa" hidden>
+          <label for="f-hakbatsa">הקבצה <span class="req">*</span></label>
+          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected>בחרו</option></select>
+          <div class="error-msg">שדה חובה</div>
+        </div>
       </div>
 
       <div class="field" id="field-school">
@@ -633,11 +638,6 @@
         <div class="error-msg">שדה חובה</div>
       </div>
 
-      <div class="field" id="field-hakbatsa" hidden>
-          <label for="f-hakbatsa">הקבצה <span class="req">*</span></label>
-          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected>בחרו הקבצה</option></select>
-          <div class="error-msg">שדה חובה</div>
-      </div>
 
     </fieldset>
 
@@ -983,7 +983,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         if (hk.length) hkShow(hk);
         else fetch(s.url + "/rest/v1/rpc/school_hakbatsa_public", { method: "POST", headers: headers, body: JSON.stringify({ p_city: MARATHON.city || "", p_school: MARATHON.school || "" }) })
           .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
-          .then(function(r){ hkShow(r && Array.isArray(r.options) && r.options.length ? r.options : HAK_DEFAULT); });
+          .then(function(r){ var o = r && Array.isArray(r.options) ? r.options.filter(function(z){ return z && String(z).trim(); }) : [];
+            hkShow(o.length >= 2 ? o : HAK_DEFAULT); });   // 5.19.92 (נועה): בית ספר בלי הקבצות (למשל בראשית) – הרשימה הקבועה
         updateAmountDisplay(); renderGroups();
       });
   }
