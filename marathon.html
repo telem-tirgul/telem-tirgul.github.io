@@ -828,6 +828,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   var MTD = {}; MT.forEach(function(d){ MTD[d[0]] = d[1]; });
   if (window.TX) window.TX.defs("נבנה מנתוני המרתון", MT);
   var tFill = function(tpl, v){ return String(tpl).replace(/\{([^{}<>]{1,40})\}/g, function(m, n){ n = n.trim(); return v && v[n] != null ? String(v[n]).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }) : ""; }); };
+  var PRICE = function(x){ return window.TX && window.TX.W ? window.TX.W.price(x) : Number(x).toFixed(0) + " ₪"; };   // 5.19.102: פורמט המחיר מהמערכת
   var tt = function(k, v){ return window.TX ? window.TX.t(k, v) : tFill(MTD[k], v); };            // HTML (innerHTML)
   var ttx = function(k, v){ if (window.TX) return window.TX.text(k, v); var d = document.createElement("div"); d.innerHTML = tFill(MTD[k], v); return d.textContent; };   // טקסט
 
@@ -862,7 +863,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     optReturning.classList.toggle("selected", firstTimeNoEl.checked);
     optFirst.classList.toggle("selected", firstTimeYesEl.checked);
     var amount = getAmount();
-    amountDisplay.textContent = amount != null ? "₪" + amount.toFixed(0) : "יש לבחור אפשרות למעלה";
+    amountDisplay.textContent = amount != null ? PRICE(amount) : "יש לבחור אפשרות למעלה";
     amountDisplay.classList.toggle("ph", amount == null);
     // תלם 5.19.39: המחיר גם בכרטיס הצד (במחשב)
 
@@ -927,6 +928,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       // תלם 5.19.41 (הלקוחה): מספר השיעורים בכל מפגש - במילים; רק הסך הכול בספרה ומודגש (למשל 6, או 4 במפגשים של שעה וחצי)
       var k = same && ds[0] % 45 === 0 ? ds[0] / 45 : 0;
       var kW = function(x){ return x === 1 ? "שיעור אקדמי אחד" : (["", "", "שני", "שלושה", "ארבעה", "חמישה", "שישה", "שבעה", "שמונה", "תשעה", "עשרה"][x] || String(x)) + " שיעורים אקדמיים"; };
+      // 5.19.102: ניסוח המשבצות מהמערכת (⚙ ← נוסחי הטפסים ← ניסוח המשבצות)
+      if (window.TX && window.TX.W) { var W = window.TX.W, LM = W.lessonMin(); durTxt = W.dur; kW = W.lessons; nTxt = W.meet(n); k = same && ds[0] % LM === 0 ? ds[0] / LM : 0; }
       // 5.19.100: שורה ראשונה – תבנית (מפגשים באותו אורך); אחרת – מחושב כמו קודם
       var line1 = same && k && n > 1 ? tt("mar.line1", { "מפגשים": nTxt, "שיעורים במפגש": kW(k), "משך מפגש": durTxt(ds[0]), "סך השיעורים": String(n * k) })
         : same && k && n === 1 ? tt("mar.line1_one", { "שיעורים במפגש": kW(k), "משך מפגש": durTxt(ds[0]) })
@@ -984,15 +987,15 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         CONFIG.locationLabel = [MARATHON.city, MARATHON.school].filter(Boolean).join(" · ");
         document.getElementById("subtitleLocation").textContent = "";
         CONFIG.priceFirstTime = Number(MARATHON.price_first); CONFIG.priceReturning = Number(MARATHON.price_repeat) || Number(MARATHON.price_first);
-        document.querySelector("#opt-first .opt-price").textContent = CONFIG.priceFirstTime.toFixed(0) + " ₪";
-        document.querySelector("#opt-returning .opt-price").textContent = CONFIG.priceReturning.toFixed(0) + " ₪";
-        document.getElementById("marPriceFirst").textContent = CONFIG.priceFirstTime.toFixed(0) + " ₪";
-        document.getElementById("marPriceRepeat").textContent = CONFIG.priceReturning.toFixed(0) + " ₪";
+        document.querySelector("#opt-first .opt-price").textContent = PRICE(CONFIG.priceFirstTime);
+        document.querySelector("#opt-returning .opt-price").textContent = PRICE(CONFIG.priceReturning);
+        document.getElementById("marPriceFirst").textContent = PRICE(CONFIG.priceFirstTime);
+        document.getElementById("marPriceRepeat").textContent = PRICE(CONFIG.priceReturning);
         // מחיר אחד למרתון: לא שואלים אם זה המרתון הראשון, ומציגים מחיר אחד
         if (CONFIG.priceFirstTime === CONFIG.priceReturning) {
           document.getElementById("fsFirstTime").hidden = true; firstTimeYesEl.checked = true; document.querySelector(".amount-row.main span").textContent = ttx("mar.price_one"); document.getElementById("sidePriceLbl").textContent = ttx("mar.price_one");
           document.getElementById("marPriceRepeat").parentNode.hidden = true;
-          document.getElementById("marPriceFirst").parentNode.innerHTML = '<b id="marPriceFirst">' + CONFIG.priceFirstTime.toFixed(0) + ' ₪</b>';
+          document.getElementById("marPriceFirst").parentNode.innerHTML = '<b id="marPriceFirst"></b>'; document.getElementById("marPriceFirst").textContent = PRICE(CONFIG.priceFirstTime);
         }
         // תלם 5.19.38: הכותרת = שם המרתון בלבד (בית הספר והשכבה כבר בשם)
         // 5.19.91 (נועה): "הרשמה ותשלום ל<מרתון>" ובשורה השנייה בתוך התגית – השכבה ובית הספר

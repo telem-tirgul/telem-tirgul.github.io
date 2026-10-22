@@ -62,6 +62,37 @@
   };
   // אותו דבר כטקסט פשוט (לכותרות / תכונות)
   TX.text = function(key, vals){ var d = document.createElement("div"); d.innerHTML = TX.t(key, vals, true).replace(/<br\s*\/?>/gi, "\n"); return (d.textContent || "").trim(); };
+  // ---------- ניסוח המשבצות (5.19.102): איך מספרים, משך ומחיר נכתבים בתוך המשבצות ----------
+  var WG = "ניסוח המשבצות (המילים שנכנסות לתוך המשבצות)";
+  var WD = [
+    ["w.meet", "מפגש אחד\nשני מפגשים\nשלושה מפגשים\nארבעה מפגשים\nחמישה מפגשים", "מספר המפגשים – שורה לכל מספר (שורה 1 = מפגש אחד, שורה 2 = שני מפגשים...)"],
+    ["w.meet_n", "{מספר} מפגשים", "מספר המפגשים – כשאין שורה למספר הזה"],
+    ["w.les", "שיעור אקדמי אחד\nשני שיעורים אקדמיים\nשלושה שיעורים אקדמיים\nארבעה שיעורים אקדמיים\nחמישה שיעורים אקדמיים\nשישה שיעורים אקדמיים\nשבעה שיעורים אקדמיים\nשמונה שיעורים אקדמיים\nתשעה שיעורים אקדמיים\nעשרה שיעורים אקדמיים", "שיעורים במפגש – שורה לכל מספר"],
+    ["w.les_n", "{מספר} שיעורים אקדמיים", "שיעורים במפגש – כשאין שורה למספר הזה"],
+    ["w.les_min", "45", "כמה דקות הן שיעור אחד"],
+    ["w.hour", "שעה\nשעתיים\nשלוש שעות\nארבע שעות\nחמש שעות", "משך – שעות שלמות, שורה לכל מספר"],
+    ["w.hour_n", "{מספר} שעות", "משך – שעות, כשאין שורה למספר הזה"],
+    ["w.min", "15: ורבע\n30: וחצי\n45: ושלושה רבעים", "משך – תוספת דקות אחרי השעות (דקות: מילים)"],
+    ["w.min_n", "ו-{מספר} דקות", "משך – תוספת דקות אחרת"],
+    ["w.min_only", "{מספר} דקות", "משך – פחות משעה"],
+    ["w.price", "{סכום} ₪", "מחיר – איך נכתב סכום"]
+  ];
+  var wReg = function(){ WD.forEach(function(d){ if (!reg[d[0]]) reg[d[0]] = { def: d[1], label: d[2], vars: {}, req: [], group: WG, plain: true }; }); };
+  var wv = function(k){ wReg(); var v = MAP[k]; if (v == null || v === "") { for (var i = 0; i < WD.length; i++) if (WD[i][0] === k) return WD[i][1]; return ""; } return toPlain(fmt(v)); };
+  var wLine = function(k, n){ var l = wv(k).split(/\n/)[n - 1]; return l && l.trim() ? l.trim() : null; };
+  var wFill = function(k, n){ return wv(k).replace(/\{[^{}]*\}/g, String(n)); };
+  TX.W = {
+    meet: function(n){ return wLine("w.meet", n) || wFill("w.meet_n", n); },
+    lessons: function(k){ return wLine("w.les", k) || wFill("w.les_n", k); },
+    lessonMin: function(){ var m = parseInt(wv("w.les_min"), 10); return m > 0 && m < 300 ? m : 45; },
+    dur: function(d){ var h = Math.floor(d / 60), m = d % 60;
+      if (!h) return wFill("w.min_only", d);
+      var H = wLine("w.hour", h) || wFill("w.hour_n", h); if (!m) return H;
+      var M = null; wv("w.min").split(/\n/).forEach(function(l){ var x = /^\s*(\d+)\s*[:=]\s*(.+)$/.exec(l); if (x && Number(x[1]) === m) M = x[2].trim(); });
+      return H + " " + (M || wFill("w.min_n", m)); },
+    price: function(x){ return wFill("w.price", Math.round(Number(x))); }
+  };
+
   // אובייקט הגדרות (למשל CONFIG.trackInfo): כל שדה טקסט נרשם ומוחלף במקום
   var objs = [];
   TX.obj = function(prefix, obj, fields, label){ objs.push({ p: prefix, o: obj, f: fields, l: label, d: JSON.parse(JSON.stringify(obj)) }); applyObjs(); };

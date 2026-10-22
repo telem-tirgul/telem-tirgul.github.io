@@ -651,6 +651,9 @@ function marDesc(){
   const ds = ms.map(mins).filter(x => x > 0), n = ms.length, nTxt = ["", "מפגש אחד", "שני מפגשים", "שלושה מפגשים", "ארבעה מפגשים", "חמישה מפגשים"][n] || (n + " מפגשים");
   const same = ds.length === n && ds.every(x => x === ds[0]), k = same && ds[0] % 45 === 0 ? ds[0] / 45 : 0;
   const kW = (x) => x === 1 ? "שיעור אקדמי אחד" : (["", "", "שני", "שלושה", "ארבעה", "חמישה", "שישה", "שבעה", "שמונה", "תשעה", "עשרה"][x] || String(x)) + " שיעורים אקדמיים";
+  // 5.19.102: ניסוח המשבצות מהמערכת
+  const W = window.TX && window.TX.W, LM = W ? W.lessonMin() : 45;
+  const nTxt2 = W ? W.meet(n) : nTxt, durTxt2 = W ? W.dur : durTxt, kW2 = W ? W.lessons : kW, k2 = same && ds[0] % LM === 0 ? ds[0] / LM : 0;
   // 5.19.100: תבניות – נערכות במערכת (⚙ ← נוסחי הטפסים ← התעניינות)
   const MTI = [
     ["mar.line1", "המרתון כולל {מפגשים} של {שיעורים במפגש} כל אחד ({משך מפגש}), ובסך הכול <b>{סך השיעורים}</b> שיעורים אקדמיים.", "שורה ראשונה (כמה מפגשים באותו אורך)",
@@ -662,9 +665,9 @@ function marDesc(){
   const MTD = {}; MTI.forEach(d => MTD[d[0]] = d[1]);
   if (window.TX) TX.defs("תיאור המרתון (קישור התעניינות למרתון)", MTI);
   const tt = (k, v) => window.TX ? TX.t(k, v) : String(MTD[k]).replace(/\{([^{}<>]{1,40})\}/g, (m, x) => v && v[x.trim()] != null ? esc3(v[x.trim()]) : "");
-  const line1 = same && k && n > 1 ? tt("mar.line1", { "מפגשים": nTxt, "שיעורים במפגש": kW(k), "משך מפגש": durTxt(ds[0]), "סך השיעורים": String(n * k) })
-    : same && k && n === 1 ? tt("mar.line1_one", { "שיעורים במפגש": kW(k), "משך מפגש": durTxt(ds[0]) })
-    : esc3("המרתון כולל " + nTxt + (!same ? "" : " של " + durTxt(ds[0]) + (n > 1 ? " כל אחד" : "")) + ".");
+  const line1 = same && k2 && n > 1 ? tt("mar.line1", { "מפגשים": nTxt2, "שיעורים במפגש": kW2(k2), "משך מפגש": durTxt2(ds[0]), "סך השיעורים": String(n * k2) })
+    : same && k2 && n === 1 ? tt("mar.line1_one", { "שיעורים במפגש": kW2(k2), "משך מפגש": durTxt2(ds[0]) })
+    : esc3("המרתון כולל " + nTxt2 + (!same ? "" : " של " + durTxt2(ds[0]) + (n > 1 ? " כל אחד" : "")) + ".");
   const line2 = n > 1 ? tt("mar.line2") : tt("mar.line2_one");
   const extra = MAR.city === "ראש העין" ? '<span class="mar-extra">' + tt("mar.extra_rh") + '</span>' : "";
   return line1 + "<br>" + line2 + extra;
