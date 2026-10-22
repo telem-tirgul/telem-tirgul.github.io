@@ -491,7 +491,17 @@
   details.ti-fold[open] > summary::after{ transform:rotate(-90deg); }
   details.ti-fold[open] > summary{ margin-bottom:10px; }
   details.ti-fold:not([open]){ padding-block:12px !important; }
+  /* 5.19.97 (נועה): הטמעה באתר השיווקי – interest.html?embed=1 בתוך iframe: בלי הלוגו והכותרת, רקע שקוף, גובה אוטומטי */
+  html.embed body{ background:transparent !important; padding:0 !important; } html.embed .wrap{ padding-top:0 !important; margin-top:0 !important; }
+  html.embed .brand, html.embed .wrap > h1, html.embed footer{ display:none !important; }
 </style>
+<script>
+  // 5.19.97: ?embed=1 – מצב הטמעה (האתר שם את הטופס ב-iframe). הגובה נשלח לאתר כדי שה-iframe יגדל לבד.
+  (function(){ if (!/[?&]embed=1(&|$)/.test(location.search)) return; document.documentElement.classList.add("embed");
+    var last = 0, send = function(){ var h = Math.ceil(document.documentElement.scrollHeight); if (h !== last) { last = h; try { parent.postMessage({ telemForm: "interest", height: h }, "*"); } catch (e) {} } };
+    window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
+  })();
+</script>
 </head>
 <body>
 <div class="wrap">
