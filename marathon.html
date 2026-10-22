@@ -807,6 +807,30 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     }
   };
 
+  // 5.19.100 (נועה): טקסטים שנבנים מהנתונים – תבניות שנערכות במערכת (⚙ ← נוסחי הטפסים). {משבצת} = ערך מהמרתון.
+  var MT = [
+    ["mar.sub", "הרשמה ותשלום ל{שם המרתון}", "הכותרת (בתגית למעלה)", { "שם המרתון": "שם המרתון בלי השכבה ובית הספר (למשל: מרתון מתמטיקה)" }, ["שם המרתון"]],
+    ["mar.line1", "המרתון כולל {מפגשים} של {שיעורים במפגש} כל אחד ({משך מפגש}), ובסך הכול <b>{סך השיעורים}</b> שיעורים אקדמיים.", "תיאור – שורה ראשונה (כמה מפגשים באותו אורך)",
+      { "מפגשים": "מספר המפגשים במילים (למשל: שני מפגשים)", "שיעורים במפגש": "שיעורים אקדמיים בכל מפגש, 45 דק' = שיעור (למשל: שלושה שיעורים אקדמיים)", "משך מפגש": "משך מפגש (למשל: שעתיים ורבע)", "סך השיעורים": "סך כל השיעורים במרתון (מספר)" }, ["מפגשים"]],
+    ["mar.line1_one", "המרתון כולל מפגש אחד של {שיעורים במפגש} ({משך מפגש}).", "תיאור – שורה ראשונה (מפגש אחד)",
+      { "שיעורים במפגש": "שיעורים אקדמיים במפגש, 45 דק' = שיעור (למשל: שלושה שיעורים אקדמיים)", "משך מפגש": "משך המפגש (למשל: שעתיים ורבע)" }, []],
+    ["mar.line2", "במפגשים אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור – שורה שנייה (כמה מפגשים)", {}, []],
+    ["mar.line2_one", "במפגש אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור – שורה שנייה (מפגש אחד)", {}, []],
+    ["mar.extra_rh", "ניתן להגיע גם למועדי תרגול נוספים עד מועד המבחן, בתיאום מראש איתנו.", "תיאור – תוספת בראש העין", {}, []],
+    ["mar.legend1", "המפגשים - ימים ושעות", "כותרת המפגשים (כשיש קבוצה אחת)", {}, []],
+    ["mar.intro1", "ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח.", "הסבר מתחת למפגשים (כשיש קבוצה אחת)", {}, []],
+    ["mar.full", "הקבוצה מלאה", "קבוצה מלאה", {}, []],
+    ["mar.seats", "נשארו {מקומות} מקומות", "מעט מקומות (5 או פחות)", { "מקומות": "כמה מקומות נשארו בקבוצה" }, ["מקומות"]],
+    ["mar.price_one", "מחיר המרתון", "שם הסכום (כשיש מחיר אחד)", {}, []],
+    ["mar.closed", "ההרשמה למרתון הזה סגורה, או שהקישור לא תקין. לפרטים: 052-9067101", "הודעה – מרתון סגור / קישור לא תקין", {}, []],
+    ["mar.oldlink", "הקישור הזה לא מעודכן. לקבלת קישור להרשמה: 052-9067101", "הודעה – קישור ישן", {}, []]
+  ];
+  var MTD = {}; MT.forEach(function(d){ MTD[d[0]] = d[1]; });
+  if (window.TX) window.TX.defs("נבנה מנתוני המרתון", MT);
+  var tFill = function(tpl, v){ return String(tpl).replace(/\{([^{}<>]{1,40})\}/g, function(m, n){ n = n.trim(); return v && v[n] != null ? String(v[n]).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }) : ""; }); };
+  var tt = function(k, v){ return window.TX ? window.TX.t(k, v) : tFill(MTD[k], v); };            // HTML (innerHTML)
+  var ttx = function(k, v){ if (window.TX) return window.TX.text(k, v); var d = document.createElement("div"); d.innerHTML = tFill(MTD[k], v); return d.textContent; };   // טקסט
+
   // ----------------------------------------------------------------
   // 2) לוגיקת הטופס - אין צורך לגעת מכאן ולמטה
   // ----------------------------------------------------------------
@@ -903,13 +927,13 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       // תלם 5.19.41 (הלקוחה): מספר השיעורים בכל מפגש - במילים; רק הסך הכול בספרה ומודגש (למשל 6, או 4 במפגשים של שעה וחצי)
       var k = same && ds[0] % 45 === 0 ? ds[0] / 45 : 0;
       var kW = function(x){ return x === 1 ? "שיעור אקדמי אחד" : (["", "", "שני", "שלושה", "ארבעה", "חמישה", "שישה", "שבעה", "שמונה", "תשעה", "עשרה"][x] || String(x)) + " שיעורים אקדמיים"; };
-      var line1 = "המרתון כולל " + nTxt + (!same ? "" : k ? " של " + kW(k) + (n > 1 ? " כל אחד" : "") + " (" + durTxt(ds[0]) + ")" : " של " + durTxt(ds[0]) + (n > 1 ? " כל אחד" : ""))
-        + (k && n > 1 ? ", ובסך הכול <b class=\"tot\">" + (n * k) + "</b> שיעורים אקדמיים" : "") + ".";
-      var T = function(k, d, l){ return window.TX ? window.TX.fmt(window.TX(k, d, l)) : d; };   // 5.19.100: הנוסח נערך במערכת (השורה הראשונה – מחושבת)
-      var line2 = n > 1 ? T("mar.line2", "במפגשים אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור המרתון · שורה שנייה (כמה מפגשים)")
-                        : T("mar.line2_one", "במפגש אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור המרתון · שורה שנייה (מפגש אחד)");
+      // 5.19.100: שורה ראשונה – תבנית (מפגשים באותו אורך); אחרת – מחושב כמו קודם
+      var line1 = same && k && n > 1 ? tt("mar.line1", { "מפגשים": nTxt, "שיעורים במפגש": kW(k), "משך מפגש": durTxt(ds[0]), "סך השיעורים": String(n * k) })
+        : same && k && n === 1 ? tt("mar.line1_one", { "שיעורים במפגש": kW(k), "משך מפגש": durTxt(ds[0]) })
+        : "המרתון כולל " + nTxt + (!same ? "" : " של " + durTxt(ds[0]) + (n > 1 ? " כל אחד" : "")) + ".";
+      var line2 = n > 1 ? tt("mar.line2") : tt("mar.line2_one");
       // תלם 5.19.41: ראש העין - אפשר להגיע גם למועדי תרגול נוספים עד המבחן, בתיאום
-      var extra = MARATHON && MARATHON.city === "ראש העין" ? '<span class="mar-extra">' + T("mar.extra_rh", "ניתן להגיע גם למועדי תרגול נוספים עד מועד המבחן, בתיאום מראש איתנו.", "תיאור המרתון · ראש העין – תוספת") + '</span>' : "";
+      var extra = MARATHON && MARATHON.city === "ראש העין" ? '<span class="mar-extra">' + tt("mar.extra_rh") + '</span>' : "";
       if (n) document.getElementById("marInfoDesc").innerHTML = line1 + "<br>" + line2 + extra;
     })();
     gs.forEach(function(g){
@@ -927,13 +951,13 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         title.appendChild(t); });
       // תלם 5.19.38: בית הספר כבר בשם המרתון
       wrap.appendChild(title);
-      var seats = full ? "הקבוצה מלאה" : (g.seats_left != null && g.seats_left <= 5 ? "נשארו " + g.seats_left + " מקומות" : "");
+      var seats = full ? ttx("mar.full") : (g.seats_left != null && g.seats_left <= 5 ? ttx("mar.seats", { "מקומות": g.seats_left }) : "");
       if (seats) { var sd = document.createElement("div"); sd.className = "opt-seats"; sd.textContent = seats; wrap.appendChild(sd); }
       lab.appendChild(inp); lab.appendChild(wrap); box.appendChild(lab);
       // תלם 5.19.37: קבוצה אחת בלבד - לא צריך לבחור. מוצגים התאריכים והשעות, והקבוצה כבר נבחרה.
       if (gs.length === 1 && !full) { inp.checked = true; lab.classList.add("selected", "single"); b.textContent = "המפגשים";
-        document.getElementById("groupLegend").textContent = "המפגשים - ימים ושעות";
-        document.getElementById("marIntro").textContent = "ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח."; }
+        document.getElementById("groupLegend").innerHTML = tt("mar.legend1");
+        document.getElementById("marIntro").innerHTML = tt("mar.intro1"); }
       inp.addEventListener("change", function(){
         box.querySelectorAll(".price-option").forEach(function(l){ l.classList.toggle("selected", l.querySelector("input").checked); });
         setInvalid("field-group", false);
@@ -943,10 +967,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function loadMarathon(){
     var s = CONFIG.supabase, headers = { "Content-Type": "application/json", "apikey": s.anonKey };
     if (s.anonKey.indexOf("eyJ") === 0) headers["Authorization"] = "Bearer " + s.anonKey;
-    return fetch(s.url + "/rest/v1/rpc/marathon_public", { method: "POST", headers: headers, body: JSON.stringify({ p_code: MARATHON_CODE }) })
-      .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }).then(function(m){
+    // 5.19.100: מחכים גם לנוסחים מהמערכת (בכניסה הראשונה), כדי שהטקסט שנבנה מהמרתון ייצא בנוסח שפורסם
+    return Promise.all([fetch(s.url + "/rest/v1/rpc/marathon_public", { method: "POST", headers: headers, body: JSON.stringify({ p_code: MARATHON_CODE }) })
+      .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }), window.TX && window.TX.ready]).then(function(a){ var m = a[0];
         MARATHON = m || null;
-        if (!MARATHON) { marNotice("ההרשמה למרתון הזה סגורה, או שהקישור לא תקין. לפרטים: 052-9067101"); document.getElementById("groupOptions").innerHTML = ""; submitBtn.disabled = true; MAR_BLOCKED = true;
+        if (!MARATHON) { marNotice(ttx("mar.closed")); document.getElementById("groupOptions").innerHTML = ""; submitBtn.disabled = true; MAR_BLOCKED = true;
           form.hidden = true; return; }   // תלם 5.19.38: סגור - רק ההודעה, בלי שום תוכן
         lockSchool(MARATHON.school || "");
         // תלם 5.19.38: בית הספר והשכבה קבועים לפי המרתון - לא שואלים את ההורה (השם של המרתון בכותרת אומר את זה)
@@ -965,7 +990,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         document.getElementById("marPriceRepeat").textContent = CONFIG.priceReturning.toFixed(0) + " ₪";
         // מחיר אחד למרתון: לא שואלים אם זה המרתון הראשון, ומציגים מחיר אחד
         if (CONFIG.priceFirstTime === CONFIG.priceReturning) {
-          document.getElementById("fsFirstTime").hidden = true; firstTimeYesEl.checked = true; document.querySelector(".amount-row.main span").textContent = "מחיר המרתון"; document.getElementById("sidePriceLbl").textContent = "מחיר המרתון";
+          document.getElementById("fsFirstTime").hidden = true; firstTimeYesEl.checked = true; document.querySelector(".amount-row.main span").textContent = ttx("mar.price_one"); document.getElementById("sidePriceLbl").textContent = ttx("mar.price_one");
           document.getElementById("marPriceRepeat").parentNode.hidden = true;
           document.getElementById("marPriceFirst").parentNode.innerHTML = '<b id="marPriceFirst">' + CONFIG.priceFirstTime.toFixed(0) + ' ₪</b>';
         }
@@ -973,7 +998,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         // 5.19.91 (נועה): "הרשמה ותשלום ל<מרתון>" ובשורה השנייה בתוך התגית – השכבה ובית הספר
         { var baseN = String(MARATHON.name || "").replace(/\s*·.*$/, "").replace(/\s*שכבת\s*\S+/, "").trim() || "מרתון מתמטיקה";
           var gr0 = MARATHON.grade ? "שכבה " + String(MARATHON.grade).replace(/['"׳]/g, "") + "'" : "";
-          document.querySelector(".subtitle").firstChild.textContent = "הרשמה ותשלום ל" + baseN.replace(/^ל/, "");
+          document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") });
           var sl2 = document.getElementById("subtitleLocation"); sl2.textContent = [gr0, MARATHON.school].filter(Boolean).join(" · "); sl2.className = "sub-l2"; }
         document.title = (MARATHON.name || "מרתון מתמטיקה") + " - תלם";
         // הקבצה: (1) מה שהוגדר במרתון (5.19.35), (2) אחרת - הרשימה של בית הספר (מסך "בתי ספר", קובץ 78, תלם 5.19.70), (3) אחרת - ברירת המחדל. שדה חובה.
@@ -1004,7 +1029,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     CONFIG.locationLabel = [city, school].filter(Boolean).join(" · ");
     if (CONFIG.locationLabel) document.getElementById("subtitleLocation").textContent = CONFIG.locationLabel;
     document.getElementById("groupOptions").innerHTML = '<div class="hint">הקבוצות מופיעות רק בקישור שנוצר במערכת הניהול.</div>';
-    if (!EXPLICIT_PREVIEW) { marNotice("הקישור הזה לא מעודכן. לקבלת קישור להרשמה: 052-9067101"); MAR_BLOCKED = true; }
+    if (!EXPLICIT_PREVIEW) { marNotice(ttx("mar.oldlink")); MAR_BLOCKED = true; }
   }
 
   function setInvalid(fieldId, invalid){

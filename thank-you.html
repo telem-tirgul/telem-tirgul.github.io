@@ -106,9 +106,9 @@
     <div class="body">
       <div class="status wait" id="pendingMsg" hidden><span class="ic">📞</span><span>ניצור איתכם קשר בימים הקרובים להסדרת התשלום.</span></div>
       <div class="status info" id="payMsg" hidden></div>
-      <div class="sec-t" id="sumT" hidden data-t="t002">פרטי ההרשמה</div>
+      <div class="sec-t" id="sumT" hidden>פרטי ההרשמה</div>
       <div class="sum" id="sum" hidden></div>
-      <div class="sec-t" id="meetT" hidden data-t="t003">מועדי המפגשים</div>
+      <div class="sec-t" id="meetT" hidden>מועדי המפגשים</div>
       <ul class="meet" id="meet" hidden></ul>
       <div class="sec-t" id="nextT" hidden>השלבים הבאים</div>
       <ul class="next" id="next" hidden></ul>
@@ -136,71 +136,120 @@
   })();
 </script>
 <script>
+  // 5.19.100 (נועה): כל הנוסחים בדף – תבניות שנערכות במערכת (⚙ ← נוסחי הטפסים ← תודה). {משבצת} = ערך מההרשמה.
+  var TYD = [
+    ["ty.title_reg", "ההרשמה התקבלה!", "כותרת – ההרשמה נשלחה", {}, []],
+    ["ty.title_phone", "טופס ההרשמה התקבל", "כותרת – תשלום טלפוני (עוד לא שולם)", {}, []],
+    ["ty.chip_wait", "⏳ ממתין לתשלום", "תגית – תשלום טלפוני", {}, []],
+    ["ty.pending_phone", 'טופס ההרשמה התקבל אך ההרשמה טרם הושלמה.<br>אנא צרו איתנו קשר טלפוני לצורך השלמת הרישום:<br><a class="ph-big" href="tel:0529067101" dir="ltr">📞 052-9067101</a>', "התיבה הצהובה – תשלום טלפוני", {}, []],
+    ["ty.pending", "ניצור איתכם קשר בימים הקרובים להסדרת התשלום.", "התיבה הצהובה – ממתין לתשלום (לא טלפוני)", {}, []],
+    ["ty.lead_register", "{שם} רשום/ה לתרגולים השוטפים{ · עיר}", "שורה מתחת לכותרת – תרגולים שוטפים", { "שם": "השם הפרטי של התלמיד/ה", " · עיר": "העיר עם נקודה לפניה (ריק אם אין עיר)" }, ["שם"]],
+    ["ty.lead_event", "{שם} רשום/ה ל{מרתון / מסלול}", "שורה מתחת לכותרת – מרתון / מסלול", { "שם": "השם הפרטי של התלמיד/ה", "מרתון / מסלול": "שם המרתון או המסלול" }, ["שם"]],
+    ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
+    ["ty.row_name", "שם התלמיד/ה", "פרטים – שם", {}, []],
+    ["ty.row_mar", "מרתון", "פרטים – מרתון", {}, []],
+    ["ty.row_track", "מסלול", "פרטים – מסלול", {}, []],
+    ["ty.row_due", "סכום לתשלום", "פרטים – סכום (לא שולם)", {}, []],
+    ["ty.row_paid", "סכום ששולם", "פרטים – סכום (שולם)", {}, []],
+    ["ty.unpaid", "לא שולם", "תגית ליד הסכום – תשלום טלפוני", {}, []],
+    ["ty.meet_t", "מועדי המפגשים", "כותרת – מועדי המפגשים (מרתון)", {}, []],
+    ["ty.next_one", "השלב הבא", "כותרת – שלב אחד", {}, []],
+    ["ty.next_many", "השלבים הבאים", "כותרת – כמה שלבים", {}, []],
+    ["ty.step_invoice", "חשבונית על התשלום תישלח אליכם במייל.", "שלב – חשבונית (שולם באשראי)", {}, []],
+    ["ty.step_mar1", "שמרו את מועדי המפגשים ביומן.", "שלב – מרתון 1", {}, []],
+    ["ty.step_mar2", "להביא למפגש: ספר ומחברת הלימוד, כלי כתיבה ומחשבון (לתלמידי כיתות ח' ומעלה).", "שלב – מרתון 2", {}, []],
+    ["ty.step_mar3", "ביטול אפשרי עד 24 שעות לפני תחילת המרתון, בפנייה בכתב.", "שלב – מרתון 3", {}, []],
+    ["ty.paid_title_reg", "ההרשמה אושרה", "כותרת – אחרי תשלום באשראי (הרשמה)", {}, []],
+    ["ty.paid_title", "התשלום התקבל", "כותרת – אחרי תשלום באשראי (בלי פרטי הרשמה)", {}, []],
+    ["ty.paid_line", "התשלום התקבל בהצלחה", "שורה ירוקה – אחרי תשלום", {}, []],
+    ["ty.paid_small", "חשבונית תישלח אליכם במייל", "שורה קטנה – אחרי תשלום", {}, []],
+    ["ty.pay_checking", "⏳ בודקים את אישור התשלום…", "בדיקת התשלום – מחכים", {}, []],
+    ["ty.pay_ok", "✔ התשלום התקבל בהצלחה.", "בדיקת התשלום – אושר", {}, []],
+    ["ty.pay_late", "אישור התשלום עוד לא הגיע אלינו. אם חויבתם - הכול בסדר, האישור יתעדכן אצלנו בדקות הקרובות.", "בדיקת התשלום – עוד לא הגיע", {}, []],
+    ["ty.pay_err", "לא הצלחנו לבדוק כרגע את אישור התשלום. אם חויבתם - הכול בסדר.", "בדיקת התשלום – תקלה", {}, []]
+  ];
+  var TYM = {}; TYD.forEach(function(d){ TYM[d[0]] = d[1]; });
+  if (window.TX) window.TX.defs("דף התודה – נבנה לפי ההרשמה", TYD);
+  var tyFill = function(k, v){ return String(TYM[k]).replace(/\{([^{}<>]{1,40})\}/g, function(m, n){ return v && v[n] != null ? String(v[n]).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }) : ""; }); };
+  var tyH = function(k, v){ return window.TX ? window.TX.t(k, v) : tyFill(k, v); };   // HTML
+  var tyT = function(k, v){ if (window.TX) return window.TX.text(k, v); var d = document.createElement("div"); d.innerHTML = tyFill(k, v); return d.textContent; };   // טקסט
+  // בעורך הנוסחים (txedit=1): הרשמה לדוגמה; tyv = reg / phone / paid
+  var TY_EDIT = window.TX && window.TX.edit, TYV = (/[?&]tyv=(\w+)/.exec(location.search) || [])[1] || "reg";
+  var TY_SAMPLE = { kind: "marathon", name: "דנה לוי", event: "מרתון מתמטיקה שכבת ט' · בראשית", amount: 354, meetings: ["יום שלישי, 8.9 · 16:30–18:45", "יום רביעי, 16.9 · 16:30–18:45"] };
+</script>
+<script>
   // הפרטים נשמרו בדפדפן בעת מילוי הטופס - לתצוגה בלבד.
   // תלם 5.19.40: "ההרשמה התקבלה" + שם התלמיד/ה, סטטוס תשלום, פרטים, מועדי המפגשים (מרתון) ו"מה הלאה"
-  (function(){
+  // 5.19.100: אחרי שהנוסחים מהמערכת הגיעו (TX.ready; בכניסה הראשונה – עד 2 שניות)
+  var tyMain = function(){
     var $ = function(id){ return document.getElementById(id); };
     var pending = /[?&]pending=1/.test(location.search), phone = /[?&]phone=1/.test(location.search), preview = /[?&]preview=1/.test(location.search), paidRef = /[?&]ref=/.test(location.search);
+    if (TY_EDIT) { preview = false; pending = phone = TYV === "phone"; paidRef = TYV === "paid"; }
     var box = $("sum");
     function row(label, value, cls){ var d = document.createElement("div"); if (cls) d.className = cls; var a = document.createElement("span"); a.textContent = label; var b = document.createElement("b"); b.textContent = value; d.appendChild(a); d.appendChild(b); box.appendChild(d); }
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
+    if (TY_EDIT) x = TY_SAMPLE;
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
     if (phone && pending && !preview) {
-      $("title").textContent = "טופס ההרשמה התקבל";
+      $("title").textContent = tyT("ty.title_phone");
       // 5.19.57: גם בתשלום טלפוני - הוי הירוק ליד הכותרת (הטופס התקבל); הסטטוס בתיבה הצהובה
-      var ch0 = $("stChip"); ch0.className = "st-chip wait"; ch0.textContent = "⏳ ממתין לתשלום";
-      var pm0 = $("pendingMsg"); pm0.innerHTML = '<span class="ic">📞</span><span>טופס ההרשמה התקבל אך ההרשמה טרם הושלמה.<br>אנא צרו איתנו קשר טלפוני לצורך השלמת הרישום:<br><a class="ph-big" href="tel:0529067101" dir="ltr">📞 052-9067101</a></span>';   // 5.19.57: נוסח הלקוחה
+      var ch0 = $("stChip"); ch0.className = "st-chip wait"; ch0.textContent = tyT("ty.chip_wait");
+      var pm0 = $("pendingMsg"); pm0.innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   // 5.19.57: נוסח הלקוחה
     }
     var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
     if (regLike && !(phone && pending && !preview)) {
-      $("title").textContent = preview ? "כך ייראה האישור" : "ההרשמה התקבלה!";
+      $("title").textContent = preview ? "כך ייראה האישור" : tyT("ty.title_reg");
       var first = String(x.name || "").trim().split(/\s+/)[0];
-      if (x.kind === "register" && x.name) { $("lead").textContent = first + " רשום/ה לתרגולים השוטפים" + (x.city ? " · " + x.city : ""); $("lead").hidden = false; }   // 5.19.91 (נועה)
-      else if (x.name && (x.event || x.track)) { $("lead").textContent = first + " רשום/ה ל" + (x.event || x.track).replace(/^ל/, ""); $("lead").hidden = false; }
+      if (x.kind === "register" && x.name) { $("lead").innerHTML = tyH("ty.lead_register", { "שם": first, " · עיר": x.city ? " · " + x.city : "" }); $("lead").hidden = false; }   // 5.19.91 (נועה)
+      else if (x.name && (x.event || x.track)) { $("lead").innerHTML = tyH("ty.lead_event", { "שם": first, "מרתון / מסלול": (x.event || x.track).replace(/^ל/, "") }); $("lead").hidden = false; }
     }
     if (preview) { var chp = $("stChip"); chp.className = "st-chip info"; chp.textContent = "👁 תצוגה מקדימה"; var pm = $("pendingMsg"); pm.className = "status info"; pm.innerHTML = '<span class="ic">👁</span><span>תצוגה מקדימה - ההרשמה לא נשמרה ולא בוצע תשלום.</span>'; pm.hidden = false; }
-    else if (pending) $("pendingMsg").hidden = false;
+    else if (pending) { if (!phone) $("pendingMsg").innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.pending") + '</span>'; $("pendingMsg").hidden = false; }
     // 5.19.91 (נועה): בלי תגית "✓ התקבל" באמצע – הכותרת עצמה בירוק עם וי ("✓ ההרשמה התקבלה")
     { var chk = $("stChip"); if (chk && / ok/.test(" " + chk.className)) { chk.hidden = true; $("title").classList.add("ty-ok"); $("title").textContent = $("title").textContent.replace(/!$/, ""); } }
     if (!x) return;
-    if (x.name) row("שם התלמיד/ה", x.name);
-    if (x.event || x.track) row(x.event ? "מרתון" : "מסלול", x.event || x.track);
-    if (x.amount != null && !isNaN(x.amount)) row(pending || preview ? "סכום לתשלום" : "סכום ששולם", Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
-    if (x.amount != null && !isNaN(x.amount) && pending && !preview) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = "לא שולם"; ab.appendChild(nt); } }   // 5.19.93 (נועה)
+    if (x.name) row(tyT("ty.row_name"), x.name);
+    if (x.event || x.track) row(x.event ? tyT("ty.row_mar") : tyT("ty.row_track"), x.event || x.track);
+    if (x.amount != null && !isNaN(x.amount)) row(pending || preview ? tyT("ty.row_due") : tyT("ty.row_paid"), Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
+    if (x.amount != null && !isNaN(x.amount) && pending && !preview) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = tyT("ty.unpaid"); ab.appendChild(nt); } }   // 5.19.93 (נועה)
+    $("sumT").textContent = tyT("ty.sum_t"); $("meetT").textContent = tyT("ty.meet_t");
     $("sumT").hidden = false; box.hidden = false;
     if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false; }
     var steps = [];
-    if (paidRef) steps.push("חשבונית על התשלום תישלח אליכם במייל.");
+    if (paidRef) steps.push("\u0001" + tyT("ty.step_invoice"));   // \u0001 = שלב החשבונית (יורד אחרי תשלום)
     // 5.19.93 (נועה): בתשלום טלפוני – "צרו קשר" כבר כתוב בתיבה הצהובה; לא חוזרים על זה ב"השלב הבא"
     if (x.kind === "marathon") {
-      steps.push("שמרו את מועדי המפגשים ביומן.");
-      steps.push("להביא למפגש: ספר ומחברת הלימוד, כלי כתיבה ומחשבון (לתלמידי כיתות ח' ומעלה).");
-      steps.push("ביטול אפשרי עד 24 שעות לפני תחילת המרתון, בפנייה בכתב.");
+      steps.push(tyT("ty.step_mar1"));
+      steps.push(tyT("ty.step_mar2"));
+      steps.push(tyT("ty.step_mar3"));
     }
     // תלם 5.19.46: הכותרת לפי מספר הסעיפים - "השלב הבא" (אחד) / "השלבים הבאים" (כמה), גם במרתון
-    $("nextT").textContent = steps.length === 1 ? "השלב הבא" : "השלבים הבאים";
-    if (steps.length) { var nl = $("next"); steps.forEach(function(t, i){ var li = document.createElement("li"); var n = document.createElement("span"); n.className = "n"; n.textContent = i + 1; var s2 = document.createElement("span"); s2.textContent = t; li.appendChild(n); li.appendChild(s2); nl.appendChild(li); }); nl.hidden = false; $("nextT").hidden = false; }
-  })();
+    $("nextT").textContent = steps.length === 1 ? tyT("ty.next_one") : tyT("ty.next_many");
+    if (steps.length) { var nl = $("next"); steps.forEach(function(t, i){ var li = document.createElement("li"); if (t.charAt(0) === "\u0001") { li.setAttribute("data-inv", "1"); t = t.slice(1); } var n = document.createElement("span"); n.className = "n"; n.textContent = i + 1; var s2 = document.createElement("span"); s2.textContent = t; li.appendChild(n); li.appendChild(s2); nl.appendChild(li); }); nl.hidden = false; $("nextT").hidden = false; }
+  };
+  var tyGo = function(){ tyMain(); if (window.__tyAfter) window.__tyAfter(); };
+  if (window.TX && window.TX.ready) window.TX.ready.then(tyGo); else setTimeout(tyGo, 0);
 
   // תלם 5.19.42: תשלום אושר - למעלה בגדול "ההרשמה אושרה / חשבונית תישלח אליכם במייל"
   window.__tyPaid = function(){
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
+    if (TY_EDIT) x = TY_SAMPLE;
     var reg = x && (x.kind === "marathon" || x.kind === "register");
     // 5.19.93 (נועה): גם בלי פרטי הרשמה (דף תשלום / הפרטים פגו) – אותו עיצוב, בלי התיבה הירוקה
-    document.getElementById("title").textContent = reg ? "ההרשמה אושרה" : "התשלום התקבל";
+    document.getElementById("title").textContent = reg ? tyT("ty.paid_title_reg") : tyT("ty.paid_title");
     // 5.19.62: אחרי תשלום - בלי תגית "שולם" למעלה (התיבה הירוקה "התשלום התקבל בהצלחה" מספיקה)
     document.getElementById("stChip").hidden = true; document.getElementById("title").classList.add("ty-ok");
     // 5.19.91 (נועה): במקום התיבה הירוקה הגדולה – שורה ירוקה קטנה מתחת לשם: "✓ התשלום התקבל בהצלחה · חשבונית תישלח אליכם במייל"
     var ld = document.getElementById("lead"), pm = document.getElementById("payMsg");
     if (pm) pm.hidden = true;
     var pl = document.getElementById("paidLine"); if (!pl) { pl = document.createElement("p"); pl.id = "paidLine"; pl.className = "paid-line"; ld.parentNode.insertBefore(pl, ld.nextSibling); }
-    pl.innerHTML = reg ? "התשלום התקבל בהצלחה<small>חשבונית תישלח אליכם במייל</small>" : "<small>חשבונית תישלח אליכם במייל</small>";
+    pl.innerHTML = (reg ? tyH("ty.paid_line") : "") + "<small>" + tyH("ty.paid_small") + "</small>";
     if (!reg) return;
     var nl = document.getElementById("next");
-    [].slice.call(nl.children).forEach(function(li){ if (/חשבונית/.test(li.textContent)) li.remove(); });
+    [].slice.call(nl.children).forEach(function(li){ if (li.getAttribute("data-inv")) li.remove(); });
     [].slice.call(nl.children).forEach(function(li, i){ var n = li.querySelector(".n"); if (n) n.textContent = i + 1; });
     if (!nl.children.length) { nl.hidden = true; document.getElementById("nextT").hidden = true; }
-    else document.getElementById("nextT").textContent = nl.children.length === 1 ? "השלב הבא" : "השלבים הבאים";
+    else document.getElementById("nextT").textContent = nl.children.length === 1 ? tyT("ty.next_one") : tyT("ty.next_many");
   };
 
   // תלם 5.19.40: הורדת הטופס החתום (נשמר בדפדפן בעת השליחה, בלשונית הזו בלבד) - רק בלחיצה, לא אוטומטית
@@ -220,11 +269,12 @@
     });
   })();
 
-  // חזרה מעמוד התשלום של איקרדיט (?ref=...): בודקים מול השרת שהתשלום באמת אושר
-  (function(){
+  // חזרה מעמוד התשלום של איקרדיט (?ref=...): בודקים מול השרת שהתשלום באמת אושר (5.19.100: אחרי שהדף נבנה – __tyAfter)
+  window.__tyAfter = function(){
+    if (TY_EDIT && TYV === "paid") { window.__tyPaid(); return; }
     var m = /[?&]ref=([A-Za-z0-9]{32,64})/.exec(location.search);
     if (!m) return;
-    var msg = document.getElementById("payMsg"); msg.hidden = false; msg.textContent = "⏳ בודקים את אישור התשלום…";
+    var msg = document.getElementById("payMsg"); msg.hidden = false; msg.textContent = tyT("ty.pay_checking");
     var tries = 0;
     function check(){
       tries++;
@@ -232,13 +282,13 @@
         method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" },
         body: JSON.stringify({ ref: m[1] })
       }).then(function(r){ return r.json(); }).then(function(b){
-        if (b && b.paid) { msg.className = "status ok"; msg.textContent = "✔ התשלום התקבל בהצלחה."; if (window.__tyPaid) window.__tyPaid(); try { sessionStorage.removeItem("pay_pending"); } catch (e) {} return; }
+        if (b && b.paid) { msg.className = "status ok"; msg.textContent = tyT("ty.pay_ok"); if (window.__tyPaid) window.__tyPaid(); try { sessionStorage.removeItem("pay_pending"); } catch (e) {} return; }
         if (tries < 5) { setTimeout(check, 3000); return; }
-        msg.textContent = "אישור התשלום עוד לא הגיע אלינו. אם חויבתם - הכול בסדר, האישור יתעדכן אצלנו בדקות הקרובות.";
-      }).catch(function(){ if (tries < 5) setTimeout(check, 3000); else msg.textContent = "לא הצלחנו לבדוק כרגע את אישור התשלום. אם חויבתם - הכול בסדר."; });
+        msg.textContent = tyT("ty.pay_late");
+      }).catch(function(){ if (tries < 5) setTimeout(check, 3000); else msg.textContent = tyT("ty.pay_err"); });
     }
     check();
-  })();
+  };
   </script>
 </body>
 </html>
