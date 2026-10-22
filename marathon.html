@@ -772,7 +772,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // תצוגה מקדימה: מוסיפים לקישור ?preview=1 - שום דבר לא נשמר ולא עובר לתשלום.
     provider: "icredit",
     // תשלום באשראי באיקרדיט. enabled: false = כרגע רק תשלום טלפוני.
-    // לבדיקה לפני שמדליקים: מוסיפים לקישור ?cardtest=1 - יופיע גם "אשראי עכשיו".
+    // לבדיקה לפני שמדליקים: מוסיפים לקישור ?cardtest=1 - יופיע גם "אשראי עכשיו" (רק בדפדפן שנכנסו בו למערכת הניהול, 5.19.97).
     // אין כאן שום סוד: פרטי המסוף נמצאים רק ב-Supabase Secrets.
     creditCard: { enabled: false },
 
@@ -1046,7 +1046,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     window.__mBarUpd = upd; setTimeout(upd, 1500);
   })();
   // תצוגה מקדימה: ?preview=1 בקישור. כל עוד האשראי כבוי (creditCard.enabled) - רק תשלום טלפוני
-  const NO_TERMINAL = !(CONFIG.creditCard && CONFIG.creditCard.enabled) && !/[?&]cardtest=1(&|$)/.test(location.search);
+  // 5.19.97 (נועה): ?cardtest=1 עובד רק בדפדפן שנכנסו בו למערכת הניהול (סימון telem_staff שהמערכת שומרת) - מי שמקבל קישור לא יראה אשראי
+  const STAFF_DEV = (function(){ try { return +localStorage.getItem("telem_staff") > Date.now(); } catch(e) { return false; } })();
+  const NO_TERMINAL = !(CONFIG.creditCard && CONFIG.creditCard.enabled) && !(STAFF_DEV && /[?&]cardtest=1(&|$)/.test(location.search));
   const EXPLICIT_PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   const PREVIEW = EXPLICIT_PREVIEW || NO_TERMINAL;
   // תשלום טלפוני: נשמר גם כשהאשראי באתר עוד לא מחובר (רק לא בתצוגה מקדימה מהמערכת)
