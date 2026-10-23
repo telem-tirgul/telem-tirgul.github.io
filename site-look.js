@@ -14,3 +14,19 @@
     } catch (e) {}   // גיליון חיצוני (גוגל פונטס) – לא נגיש, מדלגים
   });
 })();
+// את-26 (נועה 23.10): חזרה לאתר תלם אחרי התשלום. האתר מוסיף לקישור &back=<דף בית הספר>; שומרים אותו,
+// ובדף התודה / התשלום לא הושלם מציגים "חזרה לאתר תלם". רק לכתובות של האתר.
+(function(){
+  var OK = /^https:\/\/telem-tirgul\.github\.io\/telem-tr\//;
+  var b = null; try { b = new URLSearchParams(location.search).get("back"); } catch (e) {}
+  if (b && OK.test(b)) { try { sessionStorage.setItem("telem_back", b); } catch (e) {} }
+  var form = document.documentElement.getAttribute("data-form");
+  if (form !== "thank-you" && form !== "payment-failed") return;
+  document.addEventListener("DOMContentLoaded", function(){
+    var u = b && OK.test(b) ? b : null; if (!u) { try { u = sessionStorage.getItem("telem_back"); } catch (e) {} }
+    if (!u || !OK.test(u)) return;
+    var a = document.createElement("a"); a.className = "back-site"; a.href = u; a.textContent = "→ חזרה לאתר תלם";
+    var c = document.querySelector(".card .contact") || document.querySelector(".contact");
+    if (c && c.parentNode) c.parentNode.insertBefore(a, c); else document.body.appendChild(a);
+  });
+})();

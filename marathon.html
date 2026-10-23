@@ -545,7 +545,14 @@
   #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
   #field-first-time.invalid .price-options{ border-color:#C9554F; }
 </style>
-<link rel="stylesheet" href="site-look.css"><script src="site-look.js"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css"><script src="site-look.js"></script>
+<script>
+  // את-26: בתוך האתר (embed=1) – הגובה נשלח לאתר כדי שהמסגרת תגדל לבד (כמו בטופס ההתעניינות)
+  (function(){ if (!document.documentElement.classList.contains("embed")) return;
+    var last = 0, send = function(){ var h = Math.ceil(document.documentElement.scrollHeight); if (h !== last) { last = h; try { parent.postMessage({ telemForm: "marathon", height: h }, "*"); } catch (e) {} } };
+    window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
+  })();
+</script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 
@@ -1462,6 +1469,15 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // פותח שוב את עמוד התשלום (לא שולח את הטופס פעם נוספת).
   // ----------------------------------------------------------------
   var pendingPay = null;
+  // את-26 (נועה 23.10): בתוך האתר (embed=1) – מעבר לתשלום / לתודה לא בתוך המסגרת: מבקשים מהאתר להעביר את כל החלון.
+  // רק לאתר של תלם (לפי הכתובת שממנה נפתח); אחרת – כרגיל. back נשמר ומוצמד לדף התודה.
+  function goTop(u){
+    var EMB = document.documentElement.classList.contains("embed") && window.parent !== window, org = "";
+    try { org = new URL(document.referrer).origin; } catch (e) {}
+    if (EMB && org === "https://telem-tirgul.github.io") { try { parent.postMessage({ telemForm: "marathon", go: u }, org); return; } catch (e) {} }
+    location.href = u;
+  }
+  function tyUrl(q){ var u = new URL("thank-you.html?" + q, location.href); try { var b = sessionStorage.getItem("telem_back"); if (b) u.searchParams.set("back", b); } catch (e) {} return u.href; }
   function goToPayment(kind, orderId, secret){
     pendingPay = { kind: kind, id: String(orderId), secret: secret };
     try { sessionStorage.setItem("pay_pending", JSON.stringify(pendingPay)); } catch (e) {}
@@ -1472,7 +1488,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       headers: { "Content-Type": "application/json", "apikey": s.anonKey },
       body: JSON.stringify(pendingPay)
     }).then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
-      .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); location.href = u; })
+      .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); goTop(u); })
       .catch(function(err){
         console.error("icredit-pay failed:", err);
         topError.textContent = "ההרשמה נשמרה, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - צרו איתנו קשר.";
@@ -1584,7 +1600,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (isPreviewNow()) {
       saveRegPdf(signedPdf, true);   // תלם 5.19.40: לא מורידים אוטומטית - כפתור הורדה בדף התודה
       try { sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(getAmount()))); } catch (err) {}
-      setTimeout(function(){ location.href = new URL("thank-you.html?preview=1", location.href).href; }, 600); return;
+      setTimeout(function(){ goTop(tyUrl("preview=1")); }, 600); return;
     }
     const payload = {
       signature: signature,
@@ -1606,9 +1622,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       try {
         sessionStorage.setItem("reg_studentFullName", studentFirst + " " + studentLast);
         sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(Number(res.amount))));
-        sessionStorage.setItem("reg_form_url", location.href);
+        sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })());   // את-26: "לנסות שוב" – הטופס הרגיל (לא מצב הטמעה)
       } catch (err) {}
-      if (CONFIG.provider === "none" || isPhonePay()) { location.href = new URL("thank-you.html?pending=1" + (isPhonePay() ? "&phone=1" : ""), location.href).href; return; }
+      if (CONFIG.provider === "none" || isPhonePay()) { goTop(tyUrl("pending=1" + (isPhonePay() ? "&phone=1" : ""))); return; }
       goToPayment("marathon", res.order_id, res.pay_secret);
     }).catch(function(err){
       console.error("submit_marathon failed:", err);

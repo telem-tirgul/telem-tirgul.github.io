@@ -82,3 +82,8 @@ html body .dl-btn{ background:#5A1216 !important; box-shadow:none !important; }
 /* בתוך האתר (embed=1): בלי לוגו ובלי שורת הקשר בתחתית – לאתר יש משלו */
 html.embed body .brand, html.embed body .pg-head .brand, html.embed body footer{ display:none !important; }
 html.embed body{ padding-top:0 !important; }
+
+/* את-26: "חזרה לאתר תלם" בדף התודה / התשלום לא הושלם (כשהגיעו מהאתר) */
+html body a.back-site{ display:flex; width:fit-content; margin:16px auto 4px; align-items:center; gap:6px; font-family:'Heebo',sans-serif; font-weight:800; font-size:15px;
+  color:#5A1216; background:#F3E3C3; border-radius:999px; padding:9px 20px; text-decoration:none; }
+html body a.back-site:hover{ background:#EAD3A6; }
