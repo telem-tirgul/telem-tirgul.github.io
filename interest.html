@@ -494,6 +494,9 @@
   /* 5.19.97 (נועה): הטמעה באתר השיווקי – interest.html?embed=1 בתוך iframe: בלי הלוגו והכותרת, רקע שקוף, גובה אוטומטי */
   html.embed body{ background:transparent !important; padding:0 !important; } html.embed .wrap{ padding-top:0 !important; margin-top:0 !important; }
   html.embed .brand, html.embed .wrap > h1, html.embed footer{ display:none !important; }
+  /* את-25: בחירת מסלול – כרטיס קטן מעל תיאור המסלול */
+  .trk-pick{ background:#fff; border-radius:22px; box-shadow:0 14px 34px -22px rgba(62,13,16,.45); padding:14px 18px 6px; margin:0 6px 12px; }
+  .trk-pick .field{ margin-bottom:8px; } .trk-pick select{ padding-inline-end:40px !important; text-overflow:ellipsis; } .trk-pick label{ font-family:'Heebo',sans-serif; font-weight:800 !important; font-size:16px !important; }
 </style>
 <script>
   // 5.19.97: ?embed=1 – מצב הטמעה (האתר שם את הטופס ב-iframe). הגובה נשלח לאתר כדי שה-iframe יגדל לבד.
@@ -510,6 +513,7 @@
   <h1><span class="line"></span> <span data-t="t001">תלם - המרכז לשיעורי תרגול</span> <span class="line right"></span></h1>
   <div class="subtitle"><span data-t="t002">טופס התעניינות בתרגולים השוטפים</span><span id="subtitleLocation" class="sub-l2"></span></div>
   <div class="intro"><div id="introText">השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.</div></div>
+  <div class="trk-pick" id="trackPick" hidden><div class="field"><label for="f-track" data-t="t037">מסלול</label><select id="f-track"></select></div></div><!-- את-25 (נועה 23.10): בחירת / החלפת מסלול -->
   <div id="tracksBox"></div>
   <form id="intForm" novalidate>
     <div class="top-error form-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
@@ -680,10 +684,30 @@ function foldTrack(d){
   const bd = document.createElement("div"); bd.className = "ti-fold-b"; while (d.firstChild) bd.appendChild(d.firstChild);
   det.appendChild(sum); det.appendChild(bd); return det;
 }
+// את-25 (נועה 23.10): בחירת מסלול ברשימה – המסלולים של העיר (בלי סגורים); מהקישור (tracks=) – בחור מראש ואפשר להחליף. בקישור למרתון – בלי בחירה.
+const IS_MAR = P_TRACKS.includes("marathon"), P_REG = P_TRACKS.filter(t => t !== "marathon");
+let TRK_INIT = P_REG.length === 1 ? P_REG[0] : "";
+function trackPickFill(shutT){
+  const sel = $("f-track"), pick = $("trackPick"); if (!sel || !pick) return;
+  // לפי העיר: רק מסלולים שיש להם מחיר בעיר הזו ושלא נסגרו בה. בלי עיר (או עיר בלי מסלולים) – בלי בחירה, עד שבוחרים עיר
+  const city = $("f-city").value, cityT = CONFIG.trackPricing[city];
+  const opts = cityT ? Object.keys(CONFIG.trackInfo).filter(t => cityT[t] && !shutT.includes(t)) : [];
+  if (IS_MAR || !opts.length) { pick.hidden = true; if (!IS_MAR && !TRK_INIT && sel.value) TRK_INIT = sel.value; sel.innerHTML = ""; return; }
+  const cur = sel.value || TRK_INIT; TRK_INIT = "";
+  const NONE = "לא בטוחים – מידע על כל המסלולים";
+  if (window.TX && TX.def) TX.def("trk.none", NONE, "בחירת מסלול – האפשרות כשלא בוחרים", {}, { group: "בחירת מסלול", plain: true });
+  sel.innerHTML = "<option></option>" + opts.map(() => "<option></option>").join("");
+  sel.options[0].value = ""; sel.options[0].textContent = window.TX && TX.text ? (TX.text("trk.none") || NONE) : NONE;
+  [...sel.options].slice(1).forEach((o, i) => { o.value = opts[i]; o.textContent = CONFIG.trackInfo[opts[i]].title; });
+  sel.value = opts.includes(cur) ? cur : "";
+  pick.hidden = false;
+}
 function renderTracks(){
   const city = $("f-city").value, box = $("tracksBox");
   const shutT = (city && typeof INT_OPEN !== "undefined" && INT_OPEN && INT_OPEN[city] && Array.isArray(INT_OPEN[city].interestClosedTracks)) ? INT_OPEN[city].interestClosedTracks : [];
-  const tracks = (P_TRACKS.length ? P_TRACKS : (city && CONFIG.trackPricing[city] ? Object.keys(CONFIG.trackInfo) : [])).filter(t => !shutT.includes(t));   // 5.19.56: בלי מסלולים סגורים
+  trackPickFill(shutT);
+  const pickT = !IS_MAR && $("f-track") ? $("f-track").value : "";
+  const tracks = (IS_MAR ? P_TRACKS : pickT ? [pickT] : P_REG.length ? P_REG : (city && CONFIG.trackPricing[city] ? Object.keys(CONFIG.trackInfo) : [])).filter(t => !shutT.includes(t));   // 5.19.56: בלי מסלולים סגורים
   box.innerHTML = "";
   tracks.forEach(t => {
     const d = document.createElement("div"); d.className = "ti-box";
@@ -707,11 +731,12 @@ function renderTracks(){
         + (earlyOn ? '<li><b>' + pr.early + ' ₪</b> להרשמה מוקדמת' + (cut ? ' (עד ' + cut + ')' : '') + '</li><li><b>' + pr.regular + ' ₪</b> להרשמה רגילה' + (cut ? ' (מ-' + cut + ' ואילך)' : '') + '</li>' : '<li><b>' + pr.regular + ' ₪</b> לחודש</li>') + '</ul>'
         + '<div class="track-info-label">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div><ul class="track-info-list">'
         + intFeesLi(city, cityT) + intMonthLi(city) + '</ul>' : '');
-    d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; box.appendChild(foldTrack(d));
+    d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; const fd = foldTrack(d); if (pickT) fd.open = true; box.appendChild(fd);   // את-25: מסלול שנבחר – פתוח
   });
   $("introText").textContent = tracks.length ? "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה." : "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.";
 }
 renderTracks();
+if ($("f-track")) $("f-track").addEventListener("change", renderTracks);   // את-25
 if (P_MAR) callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){});
 // 5.19.58: כמו בטופס ההרשמה - שכר הלימוד של חודש ההרשמה לפי חוק "הצטרפות מאוחרת" ממסך חוקי החיוב (billing_rules_public)
 var LATE_RULES = [], JUNE = { on: true, cities: {} };
@@ -749,7 +774,8 @@ function intClosedCheck(){
   // 5.19.56 (קובץ 72): מסלולים סגורים בעיר - אם כל המסלולים שבקישור (או כולם) סגורים, הטופס סגור
   const shut = c && INT_OPEN[c] && Array.isArray(INT_OPEN[c].interestClosedTracks) ? INT_OPEN[c].interestClosedTracks : [];
   const want = P_TRACKS.filter(t => t !== "marathon"), all = Object.keys(CONFIG.trackInfo);
-  if (!closed && shut.length && (want.length ? want.every(t => shut.includes(t)) : all.every(t => shut.includes(t)))) closed = true;
+  // את-25: אפשר לבחור מסלול אחר בטופס – סגור רק כשכל המסלולים בעיר סגורים (מסלול סגור מהקישור פשוט לא נבחר מראש)
+  if (!closed && shut.length && all.every(t => shut.includes(t))) closed = true;
   let box = $("closedBox"); if (!box) { box = document.createElement("div"); box.id = "closedBox"; box.className = "closed-box"; $("intForm").parentNode.insertBefore(box, $("intForm")); }
   box.hidden = !closed; $("intForm").hidden = closed; const tb = $("tracksBox"); if (tb) tb.hidden = closed; const ib = document.querySelector(".intro"); if (ib) ib.hidden = closed;
   if (closed) box.innerHTML = "<b>ההרשמה כרגע סגורה.</b><br>לפרטים: <a href=\"tel:0529067101\">052-9067101</a>";
@@ -801,7 +827,8 @@ $("intForm").addEventListener("submit", function(e){
   bad("field-city", !city); bad("field-sfirst", !$("f-sfirst").value.trim()); bad("field-pfirst", !$("f-pfirst").value.trim());
   bad("field-pphone", !/^0\d{8,9}$/.test(ph)); bad("field-sphone", !!sph && !/^0\d{8,9}$/.test(sph)); bad("field-email", !!em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em));
   $("topError").style.display = ok ? "none" : "block"; if (!ok) return;
-  const courses = (P_TRACKS.length ? P_TRACKS : []).map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title);
+  const pickT = !IS_MAR && $("f-track") ? $("f-track").value : "";   // את-25: המסלול שנבחר בטופס (במקום tracks מהקישור)
+  const courses = (pickT ? [pickT] : P_TRACKS.length ? P_TRACKS : []).map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title);
   const payload = { website: $("f-website").value, city: city === "אחר" ? "" : city, school: $("f-school").value || null, courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: $("f-school").value || null },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };
