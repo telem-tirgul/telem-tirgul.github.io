@@ -44,9 +44,10 @@
     var t = form === "payment-failed" ? "שלום, ניסיתי לשלם והתשלום לא הושלם" : ("שלום, יש לי שאלה " + (MSG[form] || "")).trim();
     var box = document.createElement("div"); box.className = "wa-contact";
     var a = document.createElement("a"); a.className = "wa-link"; a.target = "_blank"; a.rel = "noopener"; a.href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(t);
-    a.appendChild(document.createTextNode("💬 שאלות? כתבו לנו בוואטסאפ: ")); var n = document.createElement("bdi"); n.textContent = PHONE; a.appendChild(n);
-    var m = document.createElement("div"); m.className = "wa-mail"; m.appendChild(document.createTextNode("אימייל: ")); var ml = document.createElement("a"); ml.href = "mailto:" + MAIL; ml.textContent = MAIL; m.appendChild(ml);
-    box.appendChild(a); box.appendChild(m);
+    a.appendChild(document.createTextNode("💬 וואטסאפ: ")); var n = document.createElement("bdi"); n.textContent = PHONE; a.appendChild(n);
+    var m = document.createElement("a"); m.className = "wa-link wa-mail"; m.href = "mailto:" + MAIL; m.appendChild(document.createTextNode("✉️ אימייל: ")); var mb = document.createElement("bdi"); mb.textContent = MAIL; m.appendChild(mb);   // באותה בועה, כמו הוואטסאפ
+    var h = document.createElement("div"); h.className = "wa-h"; h.textContent = "שאלות? כתבו לנו";   // נועה: כותרת, ומתחתיה וואטסאפ ואימייל זה מתחת לזה
+    box.appendChild(h); box.appendChild(a); box.appendChild(m);
     if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
 })();
