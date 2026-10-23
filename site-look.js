@@ -30,18 +30,23 @@
     if (c && c.parentNode) c.parentNode.insertBefore(a, c); else document.body.appendChild(a);
   });
 })();
-// נועה 23.10: "שאלות? כתבו לנו בוואטסאפ" (בועה לבנה עדינה) – בתחתית כל טופס ובדף התודה / התשלום לא הושלם (בתוך האתר התחתית מוסתרת – לאתר יש משלו)
+// נועה 23.10: פרטי הקשר בתחתית כל טופס ובדף התודה / התשלום לא הושלם – "שאלות? כתבו לנו בוואטסאפ: 052-9067101" (לחיץ, פותח וואטסאפ
+// עם הודעה לפי הטופס), ומתחתיו האימייל (לחיץ). מחליף את שורת "טלפון · אימייל". בתוך האתר התחתית מוסתרת – לאתר יש משלו.
 (function(){
   var MSG = { register: "לגבי ההרשמה לתרגולים השוטפים", marathon: "לגבי ההרשמה למרתון", interest: "לגבי התרגולים בתלם", shibutz: "לגבי טופס השיבוץ",
-    pay: "לגבי התשלום", cancel: "לגבי ביטול ההרשמה", "thank-you": "לגבי ההרשמה ששלחתי", "payment-failed": "" };
+    pay: "לגבי התשלום", cancel: "לגבי ביטול ההרשמה", "thank-you": "לגבי ההרשמה ששלחתי" };
+  var PHONE = "052-9067101", WA = "972529067101", MAIL = "telem.tr@gmail.com";
   var form = document.documentElement.getAttribute("data-form") || "";
   document.addEventListener("DOMContentLoaded", function(){
-    if (document.querySelector("a.wa-link")) return;
-    var where = document.querySelector("footer") || document.querySelector(".card .contact") || document.querySelector(".contact"); if (!where) return;
-    var t = form === "payment-failed" ? "שלום, ניסיתי לשלם והתשלום לא הושלם" : "שלום, יש לי שאלה " + (MSG[form] || "");
-    var a = document.createElement("a"); a.className = "wa-link"; a.target = "_blank"; a.rel = "noopener";
-    a.href = "https://wa.me/972529067101?text=" + encodeURIComponent(t.trim());
-    a.textContent = "💬 שאלות? כתבו לנו בוואטסאפ";   // נועה: בועה לבנה עדינה, בבורדו – לא בולט
-    if (where.tagName === "FOOTER") where.appendChild(a); else where.parentNode.insertBefore(a, where.nextSibling);
+    if (document.querySelector(".wa-contact")) return;
+    var old = document.querySelector("footer .contact") || document.querySelector(".card .contact") || document.querySelector(".contact");
+    var host = old || document.querySelector("footer"); if (!host) return;
+    var t = form === "payment-failed" ? "שלום, ניסיתי לשלם והתשלום לא הושלם" : ("שלום, יש לי שאלה " + (MSG[form] || "")).trim();
+    var box = document.createElement("div"); box.className = "wa-contact";
+    var a = document.createElement("a"); a.className = "wa-link"; a.target = "_blank"; a.rel = "noopener"; a.href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(t);
+    a.appendChild(document.createTextNode("💬 שאלות? כתבו לנו בוואטסאפ: ")); var n = document.createElement("bdi"); n.textContent = PHONE; a.appendChild(n);
+    var m = document.createElement("div"); m.className = "wa-mail"; m.appendChild(document.createTextNode("אימייל: ")); var ml = document.createElement("a"); ml.href = "mailto:" + MAIL; ml.textContent = MAIL; m.appendChild(ml);
+    box.appendChild(a); box.appendChild(m);
+    if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
 })();
