@@ -30,3 +30,18 @@
     if (c && c.parentNode) c.parentNode.insertBefore(a, c); else document.body.appendChild(a);
   });
 })();
+// נועה 23.10: "שאלות? כתבו לנו בוואטסאפ" – בתחתית כל טופס ובדף התודה / התשלום לא הושלם (בתוך האתר התחתית מוסתרת – לאתר יש משלו)
+(function(){
+  var MSG = { register: "לגבי ההרשמה לתרגולים השוטפים", marathon: "לגבי ההרשמה למרתון", interest: "לגבי התרגולים בתלם", shibutz: "לגבי טופס השיבוץ",
+    pay: "לגבי התשלום", cancel: "לגבי ביטול ההרשמה", "thank-you": "לגבי ההרשמה ששלחתי", "payment-failed": "" };
+  var form = document.documentElement.getAttribute("data-form") || "";
+  document.addEventListener("DOMContentLoaded", function(){
+    if (document.querySelector("a.wa-link")) return;
+    var where = document.querySelector("footer") || document.querySelector(".card .contact") || document.querySelector(".contact"); if (!where) return;
+    var t = form === "payment-failed" ? "שלום, ניסיתי לשלם והתשלום לא הושלם" : "שלום, יש לי שאלה " + (MSG[form] || "");
+    var a = document.createElement("a"); a.className = "wa-link"; a.target = "_blank"; a.rel = "noopener";
+    a.href = "https://wa.me/972529067101?text=" + encodeURIComponent(t.trim());
+    a.textContent = "💬 שאלות? כתבו לנו בוואטסאפ";
+    if (where.tagName === "FOOTER") where.appendChild(a); else where.parentNode.insertBefore(a, where.nextSibling);
+  });
+})();
