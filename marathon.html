@@ -636,6 +636,7 @@
         <div class="field" id="field-hakbatsa" hidden>
           <label for="f-hakbatsa"><span data-t="t020">הקבצה</span> <span class="req">*</span></label>
           <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected data-t="t021">בחרו</option></select>
+          <input type="text" id="f-hakbatsa-other" maxlength="60" placeholder="איזו הקבצה?" hidden style="margin-top:6px;"><!-- נועה 23.10: תמיד גם "אחר" -->
           <div class="error-msg" data-t="t022">שדה חובה</div>
         </div>
       </div>
@@ -1017,9 +1018,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         var hkSel = document.getElementById("f-hakbatsa");
         var HAK_DEFAULT = ["הקבצה א'", "הקבצה ב'", "הקבצה ג'", "לא מחולק להקבצות", '3 יח"ל', '4 יח"ל', '5 יח"ל'];
         var hkShow = function(list){
+          list = list.filter(function(o){ return String(o).trim() !== "אחר"; }).concat(["אחר"]);   // נועה 23.10: תמיד גם "אחר" (עם שדה טקסט)
           list.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
           document.getElementById("field-hakbatsa").hidden = false; hkSel.required = true;
-          hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); });
+          hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); var ot = document.getElementById("f-hakbatsa-other"); ot.hidden = hkSel.value !== "אחר"; if (!ot.hidden) ot.focus(); });
         };
         if (hk.length) hkShow(hk);
         else fetch(s.url + "/rest/v1/rpc/school_hakbatsa_public", { method: "POST", headers: headers, body: JSON.stringify({ p_city: MARATHON.city || "", p_school: MARATHON.school || "" }) })
@@ -1536,7 +1538,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (!grade) valid = false;
 
     const hakEl = document.getElementById("f-hakbatsa"), needHak = !document.getElementById("field-hakbatsa").hidden;
-    const hakbatsa = needHak ? hakEl.value : "";
+    const hakOt = document.getElementById("f-hakbatsa-other");
+    const hakbatsa = needHak ? (hakEl.value === "אחר" ? ("אחר" + (hakOt && hakOt.value.trim() ? ": " + hakOt.value.trim() : "")) : hakEl.value) : "";
     setInvalid("field-hakbatsa", needHak && !hakbatsa);
     if (needHak && !hakbatsa) valid = false;
 
