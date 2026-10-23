@@ -494,10 +494,36 @@
   /* 5.19.97 (נועה): הטמעה באתר השיווקי – interest.html?embed=1 בתוך iframe: בלי הלוגו והכותרת, רקע שקוף, גובה אוטומטי */
   html.embed body{ background:transparent !important; padding:0 !important; } html.embed .wrap{ padding-top:0 !important; margin-top:0 !important; }
   html.embed .brand, html.embed .wrap > h1, html.embed footer{ display:none !important; }
+  /* 5.19.105 (נועה, את-21): בהטמעה – העיצוב של האתר השיווקי. רק כש-embed=1; הטופס הרגיל לא משתנה. בלי שינוי בשדות / בלוגיקה / בשליחה */
+  html.embed{ color-scheme:light; background:transparent !important; }
+  html.embed :root, html.embed{ --bg:#FBF7F1; --paper:#fff; --ink:#2B2320; --ink-soft:#6b5f55; --border:#eadfce; --accent:#5A1216; --accent-light:#8B1E23; --gold:#D9A441; --gold-deep:#D9A441; }
+  html.embed body{ color:#2B2320 !important; }
+  html.embed .subtitle{ display:none !important; }
+  html.embed .wrap{ max-width:720px !important; }
+  html.embed :is(fieldset, .sec-card, .intro){ background:#fff !important; border:none !important; border-radius:28px !important;
+    box-shadow:0 14px 34px -22px rgba(62,13,16,.45) !important; padding:20px 22px 10px !important; margin-bottom:16px !important; }
+  html.embed .intro{ padding:16px 22px !important; color:#6b5f55 !important; }
+  html.embed .track-info{ background:#fff !important; border-top:none !important; border-bottom:none !important; border-inline-end:none !important; border-radius:22px !important;
+    box-shadow:0 14px 34px -22px rgba(62,13,16,.45) !important; }
+  html.embed :is(fieldset > legend, .sec-card > .sec-h){ font-family:'Heebo',sans-serif !important; color:#5A1216 !important; border-bottom:1px solid rgba(217,164,65,.45) !important; }
+  html.embed :is(fieldset > legend, .sec-card > .sec-h)::before{ background:#5A1216 !important; box-shadow:0 0 0 3px rgba(217,164,65,.35); }
+  html.embed .field > label, html.embed .field label{ color:#6b5f55 !important; }
+  html.embed :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea):not(.field.invalid *){ background-color:#fff !important; border:1.5px solid #eadfce !important; border-radius:14px !important; color:#2B2320 !important; }
+  html.embed :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea):not(.field.invalid *):focus{ border-color:#D9A441 !important; box-shadow:0 0 0 3px rgba(217,164,65,.22) !important; }
+  html.embed .field.invalid :is(input, select, textarea){ border-radius:14px !important; }
+  html.embed body .field :is(select.locked, input.locked, select:disabled, input:disabled, input.ro-val, input[readonly]):not(.q1):not(.q2):not(.q3){ border:1.5px solid #f1e9dd !important; border-radius:14px !important; }
+  html.embed .disclaimer{ color:#6b5f55 !important; font-weight:700 !important; }
+  html.embed button#submitBtn{ background:#8B1E23 !important; border-radius:999px !important; box-shadow:0 14px 30px -16px rgba(139,30,35,.7) !important; font-family:'Heebo',sans-serif; }
+  html.embed button#submitBtn:hover{ background:#5A1216 !important; }
+  html.embed .req{ color:#8B1E23 !important; }
 </style>
 <script>
   // 5.19.97: ?embed=1 – מצב הטמעה (האתר שם את הטופס ב-iframe). הגובה נשלח לאתר כדי שה-iframe יגדל לבד.
-  (function(){ if (!/[?&]embed=1(&|$)/.test(location.search)) return; document.documentElement.classList.add("embed");
+  (function(){ if (!/[?&]embed=1(&|$)/.test(location.search)) return; document.documentElement.classList.add("embed"); document.documentElement.setAttribute("data-theme", "light");   /* את-21: באתר תמיד בהיר */
+    // את-21: גם כשהמחשב / הטלפון במצב כהה – העיצוב הבהיר (האתר בהיר): כללי "רק בהיר" חלים תמיד, כללי "כהה" יורדים
+    [].forEach.call(document.styleSheets, function(sh){ try { var rs = sh.cssRules; for (var i = rs.length - 1; i >= 0; i--) { var r = rs[i]; if (!r.media) continue; var c = r.media.mediaText || "";
+      if (/not all and \(prefers-color-scheme: ?dark\)/.test(c)) { var t = [].map.call(r.cssRules, function(x){ return x.cssText; }); sh.deleteRule(i); for (var k = t.length - 1; k >= 0; k--) sh.insertRule(t[k], i); }
+      else if (/prefers-color-scheme: ?dark/.test(c)) sh.deleteRule(i); } } catch (e) {} });   /* גיליון של גוגל פונטס – לא נגיש, מדלגים */
     var last = 0, send = function(){ var h = Math.ceil(document.documentElement.scrollHeight); if (h !== last) { last = h; try { parent.postMessage({ telemForm: "interest", height: h }, "*"); } catch (e) {} } };
     window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
   })();
