@@ -95,6 +95,7 @@ html body a.back-site{ display:flex; width:fit-content; margin:16px auto 4px; al
   color:#5A1216; background:#F3E3C3; border-radius:999px; padding:9px 20px; text-decoration:none; }
 html body a.back-site:hover{ background:#EAD3A6; }
 
-/* קישור "וואטסאפ" בשורת פרטי הקשר (נועה 23.10) – כמו שאר הקישורים שם */
-html body a.wa-link{ color:#5A1216; font-weight:700; text-decoration:none; }
-html body a.wa-link:hover{ text-decoration:underline; }
+/* "שאלות? כתבו לנו בוואטסאפ" (נועה 23.10) – בועה לבנה עדינה בבורדו, לא בולטת */
+html body a.wa-link{ display:flex; width:fit-content; margin:12px auto 2px; align-items:center; gap:6px; font-family:'Heebo',sans-serif; font-weight:700; font-size:14px;
+  color:#5A1216; background:#fff; border:1px solid #eadfce; border-radius:999px; padding:6px 16px; text-decoration:none; }
+html body a.wa-link:hover{ border-color:#D9A441; }
