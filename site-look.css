@@ -1,0 +1,84 @@
+/* תלם – עיצוב אחיד לכל הטפסים, כמו באתר השיווקי (נועה 23.10.2026).
+   נטען אחרי ה-style של כל טופס וגובר עליו. רק מראה – בלי שינוי בשדות, בבדיקות או בשליחה.
+   הערכים לפי הקוד של שיחת האתר (את-21). תמיד בהיר (site-look.js מוריד את כללי המצב הכהה). */
+
+html{ color-scheme:light; }
+html body{ background:#FBF7F1 !important; color:#2B2320; }
+
+/* ראש הטופס: הלוגו (מחוץ לאתר), ומתחתיו כותרת הטופס בסגנון כותרות האתר + העיר / בית הספר */
+html body .brand-logo{ max-width:190px; mix-blend-mode:multiply; }
+html body h1:has(> .line){ display:none !important; }
+html body :is(.hero, .wrap) .subtitle{ display:block !important; background:none !important; border-radius:0 !important; padding:0 !important; margin:6px auto 22px !important;
+  text-align:center; font-family:'Heebo','Segoe UI',sans-serif !important; font-weight:900 !important; font-size:clamp(24px,4.6vw,34px) !important;
+  line-height:1.2; letter-spacing:-.3px; color:#5A1216 !important; text-wrap:balance; }
+html body :is(.hero, .wrap) .subtitle > span:not(#subtitleLocation):not(.sub-loc){ color:inherit !important; font:inherit !important; background:none !important; }
+html body :is(.hero, .wrap) .subtitle::after{ content:""; display:block; width:70px; height:3px; border-radius:3px; background:#D9A441; margin:12px auto 0; }
+html body :is(.hero, .wrap) .subtitle :is(#subtitleLocation, .sub-loc){ display:block; margin-top:6px; font-family:'Assistant','Segoe UI',sans-serif; font-size:17px !important;
+  font-weight:700 !important; letter-spacing:0; color:#8A6A3A !important; opacity:1 !important; }
+html body :is(.hero, .wrap) .subtitle :is(#subtitleLocation, .sub-loc):empty, html body :is(.hero, .wrap) .subtitle [hidden]{ display:none !important; }
+html body :is(.hero, .wrap) .subtitle #subtitleLocation::before{ content:none !important; }
+
+/* משפט הפתיחה (ובמרתון – תיאור המרתון) */
+html body .mar-info{ background:#F3E3C3 !important; border:none !important; border-radius:22px 22px 22px 6px !important; box-shadow:none !important; color:#3E0D10 !important; }
+html body .intro{ background:#F3E3C3 !important; border:none !important; border-radius:22px 22px 22px 6px !important; box-shadow:none !important;
+  color:#3E0D10 !important; font-size:16.5px !important; }
+html body .intro strong, html body .intro .lock-line{ color:#5A1216 !important; }
+
+/* כרטיסי החלקים */
+html body :is(fieldset, .sec-card){ background:#fff !important; border:none !important; border-radius:28px 28px 28px 8px !important;
+  box-shadow:0 14px 34px -22px rgba(62,13,16,.45) !important; padding:22px 24px 12px !important; margin-bottom:14px !important; }
+html body :is(fieldset, .sec-card, .intro){ margin-inline:6px !important; }
+html body fieldset > legend{ float:right; width:100%; padding:0 0 12px !important; margin-bottom:14px !important; display:flex; align-items:center; gap:10px; }
+html body fieldset > legend + *{ clear:both; }
+html body :is(fieldset > legend, .sec-card > .sec-h){ border-bottom:2px solid #F3E3C3 !important; font-family:'Heebo',sans-serif !important; font-weight:900 !important;
+  color:#5A1216 !important; font-size:20px !important; }
+html body :is(fieldset > legend, .sec-card > .sec-h)::before{ background:#5A1216 !important; color:#fff !important; width:32px !important; height:32px !important; font-size:15px !important; }
+@media (max-width:520px){
+  html body :is(fieldset, .sec-card){ padding:18px 16px 10px !important; }
+  html body :is(fieldset > legend, .sec-card > .sec-h){ font-size:18px !important; }
+}
+
+/* שדות */
+html body :is(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], select, textarea):not(.field.invalid *){
+  border:1.5px solid #eadfce !important; border-radius:14px !important; background-color:#FBF7F1 !important; }
+html body :is(input, select, textarea):not(.field.invalid *):focus{ border-color:#D9A441 !important; box-shadow:0 0 0 3px rgba(217,164,65,.25) !important; background-color:#fff !important; }
+html body .field.invalid :is(input, select, textarea){ border-radius:14px !important; }
+html body .field label, html body .field > label, html body .field > .field-title{ color:#5A1216 !important; }
+html body input:-webkit-autofill, html body textarea:-webkit-autofill, html body select:-webkit-autofill{ --af-bg:#FBF7F1; }
+
+/* מסגרות פנימיות (מסלולים, סכום, תנאים, חתימה, הסכמות) – באותה שפה */
+html body .track-info{ background:#fff !important; border-top:none !important; border-bottom:none !important; border-inline-end:none !important; border-radius:22px !important;
+  box-shadow:0 14px 34px -22px rgba(62,13,16,.45) !important; }
+html body .wrap > .track-info, html body #tracksBox .track-info, html body form > .track-info{ margin-inline:6px !important; }
+html body fieldset .track-info, html body .sec-card .track-info{ box-shadow:none !important; border:1px solid #F3E3C3 !important; border-inline-start:4px solid var(--track-color, #5A1216) !important; }
+html body :is(.terms-box, .consents-box){ background:#FBF7F1 !important; border:1px solid #eadfce !important; border-radius:18px !important; }
+html body .sig-box{ background:#FBF7F1 !important; border:1.5px dashed #eadfce !important; border-radius:18px !important; }
+html body .sig-box.signed{ border-style:solid !important; border-color:#3F7D4F !important; }
+html body .amount-row:not(.amount-row-recur){ background:#F3E3C3 !important; border:none !important; border-radius:18px !important; }
+html body .amount-row-recur, html body .amount-breakdown{ border-color:#eadfce !important; border-radius:18px !important; }
+html body .ti-box{ background:#FBF7F1 !important; border:1px solid #eadfce !important; border-radius:18px !important; }
+html body .closed-box{ background:#fff !important; border:none !important; border-radius:28px 28px 28px 8px !important; box-shadow:0 14px 34px -22px rgba(62,13,16,.45) !important; }
+
+/* כפתור שליחה */
+html body button#submitBtn{ background:#5A1216 !important; border-radius:999px !important; box-shadow:none !important; font-family:'Heebo',sans-serif !important; font-weight:800 !important; }
+html body button#submitBtn:hover{ background:#3E0D10 !important; }
+html body .disclaimer{ color:#3E0D10 !important; }
+
+/* כותרת תחתונה (מחוץ לאתר) */
+html body footer{ color:#6b5f55 !important; }
+
+/* דף התודה ודף כשל התשלום – כרטיס באותה שפה */
+html body .card{ background:#fff !important; border:none !important; border-radius:28px 28px 28px 8px !important; box-shadow:0 14px 34px -22px rgba(62,13,16,.45) !important; }
+html body .card .top{ background:#fff !important; border-bottom:2px solid #F3E3C3 !important; }
+html body .pg-head .org{ display:none !important; }
+html body .card :is(h1, .ty-h){ font-family:'Heebo',sans-serif !important; font-weight:900 !important; color:#5A1216 !important; }
+html body .sum, html body .meet li{ border-color:#eadfce !important; border-radius:14px !important; }
+html body .meet li{ background:#FBF7F1 !important; }
+html body .sec-t{ color:#5A1216 !important; }
+html body .sec-t::after{ background:#D9A441 !important; }
+html body :is(.dl-btn, .btn-main, a.btn, button.btn){ border-radius:999px; }
+html body .dl-btn{ background:#5A1216 !important; box-shadow:none !important; }
+
+/* בתוך האתר (embed=1): בלי לוגו ובלי שורת הקשר בתחתית – לאתר יש משלו */
+html.embed body .brand, html.embed body .pg-head .brand, html.embed body footer{ display:none !important; }
+html.embed body{ padding-top:0 !important; }
