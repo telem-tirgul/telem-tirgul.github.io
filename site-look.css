@@ -103,3 +103,30 @@ html body a.wa-link{ display:inline-block; text-align:center; line-height:1.6; f
 html body a.wa-link:hover{ text-decoration:underline; }
 html body a.wa-link bdi{ white-space:nowrap; }
 
+
+/* את-37 (נועה 23.10): כרטיס מסלול – כמו באתר (הקוד מלוח האתר) */
+html body .tk{ --tc:#9A1B1A; --tl:#fbeceb; display:flex; flex-direction:column; padding:0 !important; overflow:hidden; border:none !important; border-radius:28px 28px 28px 8px !important;
+  background:#fff !important; box-shadow:0 16px 36px -24px rgba(62,13,16,.55) !important; text-align:right; margin:0 6px 14px !important; }
+html body .tk.c-green{ --tc:#46721F; --tl:#eef4e6; } html body .tk.c-blue{ --tc:#1A5C9E; --tl:#e8f0f9; }
+html body .tk .tk-head{ display:flex; align-items:center; gap:14px; background:var(--tc); color:#fff; padding:16px 18px; }
+html body .tk .tk-num{ flex:none; width:44px; height:44px; border-radius:50%; background:#fff; color:var(--tc); font-family:'Heebo',sans-serif; font-weight:900; font-size:20px; display:flex; align-items:center; justify-content:center; }
+html body .tk .tk-head h3{ margin:0; font-family:'Heebo',sans-serif; font-weight:900; font-size:21px; line-height:1.15; color:#fff; }
+html body .tk .tk-sub{ display:block; margin-top:4px; font-size:15px; font-weight:700; opacity:.92; line-height:1.35; }
+html body .tk .tk-body{ padding:16px 18px 14px; display:flex; flex-direction:column; gap:14px; flex:1; }
+html body .tk .tk-desc{ margin:0; font-size:17px; font-weight:600; line-height:1.7; color:#2B2320; background:var(--tl); border-radius:18px; padding:14px 16px; border-inline-start:4px solid var(--tc); }
+html body .tk .tk-lbl{ display:block; font-family:'Heebo',sans-serif; font-weight:800; font-size:13.5px; color:#6b5f55; margin-bottom:4px; }
+html body .tk .tk-price{ padding:0 2px; }
+html body .tk .tk-one{ display:flex; align-items:baseline; justify-content:flex-start; gap:10px; }
+html body .tk .tk-one .tk-lbl{ margin:0; font-size:15px; }
+html body .tk .tk-one b, html body .tk .tk-row b{ font-family:'Heebo',sans-serif; font-weight:800; font-size:20px; color:#2B2320; }
+html body .tk .tk-row{ display:flex; align-items:baseline; gap:8px; padding:2px 0; }
+html body .tk .tk-row span{ font-size:14px; color:#6b5f55; line-height:1.4; } html body .tk .tk-row br{ display:none; }
+html body .tk .tk-row small{ font-size:14px; } html body .tk .tk-row small::before{ content:' ('; } html body .tk .tk-row small::after{ content:')'; }
+html body .tk .tk-once{ border-top:1px dashed #eadfce; padding:10px 2px 0; margin:0; font-size:13.5px; color:#6b5f55; line-height:1.6; }
+html body .tk .tk-once.tk-more{ border-top:none; padding-top:0; }
+html body .tk .tk-once b{ color:#2B2320; }
+html body details.tk > summary{ list-style:none; cursor:pointer; } html body details.tk > summary::-webkit-details-marker{ display:none; }
+html body details.tk .tk-car{ margin-inline-start:auto; flex:none; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.22) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14.5 6.5L9 12l5.5 5.5' fill='none' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 15px no-repeat; transition:transform .2s; }
+html body details.tk[open] .tk-car{ transform:rotate(-90deg); }
+
+html body select{ padding-inline-end:40px !important; text-overflow:ellipsis; }   /* טקסט ארוך לא עולה על החץ */

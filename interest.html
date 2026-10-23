@@ -726,6 +726,17 @@ function renderTracks(){
     const sd = (iso) => { const p = String(iso || "").split("-"); return p.length === 3 ? Number(p[2]) + "." + Number(p[1]) + "." + p[0].slice(2) : ""; };
     // 5.19.58: תאריך ההרשמה המוקדמת של העיר (מהמערכת); אחרי שעבר - רק המחיר הרגיל
     const cutIso = (cityT && cityT.earlyUntil) || CONFIG.earlyRegistrationCutoff, cut = sd(cutIso), earlyOn = new Date() < new Date(cutIso + "T23:59:59");
+    // את-37 (נועה 23.10): כרטיס מסלול כמו באתר (TELEM_TK ב-site-look.js). כמה מסלולים – כל אחד נפתח בלחיצה; מסלול אחד – פתוח
+    if (window.TELEM_TK) {
+      const J = JUNE || { on: true, cities: {} }, cc = J.cities[city], mat = Number(cityT && cityT.materialsFee || 0);
+      let om, orr; if (!J.on) { om = false; orr = false; } else if (cc && typeof cc === "object") { om = !!cc.materials && mat > 0; orr = !!cc.registration; } else { om = mat > 0; orr = !om; }
+      const fees = cityT ? [{ amount: cityT.registrationFee, label: "דמי שיבוץ והרשמה", offset: orr }].concat(mat ? [{ amount: mat, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: om }] : []) : [];
+      const monthLi = cityT ? intMonthLi(city).replace(/<\/?li>/g, "") : "";
+      const one = tracks.length === 1 || !!pickT, w = document.createElement("div");
+      w.innerHTML = TELEM_TK({ key: t, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: earlyOn, cut: cut,
+        fees: fees, extra: monthLi ? [monthLi] : [], fold: !one });
+      box.appendChild(w.firstChild); return;
+    }
     d.className = "track-info " + (info.color || "");
     d.innerHTML = '<div class="track-info-title"></div><div class="track-info-body"></div>' + (pr ? '<div class="track-info-label">תשלום חודשי:</div><ul class="track-info-list">'
         + (earlyOn ? '<li><b>' + pr.early + ' ₪</b> להרשמה מוקדמת' + (cut ? ' (עד ' + cut + ')' : '') + '</li><li><b>' + pr.regular + ' ₪</b> להרשמה רגילה' + (cut ? ' (מ-' + cut + ' ואילך)' : '') + '</li>' : '<li><b>' + pr.regular + ' ₪</b> לחודש</li>') + '</ul>'

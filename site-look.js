@@ -51,3 +51,21 @@
     if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
 })();
+// את-37 (נועה 23.10): כרטיס מסלול – אותו מבנה ועיצוב כמו באתר (פס בצבע המסלול, מספר, שם קצר + המשך, התיאור, התשלום החודשי, החד-פעמיים).
+// o: {key, color, title, body, early, regular, earlyOn, cut ("8.10.26"), fees:[{amount, label, offset}], offMonth, extra:[html], fold}
+window.TELEM_TK = function(o){
+  var e = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var NUM = { single: 1, "unlimited-single": 2, double: 3 };
+  var SHORT = { single: "מסלול מקצוע אחד", "unlimited-single": "מסלול מקצוע אחד ללא הגבלה", double: "מסלול שני מקצועות" };
+  var SUB = { single: "מתמטיקה או אנגלית", "unlimited-single": "מתמטיקה או אנגלית ללא הגבלה בכמות המפגשים", double: "מתמטיקה וגם אנגלית ללא הגבלה בכמות המפגשים" };
+  var head = '<div class="tk-head"><span class="tk-num">' + (NUM[o.key] || "") + '</span><div><h3>' + e(SHORT[o.key] || o.title) + '</h3>' + (SUB[o.key] ? '<span class="tk-sub">' + e(SUB[o.key]) + '</span>' : "") + '</div>' + (o.fold ? '<span class="tk-car" aria-hidden="true"></span>' : "") + '</div>';
+  var price = o.regular == null ? "" : (o.earlyOn && o.early != null
+    ? '<div class="tk-price"><span class="tk-lbl">תשלום חודשי</span><div class="tk-row"><b>' + e(o.early) + ' ₪</b><span>להרשמה מוקדמת<br><small>עד ' + e(o.cut) + '</small></span></div><div class="tk-row"><b>' + e(o.regular) + ' ₪</b><span>להרשמה רגילה<br><small>מ-' + e(o.cut) + ' ואילך</small></span></div></div>'
+    : '<div class="tk-price tk-one"><span class="tk-lbl">תשלום חודשי</span><b>' + e(o.regular) + ' ₪</b></div>');
+  var fees = (o.fees || []).filter(function(f){ return f && f.amount; }).map(function(f){ return '<b>' + e(f.amount) + ' ₪</b> ' + e(f.label) + (f.offset ? ' (יקוזז מתשלום חודש ' + e(o.offMonth || "יוני") + ')' : ""); });
+  var once = fees.length ? '<p class="tk-once">בנוסף, בעת ההרשמה: ' + fees.join(" ו-") + '</p>' : "";
+  var extra = (o.extra || []).filter(Boolean).map(function(x){ return '<p class="tk-once tk-more">' + x + '</p>'; }).join("");
+  var body = '<div class="tk-body">' + (o.body ? '<p class="tk-desc">' + e(o.body) + '</p>' : "") + price + once + extra + '</div>';
+  var cls = 'tk c-' + e(o.color || "red");
+  return o.fold ? '<details class="' + cls + ' tk-fold"><summary>' + head + '</summary>' + body + '</details>' : '<div class="' + cls + '">' + head + body + '</div>';
+};

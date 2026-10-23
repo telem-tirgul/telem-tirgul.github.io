@@ -642,6 +642,7 @@
         <div class="track-info-prices" id="trackInfoPrices"></div>
         <div class="track-info-note" id="trackInfoNote"></div>
       </div>
+      <div id="trackCard" hidden></div><!-- את-37: כרטיס המסלול כמו באתר -->
     </fieldset>
 
     <fieldset>
@@ -1552,7 +1553,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var cityTable = CONFIG.trackPricing[city];
 
     if (!city || !trackKey || !cityTable || !cityTable[trackKey]){
-      trackInfoBox.className = "track-info empty";
+      trackInfoBox.className = "track-info empty"; document.getElementById("trackCard").hidden = true;
       document.getElementById("trackInfoTitle").textContent = "פרטים על המסלול כולל המחירים יופיעו לאחר בחירת המסלול";
       ["trackInfoBody", "trackInfoPrices", "trackInfoNote"].forEach(function(id){ document.getElementById(id).innerHTML = ""; });
       trackInfoBox.style.display = "block";
@@ -1594,6 +1595,17 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       "<div class=\"track-info-label\">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div>" +
       "<ul class=\"track-info-list\">" + oneTimeItems.join("") + ((getRecurInfo() || {}).juneFree ? "<li>הקיזוז גדול מהתשלום החודשי - לכן אין תשלום על חודש יוני.</li>" : "") + "</ul>";
     trackInfoBox.style.display = "block";
+    // את-37 (נועה 23.10): כרטיס המסלול כמו באתר (TELEM_TK ב-site-look.js); התיבה הישנה מוסתרת
+    if (window.TELEM_TK) {
+      var fees = [{ amount: cityTable.registrationFee, label: "דמי שיבוץ והרשמה", offset: !!jo.registration }];
+      if (cityTable.materialsFee) fees.push({ amount: cityTable.materialsFee, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: !!jo.materials });
+      var extra = []; if (recurInfo) { var fm = String(firstMonthText(city) || "").replace(/<\/?li>/g, ""); if (fm) extra.push(fm); }
+      if ((getRecurInfo() || {}).juneFree) extra.push("הקיזוז גדול מהתשלום החודשי - לכן אין תשלום על חודש יוני.");
+      var tc = document.getElementById("trackCard");
+      tc.innerHTML = TELEM_TK({ key: trackKey, color: info.color, title: info.title, body: info.body, early: prices.early, regular: prices.regular,
+        earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra });
+      tc.hidden = false; trackInfoBox.style.display = "none";
+    }
   }
 
   cityEl.addEventListener("change", function(){
