@@ -58,7 +58,7 @@ window.TELEM_TK = function(o){
   var NUM = { single: 1, "unlimited-single": 2, double: 3 };
   var SHORT = { single: "מסלול מקצוע אחד", "unlimited-single": "מסלול מקצוע אחד ללא הגבלה", double: "מסלול שני מקצועות" };
   var SUB = { single: "מתמטיקה או אנגלית", "unlimited-single": "מתמטיקה או אנגלית ללא הגבלה בכמות המפגשים", double: "מתמטיקה וגם אנגלית ללא הגבלה בכמות המפגשים" };
-  var head = '<div class="tk-head"><span class="tk-num">' + (NUM[o.key] || "") + '</span><div><h3>' + e(SHORT[o.key] || o.title) + '</h3>' + (SUB[o.key] ? '<span class="tk-sub">' + e(SUB[o.key]) + '</span>' : "") + '</div>' + (o.fold ? '<span class="tk-car" aria-hidden="true"></span>' : "") + '</div>';
+  var head = '<div class="tk-head"><div><h3>' + e(SHORT[o.key] || o.title) + '</h3>' + (SUB[o.key] ? '<span class="tk-sub">' + e(SUB[o.key]) + '</span>' : "") + '</div>' + (o.fold ? '<span class="tk-car" aria-hidden="true"></span>' : "") + '</div>';
   var price = o.regular == null ? "" : (o.earlyOn && o.early != null
     ? '<div class="tk-price"><span class="tk-lbl">תשלום חודשי</span><div class="tk-row"><b>' + e(o.early) + ' ₪</b><span>להרשמה מוקדמת<br><small>עד ' + e(o.cut) + '</small></span></div><div class="tk-row"><b>' + e(o.regular) + ' ₪</b><span>להרשמה רגילה<br><small>מ-' + e(o.cut) + ' ואילך</small></span></div></div>'
     : '<div class="tk-price tk-one"><span class="tk-lbl">תשלום חודשי</span><b>' + e(o.regular) + ' ₪</b></div>');
