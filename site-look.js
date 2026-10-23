@@ -45,8 +45,8 @@
     var box = document.createElement("div"); box.className = "wa-contact";
     var a = document.createElement("a"); a.className = "wa-link"; a.target = "_blank"; a.rel = "noopener"; a.href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(t);
     a.appendChild(document.createTextNode("💬 וואטסאפ: ")); var n = document.createElement("bdi"); n.textContent = PHONE; a.appendChild(n);
-    var m = document.createElement("a"); m.className = "wa-link wa-mail"; m.href = "mailto:" + MAIL; m.appendChild(document.createTextNode("✉️ אימייל: ")); var mb = document.createElement("bdi"); mb.textContent = MAIL; m.appendChild(mb);   // באותה בועה, כמו הוואטסאפ
-    var h = document.createElement("div"); h.className = "wa-h"; h.textContent = "שאלות? כתבו לנו";   // נועה: כותרת, ומתחתיה וואטסאפ ואימייל זה מתחת לזה
+    var m = document.createElement("a"); m.className = "wa-link wa-mail"; m.target = "_blank"; m.rel = "noopener"; m.href = "mailto:" + MAIL; m.appendChild(document.createTextNode("✉️ אימייל: ")); var mb = document.createElement("bdi"); mb.textContent = MAIL; m.appendChild(mb);   // באותה בועה, כמו הוואטסאפ
+    var h = document.createElement("div"); h.className = "wa-h"; h.textContent = "שאלות? כתבו לנו";   // נועה: הכול במסגרת אחת – כותרת, ומתחתיה וואטסאפ ואימייל
     box.appendChild(h); box.appendChild(a); box.appendChild(m);
     if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
