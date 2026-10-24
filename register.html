@@ -1644,7 +1644,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     ["registrationFee", "materialsFee"].forEach(function(k){ if (x[k] != null) x[k] = num(x[k]); });
     ["activityStartDate", "earlyUntil"].forEach(function(k){ if (x[k] != null && !/^\d{4}-\d{2}-\d{2}$/.test(String(x[k]))) delete x[k]; });
     return x; }
-  callSupabase("reg_prices_public", null).then(function(all){
+  (window.TELEM_HOLD || function(p){ return p; })(callSupabase("reg_prices_public", null)).then(function(all){
     if (!all || typeof all !== "object") return;
     Object.keys(all).forEach(function(c){
       var x = all[c] && typeof all[c] === "object" ? cleanPrices(all[c]) : null;
@@ -1655,7 +1655,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     REG_OPEN = all; regClosedCheck();
   }).catch(function(){});
   // 5.19.57: חוקי חיוב לטופס (שיחת התשלומים: billing_rules_public). אין פונקציה / שגיאה = אין חוק (חודש מלא).
-  callSupabase("billing_rules_public", null).then(function(x){
+  (window.TELEM_HOLD || function(p){ return p; })(callSupabase("billing_rules_public", null)).then(function(x){
     var list = x && Array.isArray(x.late_join) ? x.late_join : [];
     JUNE = { on: !(x && x.june_offset === false), cities: (x && x.city_offsets && typeof x.city_offsets === "object") ? x.city_offsets : {}, known: !!(x && "june_offset" in x) };
     LATE_RULES = list.map(function(r){ return { city: typeof r.city === "string" ? r.city : "", from_day: Math.round(Number(r.from_day)), percent: Number(r.percent), apply: r.apply === "first" ? "first" : "last" }; })

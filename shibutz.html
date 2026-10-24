@@ -1193,8 +1193,8 @@
     try {
       var h = { "Content-Type": "application/json", "apikey": SUPABASE.key };
       if (SUPABASE.key.indexOf("eyJ") === 0) h["Authorization"] = "Bearer " + SUPABASE.key;
-      fetch(SUPABASE.url + "/rest/v1/rpc/scheduling_status", { method: "POST", headers: h, body: "{}" })
-        .then(function(r){ return r.ok ? r.json() : null; })
+      (window.TELEM_HOLD || function(p){ return p; })(fetch(SUPABASE.url + "/rest/v1/rpc/scheduling_status", { method: "POST", headers: h, body: "{}" })
+        .then(function(r){ return r.ok ? r.json() : null; }))
         .then(function(st){
           if (!st || st.open !== false) return;
           var box = document.createElement("div"); box.className = "closed-box";

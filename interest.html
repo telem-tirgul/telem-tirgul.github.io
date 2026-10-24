@@ -748,7 +748,7 @@ function renderTracks(){
 }
 renderTracks();
 if ($("f-track")) $("f-track").addEventListener("change", renderTracks);   // את-25
-if (P_MAR) callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){});
+if (P_MAR) (window.TELEM_HOLD || function(p){ return p; })(callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){}));
 // 5.19.58: כמו בטופס ההרשמה - שכר הלימוד של חודש ההרשמה לפי חוק "הצטרפות מאוחרת" ממסך חוקי החיוב (billing_rules_public)
 var LATE_RULES = [], JUNE = { on: true, cities: {} };
 // 5.19.58: מה מקוזז ביוני - לפי מסך חוקי החיוב (june_offset + city_offsets); ברירת מחדל: חומרי תרגול, ואם אין - דמי הרשמה
@@ -763,7 +763,7 @@ function intMonthLi(city){
   if (!m || m.apply !== "first") return "<li>שכר הלימוד עבור חודש ההרשמה - " + full + ".</li>";
   return "<li>שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-" + (m.from_day - 1) + " לחודש - " + full + ". הרשמה מה-" + m.from_day + " לחודש ואילך - " + m.percent + "% מהתשלום החודשי.</li>";
 }
-callSupabase("billing_rules_public", null).then(function(x){
+(window.TELEM_HOLD || function(p){ return p; })(callSupabase("billing_rules_public", null)).then(function(x){
   var list = x && Array.isArray(x.late_join) ? x.late_join : [];
   JUNE = { on: !(x && x.june_offset === false), cities: (x && x.city_offsets && typeof x.city_offsets === "object") ? x.city_offsets : {} };
   LATE_RULES = list.map(function(r){ return { city: typeof r.city === "string" ? r.city : "", from_day: Math.round(Number(r.from_day)), percent: Number(r.percent), apply: r.apply === "first" ? "first" : "last" }; })
@@ -771,7 +771,7 @@ callSupabase("billing_rules_public", null).then(function(x){
   renderTracks();
 }).catch(function(){});
 // מחירים מהמערכת (נערכים במערכת הניהול). אם אין חיבור - נשארים המחירים שכתובים למעלה.
-callSupabase("reg_prices_public", null).then(function(all){
+(window.TELEM_HOLD || function(p){ return p; })(callSupabase("reg_prices_public", null)).then(function(all){
   if (!all || typeof all !== "object") return;
   Object.keys(all).forEach(function(c){ const x = all[c]; if (!x || !x.single || x.single.early == null) return; CONFIG.trackPricing[c] = Object.assign({}, CONFIG.trackPricing[c] || {}, x); });
   INT_OPEN = all; renderTracks(); intClosedCheck();

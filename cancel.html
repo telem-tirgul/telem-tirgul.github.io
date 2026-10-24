@@ -930,7 +930,7 @@ function fill(d){
 }
 if (!TOKEN && PREVIEW) fill({ status: "נשלח", city: "ראש העין", school: "בארי", track: "single", subject: "מתמטיקה", student_first: "ישראל", student_last: "ישראלי", grade: "ז'", parent_first: "הורה", parent_last: "ישראלי" });
 else if (TOKEN.length < 40) showBad("הקישור לא תקין. לפרטים: 052-9067101");
-else rpcRaw("cancellation_public", { p_token: TOKEN }).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא הצלחנו לטעון את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101"));
+else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("cancellation_public", { p_token: TOKEN })).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא הצלחנו לטעון את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101"));
 $("canForm").addEventListener("submit", function(e){
   e.preventDefault();
   let ok = true;

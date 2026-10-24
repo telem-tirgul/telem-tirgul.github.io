@@ -902,7 +902,7 @@ const SAMPLE = { status: "opened", description: "הרשמה לתרגולים + �
   needs_student: true, fields: { parent_name: { value: "מיכל לוי", required: true }, parent_email: { value: "", required: true }, subject: { value: "מתמטיקה" } } };
 if (PREVIEW && !CODE) fill(SAMPLE);
 else if (CODE.length < 32) showBad("הקישור לא תקין. לפרטים: 052-9067101");
-else rpcRaw("pay_link_public", { p_code: CODE }).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא הצלחנו לטעון את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101"));
+else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("pay_link_public", { p_code: CODE })).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא הצלחנו לטעון את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101"));
 
 function recurTxt(d){ return d.monthly_count + " תשלומים חודשיים" + (d.first_monthly_date ? ", החל מ-" + dateHe(d.first_monthly_date) : "") + " ועד חודש יוני כולל"; }
 // 5.19.58: קישור "מהיר" - רק סיכום + כפתור לתשלום (ישר ל-icredit-pay; השרת מסמן את הקישור בעצמו)

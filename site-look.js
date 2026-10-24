@@ -1,5 +1,19 @@
 // תלם – עיצוב אחיד לכל הטפסים (נועה 23.10.2026): הטפסים תמיד בהירים, כמו האתר.
 // כללי "רק במצב בהיר" חלים תמיד, וכללי "מצב כהה" יורדים. רץ מיד אחרי site-look.css (בסוף ה-head).
+// נועה 24.10: לא להראות טקסטים / מחירים זמניים לפני שהנתונים מהמערכת מגיעים – הדף מוסתר (עם "טוען…") עד שהנוסחים (TX.ready)
+// וכל מה שהטופס ביקש לחכות לו (window.TELEM_HOLD(promise)) הגיעו. ליתר ביטחון – אחרי 8 שניות מוצג בכל מקרה. + חיבור מוקדם לשרת.
+(function(){
+  var de = document.documentElement, holds = [], shown = false;
+  de.classList.add("tl-wait");
+  try { var l = document.createElement("link"); l.rel = "preconnect"; l.href = "https://oulivucqbpmbavbavfvy.supabase.co"; l.crossOrigin = ""; document.head.appendChild(l); } catch (e) {}
+  var show = function(){ if (shown) return; shown = true; de.classList.remove("tl-wait"); try { window.dispatchEvent(new Event("resize")); } catch (e) {} };
+  var safe = function(p){ return Promise.resolve(p).then(function(){}, function(){}); };
+  window.TELEM_HOLD = function(p){ holds.push(safe(p)); return p; };
+  setTimeout(show, 8000);
+  document.addEventListener("DOMContentLoaded", function(){ setTimeout(function(){
+    Promise.all([safe(window.TX && window.TX.ready)].concat(holds)).then(function(){ requestAnimationFrame(show); });
+  }, 0); });
+})();
 (function(){
   var de = document.documentElement; de.setAttribute("data-theme", "light");
   if (/[?&]embed=1(&|$)/.test(location.search)) de.classList.add("embed");
