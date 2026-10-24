@@ -553,6 +553,16 @@
     window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
   })();
 </script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<!-- נועה 24.10: לא להראות טקסטים זמניים לפני שנתוני המרתון נטענים – מסתירים עד שהנתונים מגיעים, וחיבור מוקדם לשרת -->
+<link rel="preconnect" href="https://oulivucqbpmbavbavfvy.supabase.co" crossorigin>
+<script>try { if (/[?&]m=/.test(location.search)) document.documentElement.classList.add("mar-loading"); } catch (e) {}</script>
+<style>
+  html.mar-loading .wrap > :not(header):not(.mar-loader), html.mar-loading .subtitle{ visibility:hidden; }
+  .mar-loader{ display:none; text-align:center; color:var(--ink-soft, #7a6f66); font-size:15px; padding:28px 0; }
+  html.mar-loading .mar-loader{ display:block; }
+  .mar-loader i{ display:inline-block; width:18px; height:18px; border:3px solid currentColor; border-top-color:transparent; border-radius:50%; vertical-align:-4px; margin-inline-end:8px; animation:marspin .8s linear infinite; }
+  @keyframes marspin{ to{ transform:rotate(360deg); } }
+</style>
 </head>
 <body>
 
@@ -566,6 +576,7 @@
   <div class="subtitle"><span data-t="t003">הרשמה ותשלום למרתון מתמטיקה</span><span id="subtitleLocation"></span></div>
   </div></header>
 
+  <div class="mar-loader" aria-live="polite"><i aria-hidden="true"></i>טוען את פרטי המרתון…</div>
   <div class="intro" hidden><div id="marIntro"></div></div>
 
   <div class="top-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
@@ -975,6 +986,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       });
     });
   }
+  function marShow(){ document.documentElement.classList.remove("mar-loading"); }
+  setTimeout(marShow, 10000);   // ליתר ביטחון – אם משהו נתקע, מראים את הטופס בכל זאת
   function loadMarathon(){
     var s = CONFIG.supabase, headers = { "Content-Type": "application/json", "apikey": s.anonKey };
     if (s.anonKey.indexOf("eyJ") === 0) headers["Authorization"] = "Bearer " + s.anonKey;
@@ -982,6 +995,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     return Promise.all([fetch(s.url + "/rest/v1/rpc/marathon_public", { method: "POST", headers: headers, body: JSON.stringify({ p_code: MARATHON_CODE }) })
       .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }), window.TX && window.TX.ready]).then(function(a){ var m = a[0];
         MARATHON = m || null;
+        setTimeout(marShow, 0);
         if (!MARATHON) { marNotice(ttx("mar.closed")); document.getElementById("groupOptions").innerHTML = ""; submitBtn.disabled = true; MAR_BLOCKED = true;
           form.hidden = true; return; }   // תלם 5.19.38: סגור - רק ההודעה, בלי שום תוכן
         lockSchool(MARATHON.school || "");
