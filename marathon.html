@@ -1018,7 +1018,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         var hkSel = document.getElementById("f-hakbatsa");
         var HAK_DEFAULT = ["עוד אין הקבצות", "הקבצה א'", "הקבצה ב'", "הקבצה ג'", '3 יח"ל', '4 יח"ל', '5 יח"ל'];   // נועה 25.10
         var hkShow = function(list){
-          list = list.filter(function(o){ return String(o).trim() !== "אחר"; }).concat(["אחר"]);   // נועה 23.10: תמיד גם "אחר" (בלי שדה טקסט)
+          list = list.filter(function(o){ return String(o).trim() !== "אחר"; });
+          if (!list.some(function(o){ return /^עוד אין/.test(String(o).trim()); })) list = list.concat(["אחר"]);   // נועה 23.10: "אחר" (בלי שדה טקסט); 25.10 – לא כשיש "עוד אין הקבצות"
           list.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
           document.getElementById("field-hakbatsa").hidden = false; hkSel.required = true;
           hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); });

@@ -798,7 +798,7 @@ const HAK_DEFAULT = ["עוד אין הקבצות", "הקבצה א'", "הקבצה
 let hakReq = 0;
 function hakOther(id){ const w = $(id + "-other"); if (w) w.hidden = $(id).value !== "אחר"; }
 function hakFill(list){ ["f-math", "f-eng"].forEach(id => { const el = $(id), cur = el.value; el.innerHTML = '<option value="">בחרו</option>';
-  list.concat(["אחר"]).forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; el.appendChild(o); });
+  list.concat(list.some(t => /^עוד אין/.test(String(t).trim())) ? [] : ["אחר"]).forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; el.appendChild(o); });
   if ([...el.options].some(o => o.value === cur)) el.value = cur; hakOther(id); }); }
 function hakLoad(){ const c = $("f-city").value, sc = $("f-school").value, n = ++hakReq;
   if (!c || !sc) { hakFill(HAK_DEFAULT); return; }
