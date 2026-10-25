@@ -1459,6 +1459,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
     else if (/already registered/.test(m)) {   // נועה 25.10: כבר רשום/ה ושילם/ה – לדף התודה, שם כתוב בפירוש שאין צורך להירשם שוב
       ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at"].forEach(function(k){ try { sessionStorage.removeItem(k); } catch (e) {} });
+      try { var nmA = ((document.getElementById("f-student-first").value || "") + " " + (document.getElementById("f-student-last").value || "")).trim();
+            sessionStorage.setItem("reg_already", JSON.stringify({ name: nmA, event: (MARATHON && MARATHON.name) || "מרתון מתמטיקה" })); } catch (e) {}
       goTop(tyUrl("already=1")); return; }
     else if (m) console.warn("submit error:", m);   // נועה 25.10: בלי קוד שגיאה בטופס
     topError.style.display = "block";

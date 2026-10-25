@@ -123,7 +123,7 @@
 <script>
   // אבטחה 5.19.53: הטופס החתום ופרטי ההרשמה נשמרים בדפדפן (בלשונית הזו) רק 30 דקות מרגע השליחה
   (function(){
-    var KEYS = ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at"], TTL = 30 * 60 * 1000;
+    var KEYS = ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at", "reg_already"], TTL = 30 * 60 * 1000;
     function wipe(){ KEYS.forEach(function(k){ try { sessionStorage.removeItem(k); } catch (e) {} }); }
     try {
       var t = Number(sessionStorage.getItem("reg_saved_at"));
@@ -183,19 +183,21 @@
   // 5.19.100: אחרי שהנוסחים מהמערכת הגיעו (TX.ready; בכניסה הראשונה – עד 2 שניות)
   var tyMain = function(){
     var $ = function(id){ return document.getElementById(id); };
-    // נועה 25.10: נשלח טופס מרתון לתלמיד/ה שכבר רשום/ה ושילם/ה – כותבים בפירוש שאין צורך להירשם שוב
-    if (/[?&]already=1/.test(location.search) && !TY_EDIT) {
-      $("title").textContent = "התלמיד/ה כבר רשום/ה למרתון";
-      var chA = $("stChip"); chA.className = "st-chip ok"; chA.textContent = "✓ רשום/ה";
-      var ld = $("lead"); ld.textContent = "ההרשמה והתשלום למרתון הזה כבר התקבלו אצלנו – אין צורך להירשם שוב."; ld.appendChild(document.createElement("br")); ld.appendChild(document.createTextNode("נתראה במרתון!")); ld.hidden = false;
-      document.title = "כבר רשומים - תלם"; return;
-    }
     var pending = /[?&]pending=1/.test(location.search), phone = /[?&]phone=1/.test(location.search), preview = /[?&]preview=1/.test(location.search), paidRef = /[?&]ref=/.test(location.search);
     if (TY_EDIT) { preview = false; pending = phone = TYV === "phone"; paidRef = TYV === "paid"; }
     var box = $("sum");
     function row(label, value, cls){ var d = document.createElement("div"); if (cls) d.className = cls; var a = document.createElement("span"); a.textContent = label; var b = document.createElement("b"); b.textContent = value; d.appendChild(a); d.appendChild(b); box.appendChild(d); }
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
     if (TY_EDIT) x = TY_SAMPLE;
+    // נועה 25.10: נשלח טופס מרתון לתלמיד/ה שכבר רשום/ה ושילם/ה – כותבים בפירוש שאין צורך להירשם שוב, עם שם התלמיד/ה והמרתון
+    if (/[?&]already=1/.test(location.search) && !TY_EDIT) {
+      var al = null; try { al = JSON.parse(sessionStorage.getItem("reg_already") || "null"); } catch (e) {}
+      $("title").textContent = "התלמיד/ה כבר רשום/ה למרתון";
+      var chA = $("stChip"); chA.className = "st-chip ok"; chA.textContent = "✓ רשום/ה";
+      var ld = $("lead"); ld.textContent = "ההרשמה והתשלום למרתון הזה כבר התקבלו אצלנו – אין צורך להירשם שוב."; ld.appendChild(document.createElement("br")); ld.appendChild(document.createTextNode("נתראה במרתון!")); ld.hidden = false;
+      if (al && (al.name || al.event)) { if (al.name) row(tyT("ty.row_name"), al.name); if (al.event) row(tyT("ty.row_mar"), al.event); $("sumT").textContent = tyT("ty.sum_t"); $("sumT").hidden = false; box.hidden = false; }
+      document.title = "כבר רשומים - תלם"; return;
+    }
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
     if (phone && pending && !preview) {
       $("title").textContent = tyT("ty.title_phone");
