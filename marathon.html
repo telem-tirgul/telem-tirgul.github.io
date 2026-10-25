@@ -1457,7 +1457,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
     else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
-    else if (m) topError.textContent += " (קוד: " + m.slice(0, 60) + ")";
+    else if (/already registered/.test(m)) {   // נועה 25.10: כבר רשום/ה ושילם/ה – לדף התודה, שם כתוב בפירוש שאין צורך להירשם שוב
+      ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at"].forEach(function(k){ try { sessionStorage.removeItem(k); } catch (e) {} });
+      goTop(tyUrl("already=1")); return; }
+    else if (m) console.warn("submit error:", m);   // נועה 25.10: בלי קוד שגיאה בטופס
     topError.style.display = "block";
     topError.scrollIntoView({ behavior: "smooth", block: "center" });
     submitBtn.disabled = false;
