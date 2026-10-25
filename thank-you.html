@@ -187,7 +187,7 @@
     if (/[?&]already=1/.test(location.search) && !TY_EDIT) {
       $("title").textContent = "התלמיד/ה כבר רשום/ה למרתון";
       var chA = $("stChip"); chA.className = "st-chip ok"; chA.textContent = "✓ רשום/ה";
-      var ld = $("lead"); ld.textContent = "ההרשמה והתשלום למרתון הזה כבר התקבלו אצלנו – אין צורך להירשם שוב. נתראה במרתון!"; ld.hidden = false;
+      var ld = $("lead"); ld.textContent = "ההרשמה והתשלום למרתון הזה כבר התקבלו אצלנו – אין צורך להירשם שוב."; ld.appendChild(document.createElement("br")); ld.appendChild(document.createTextNode("נתראה במרתון!")); ld.hidden = false;
       document.title = "כבר רשומים - תלם"; return;
     }
     var pending = /[?&]pending=1/.test(location.search), phone = /[?&]phone=1/.test(location.search), preview = /[?&]preview=1/.test(location.search), paidRef = /[?&]ref=/.test(location.search);
