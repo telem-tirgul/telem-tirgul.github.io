@@ -505,7 +505,7 @@
     window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
   })();
 </script>
-<link rel="stylesheet" href="site-look.css?v=2"><script src="site-look.js?v=2"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css?v=3"><script src="site-look.js?v=3"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 <div class="wrap">
@@ -536,8 +536,8 @@
         <div></div>
       </div>
       <div class="row">
-        <div class="field"><label for="f-math" data-t="t016">רמה במתמטיקה</label><select id="f-math"><option value="" data-t="t017">בחרו</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option data-t="t018">לא מחולק להקבצות</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select><input id="f-math-other" type="text" maxlength="40" placeholder="איזו הקבצה?" aria-label="הקבצה במתמטיקה - אחר" hidden style="margin-top:6px"></div>
-        <div class="field"><label for="f-eng" data-t="t019">רמה באנגלית</label><select id="f-eng"><option value="" data-t="t020">בחרו</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option data-t="t021">לא מחולק להקבצות</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select><input id="f-eng-other" type="text" maxlength="40" placeholder="איזו הקבצה?" aria-label="הקבצה באנגלית - אחר" hidden style="margin-top:6px"></div>
+        <div class="field"><label for="f-math" data-t="t016">רמה במתמטיקה</label><select id="f-math"><option value="" data-t="t017">בחרו</option><option data-t="t018">עוד אין הקבצות</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select><input id="f-math-other" type="text" maxlength="40" placeholder="איזו הקבצה?" aria-label="הקבצה במתמטיקה - אחר" hidden style="margin-top:6px"></div>
+        <div class="field"><label for="f-eng" data-t="t019">רמה באנגלית</label><select id="f-eng"><option value="" data-t="t020">בחרו</option><option data-t="t021">עוד אין הקבצות</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select><input id="f-eng-other" type="text" maxlength="40" placeholder="איזו הקבצה?" aria-label="הקבצה באנגלית - אחר" hidden style="margin-top:6px"></div>
       </div>
     </fieldset>
     <fieldset>
@@ -794,7 +794,7 @@ function intClosedCheck(){
 $("f-city").addEventListener("change", intClosedCheck);
 const digits = (v) => String(v || "").replace(/\D/g, "");
 // תלם 5.19.70: ההקבצות לפי בית הספר (מסך "בתי ספר" במערכת, קובץ 78). אין רשימה לבית הספר - ברירת המחדל. תמיד גם "אחר".
-const HAK_DEFAULT = ["הקבצה א'", "הקבצה ב'", "הקבצה ג'", "לא מחולק להקבצות", '3 יח"ל', '4 יח"ל', '5 יח"ל'];
+const HAK_DEFAULT = ["עוד אין הקבצות", "הקבצה א'", "הקבצה ב'", "הקבצה ג'", '3 יח"ל', '4 יח"ל', '5 יח"ל'];   // נועה 25.10
 let hakReq = 0;
 function hakOther(id){ const w = $(id + "-other"); if (w) w.hidden = $(id).value !== "אחר"; }
 function hakFill(list){ ["f-math", "f-eng"].forEach(id => { const el = $(id), cur = el.value; el.innerHTML = '<option value="">בחרו</option>';
@@ -837,7 +837,7 @@ $("intForm").addEventListener("submit", function(e){
   const city = $("f-city").value, ph = digits($("f-pphone").value), sph = digits($("f-sphone").value), em = $("f-email").value.trim();
   bad("field-city", !city); bad("field-sfirst", !$("f-sfirst").value.trim()); bad("field-pfirst", !$("f-pfirst").value.trim());
   bad("field-pphone", !/^0\d{8,9}$/.test(ph)); bad("field-sphone", !!sph && !/^0\d{8,9}$/.test(sph)); bad("field-email", !!em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em));
-  $("topError").style.display = ok ? "none" : "block"; if (!ok) return;
+  $("topError").style.display = ok ? "none" : "block"; if (!ok) { if (window.TELEM_BAD) TELEM_BAD($("submitBtn")); return; } if (window.TELEM_OK) TELEM_OK();
   const pickT = !IS_MAR && $("f-track") ? $("f-track").value : "";   // את-25: המסלול שנבחר בטופס (במקום tracks מהקישור)
   const courses = (pickT ? [pickT] : P_TRACKS.length ? P_TRACKS : []).map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title);
   const payload = { website: $("f-website").value, city: city === "אחר" ? "" : city, school: $("f-school").value || null, courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),

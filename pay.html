@@ -487,7 +487,7 @@
   select{ padding-inline-end:36px !important; }
   .req, label .req, .sig-lbl .req{ color:#B3241F !important; font-weight:800; }
 </style>
-<link rel="stylesheet" href="site-look.css?v=2"><script src="site-look.js?v=2"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css?v=3"><script src="site-look.js?v=3"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 <div class="wrap">
@@ -957,8 +957,9 @@ $("payForm").addEventListener("submit", function(e){
   $("termsError").textContent = $("f-terms").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-terms").checked) ok = false;
   $("consentError").textContent = $("f-consent").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-consent").checked) ok = false;
   const signature = signatureImage(); if (!signature) { $("sigError").textContent = "יש לחתום כדי להמשיך."; ok = false; }
-  if (!ok) { topError.textContent = "יש להשלים את השדות המסומנים."; topError.style.display = "block"; topError.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-  topError.style.display = "none"; submitBtn.disabled = true; submitBtn.textContent = "מכין את הטופס החתום…";
+  if (!ok) { topError.textContent = "יש להשלים את השדות המסומנים."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); else topError.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+  if (window.TELEM_OK) TELEM_OK();
+  topError.style.display = "none"; submitBtn.disabled = true; submitBtn.textContent = "ממשיכים לתשלום…";
   const signer = (($("f-parent_name") || {}).value || "").trim();
   makeSignedPdf("טופס תשלום" + (LINK.description ? " - " + LINK.description : ""), signer).then(function(pdf){
     if (PREVIEW) { if (pdf) { const a = document.createElement("a"); a.href = pdf; a.download = "טופס-תשלום-תצוגה-מקדימה.pdf"; document.body.appendChild(a); a.click(); }

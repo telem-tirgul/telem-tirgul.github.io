@@ -83,3 +83,28 @@ window.TELEM_TK = function(o){
   var cls = 'tk c-' + e(o.color || "red");
   return o.fold ? '<details class="' + cls + ' tk-fold"><summary>' + head + '</summary>' + body + '</details>' : '<div class="' + cls + '">' + head + body + '</div>';
 };
+
+// נועה 25.10: שדות חסרים / לא תקינים – קופצים לשדה הראשון המסומן, ושורה אדומה ליד כפתור השליחה
+window.TELEM_BAD = function(btn){
+  var vis = function(el){ return el && el.offsetParent !== null && getComputedStyle(el).display !== "none" && getComputedStyle(el).visibility !== "hidden"; };
+  var all = Array.prototype.slice.call(document.querySelectorAll(".invalid, .error-msg"));
+  var first = null;
+  for (var i = 0; i < all.length && !first; i++) {
+    var el = all[i];
+    if (el.id === "topError" || el.id === "tlFixNote") continue;
+    if (el.classList.contains("invalid") ? vis(el) : (el.textContent.trim() && vis(el))) first = el.classList.contains("invalid") ? el : (el.closest(".field, .consent, .sig-wrap, label") || el);
+  }
+  if (first) {
+    first.scrollIntoView({ behavior: "smooth", block: "center" });
+    var inp = first.matches("input, select, textarea") ? first : first.querySelector("input:not([type=hidden]), select, textarea");
+    if (inp && inp.type !== "checkbox" && inp.type !== "radio") setTimeout(function(){ try { inp.focus({ preventScroll: true }); } catch (e) {} }, 450);
+  }
+  if (btn && btn.parentNode) {
+    var n = document.getElementById("tlFixNote");
+    if (!n) { n = document.createElement("div"); n.id = "tlFixNote"; n.className = "tl-fix-note"; n.setAttribute("role", "alert"); }
+    if (n.nextSibling !== btn) btn.parentNode.insertBefore(n, btn);
+    n.textContent = "יש שדות שצריך למלא או לתקן – הם מסומנים באדום בטופס.";
+    n.hidden = false;
+  }
+};
+window.TELEM_OK = function(){ var n = document.getElementById("tlFixNote"); if (n) n.hidden = true; };
