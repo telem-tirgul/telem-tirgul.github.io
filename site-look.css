@@ -13,7 +13,7 @@ html body :is(.hero, .wrap) .subtitle{ display:block !important; background:none
   line-height:1.2; letter-spacing:-.3px; color:#5A1216 !important; text-wrap:balance; }
 html body :is(.hero, .wrap) .subtitle > span:not(#subtitleLocation):not(.sub-loc){ color:inherit !important; font:inherit !important; background:none !important; }
 html body :is(.hero, .wrap) .subtitle::after{ content:""; display:block; width:70px; height:3px; border-radius:3px; background:#D9A441; margin:12px auto 0; }
-html body :is(.hero, .wrap) .subtitle :is(#subtitleLocation, .sub-loc){ display:block; margin-top:6px; font-family:'Assistant','Segoe UI',sans-serif; font-size:17px !important;
+html body :is(.hero, .wrap) .subtitle :is(#subtitleLocation, .sub-loc){ display:block; margin-top:6px; font-family:'Assistant','Segoe UI',sans-serif; font-size:clamp(19px,3.2vw,23px) !important;   /* נועה 25.10: טיפה יותר גדול מכותרות המסגרות */
   font-weight:700 !important; letter-spacing:0; color:#8A6A3A !important; opacity:1 !important; }
 html body :is(.hero, .wrap) .subtitle :is(#subtitleLocation, .sub-loc):empty, html body :is(.hero, .wrap) .subtitle [hidden]{ display:none !important; }
 html body :is(.hero, .wrap) .subtitle #subtitleLocation::before{ content:none !important; }
