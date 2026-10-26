@@ -1939,6 +1939,12 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
     else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
+    else if (/already registered/.test(m)) {   // נועה 26.10: כבר רשום/ה לאותו תרגול – לדף התודה "אין צורך להירשם שוב"
+      ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at"].forEach(function(k){ try { sessionStorage.removeItem(k); } catch (e) {} });
+      try { var nmA = ((document.getElementById("f-student-first").value || "") + " " + ((document.getElementById("f-student-last") || {}).value || "")).trim(), sj = document.getElementById("f-subject");
+            sessionStorage.setItem("reg_already", JSON.stringify({ kind: "register", name: nmA, event: sj && sj.selectedIndex > 0 ? sj.options[sj.selectedIndex].textContent.trim() : "התרגולים השוטפים" })); } catch (e) {}
+      var u = new URL("thank-you.html?already=1", location.href); try { var bk = sessionStorage.getItem("telem_back"); if (bk) u.searchParams.set("back", bk); } catch (e) {}
+      location.href = u.href; return; }
     else if (m) console.warn("submit error:", m);   // נועה 25.10: בלי קוד שגיאה בטופס
     topError.style.display = "block";
     topError.scrollIntoView({ behavior: "smooth", block: "center" });
