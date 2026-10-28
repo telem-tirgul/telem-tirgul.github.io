@@ -1053,8 +1053,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         var HAK_DEFAULT = ["עוד אין הקבצות", "הקבצה א'", "הקבצה ב'", "הקבצה ג'", '3 יח"ל', '4 יח"ל', '5 יח"ל'];   // נועה 25.10
         var hkShow = function(list, fixed){
           list = list.filter(function(o){ return String(o).trim() !== "אחר"; });
-          // נועה 28.10: במרתון עם רשימת הקבצות משלו – השרת מקבל רק ערך מהרשימה, אז בלי "אחר" (אחרת "לא הצלחנו לשמור")
-          if (!fixed && !list.some(function(o){ return /^עוד אין/.test(String(o).trim()); })) list = list.concat(["אחר"]);   // נועה 23.10: "אחר" (בלי שדה טקסט); 25.10 – לא כשיש "עוד אין הקבצות"
+          // נועה 28.10: בלי "אחר" בהקבצה בכלל (השרת מקבל רק ערך מהרשימה של המרתון)   // נועה 23.10: "אחר" (בלי שדה טקסט); 25.10 – לא כשיש "עוד אין הקבצות"
           list.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
           document.getElementById("field-hakbatsa").hidden = false; hkSel.required = true;
           hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); });
@@ -1588,6 +1587,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var payload = { website: document.getElementById("f-website").value, city: (MARATHON && MARATHON.city) || "", school: v("f-school"),
       courses: ["מרתון: " + mName + (when ? " (" + when + ")" : "")], filled_by: "טופס מרתון – רק פרטים",
       notes: "השאירו פרטים בטופס המרתון (בלי הרשמה)" + (gLbl ? " · " + gLbl : ""),
+      marathon_code: MARATHON_CODE || null,   // קובץ 118: כבר רשום/ה למרתון הזה → "הפרטים כבר אצלנו"
       student: { first_name: v("f-student-first"), last_name: v("f-student-last"), phone: v("f-student-phone"), grade: v("f-grade"), math_level: needHak ? hakEl.value : null, english_level: null, school: v("f-school") },
       parent: { first_name: v("f-parent-first"), last_name: v("f-parent-last"), phone: v("f-phone"), email: v("f-email") || null } };
     mkSaveDraft();
@@ -1596,7 +1596,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })()); } catch (e) {}
     btn.disabled = true; btn.textContent = "שולחים…";
     if (isPreviewNow() && EXPLICIT_PREVIEW) { setTimeout(function(){ goTop(tyUrl("lead=1&preview=1")); }, 500); return; }
-    callSupabase("submit_interest", payload).then(function(){ goTop(tyUrl("lead=1")); }).catch(function(){
+    callSupabase("submit_interest", payload).then(function(res){
+      if (res && res.already) { try { sessionStorage.setItem("reg_already", JSON.stringify({ name: v("f-student-first") + " " + v("f-student-last"), event: mName })); } catch (e) {}
+        goTop(tyUrl("already=1")); return; }
+      goTop(tyUrl("lead=1")); }).catch(function(){
       btn.disabled = false; btn.textContent = "שליחת הפרטים";
       topError.textContent = "לא הצלחנו לשלוח. נסו שוב בעוד רגע, או התקשרו: 052-9067101"; topError.style.display = "block"; });
   }
