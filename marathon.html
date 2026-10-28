@@ -1051,14 +1051,15 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         var hk = Array.isArray(MARATHON.hakbatsa_options) ? MARATHON.hakbatsa_options.filter(Boolean) : [];
         var hkSel = document.getElementById("f-hakbatsa");
         var HAK_DEFAULT = ["עוד אין הקבצות", "הקבצה א'", "הקבצה ב'", "הקבצה ג'", '3 יח"ל', '4 יח"ל', '5 יח"ל'];   // נועה 25.10
-        var hkShow = function(list){
+        var hkShow = function(list, fixed){
           list = list.filter(function(o){ return String(o).trim() !== "אחר"; });
-          if (!list.some(function(o){ return /^עוד אין/.test(String(o).trim()); })) list = list.concat(["אחר"]);   // נועה 23.10: "אחר" (בלי שדה טקסט); 25.10 – לא כשיש "עוד אין הקבצות"
+          // נועה 28.10: במרתון עם רשימת הקבצות משלו – השרת מקבל רק ערך מהרשימה, אז בלי "אחר" (אחרת "לא הצלחנו לשמור")
+          if (!fixed && !list.some(function(o){ return /^עוד אין/.test(String(o).trim()); })) list = list.concat(["אחר"]);   // נועה 23.10: "אחר" (בלי שדה טקסט); 25.10 – לא כשיש "עוד אין הקבצות"
           list.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
           document.getElementById("field-hakbatsa").hidden = false; hkSel.required = true;
           hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); });
         };
-        if (hk.length) hkShow(hk);
+        if (hk.length) hkShow(hk, true);
         else fetch(s.url + "/rest/v1/rpc/school_hakbatsa_public", { method: "POST", headers: headers, body: JSON.stringify({ p_city: MARATHON.city || "", p_school: MARATHON.school || "" }) })
           .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
           .then(function(r){ var o = r && Array.isArray(r.options) ? r.options.filter(function(z){ return z && String(z).trim(); }) : [];
@@ -1493,6 +1494,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
     else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
+    else if (/hakbatsa/.test(m)) { topError.textContent = "נא לבחור הקבצה מהרשימה ולשלוח שוב."; setInvalid("field-hakbatsa", true); }
     else if (/already registered/.test(m)) {   // נועה 25.10: כבר רשום/ה ושילם/ה – לדף התודה, שם כתוב בפירוש שאין צורך להירשם שוב
       ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at"].forEach(function(k){ try { sessionStorage.removeItem(k); } catch (e) {} });
       try { var nmA = ((document.getElementById("f-student-first").value || "") + " " + (document.getElementById("f-student-last").value || "")).trim();
