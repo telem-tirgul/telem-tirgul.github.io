@@ -668,11 +668,24 @@
           <input type="text" id="f-parent-first" maxlength="40" name="parentFirst" autocomplete="given-name" required>
           <div class="error-msg" data-t="t027">שדה חובה</div>
         </div>
+        <div class="field" id="field-parent-last">
+          <label for="f-parent-last"><span data-t="t028">שם משפחה הורה</span> <span class="req">*</span></label>
+          <input type="text" id="f-parent-last" maxlength="40" name="parentLast" autocomplete="family-name" required>
+          <div class="error-msg" data-t="t029">שדה חובה</div>
+        </div>
+      </div>
+
+      <div class="row">
         <div class="field" id="field-phone">
           <label for="f-phone"><span data-t="t030">טלפון הורה</span> <span class="req">*</span></label>
           <input type="tel" id="f-phone" name="phone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
           <div class="hint" data-t="t031">10 ספרות, ללא מקפים</div>
           <div class="error-msg" data-t="t032">יש להזין 10 ספרות</div>
+        </div>
+        <div class="field" id="field-email">
+          <label for="f-email"><span data-t="t033">אימייל</span> <span class="req">*</span></label>
+          <input type="email" id="f-email" maxlength="100" name="email" autocomplete="email" required>
+          <div class="error-msg" data-t="t034">כתובת אימייל לא תקינה</div>
         </div>
       </div>
     </fieldset>
@@ -699,22 +712,6 @@
 
     <div id="regPart" hidden>
     <div class="reg-part-h" data-t="mk.reg_h">השלמת ההרשמה</div>
-    <fieldset>
-      <legend data-t="mk.parent2_t">פרטים נוספים של ההורה</legend>
-      <div class="row keep2">
-        <div class="field" id="field-parent-last">
-          <label for="f-parent-last"><span data-t="t028">שם משפחה הורה</span> <span class="req">*</span></label>
-          <input type="text" id="f-parent-last" maxlength="40" name="parentLast" autocomplete="family-name" required>
-          <div class="error-msg" data-t="t029">שדה חובה</div>
-        </div>
-        <div class="field" id="field-email">
-          <label for="f-email"><span data-t="t033">אימייל</span> <span class="req">*</span></label>
-          <input type="email" id="f-email" maxlength="100" name="email" autocomplete="email" required>
-          <div class="error-msg" data-t="t034">כתובת אימייל לא תקינה</div>
-        </div>
-      </div>
-    </fieldset>
-
     <fieldset id="fsFirstTime">
       <legend data-t="t035">האם זהו המרתון הראשון שלך/ה השנה?</legend>
       <div class="field" id="field-first-time">
@@ -1558,7 +1555,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   document.querySelectorAll("input[name=mkmode]").forEach(function(r){ r.addEventListener("change", function(){ mkPaint();
     if (r.value === "reg" && r.checked) setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }); });
   // הפרטים שמולאו – נשמרים בדפדפן (לשונית זו), כדי ש"להשלמת ההרשמה" בדף התודה יחזיר טופס ממולא
-  var MK_FIELDS = ["f-student-first", "f-student-last", "f-grade", "f-student-phone", "f-hakbatsa", "f-school", "f-parent-first", "f-phone"];
+  var MK_FIELDS = ["f-student-first", "f-student-last", "f-grade", "f-student-phone", "f-hakbatsa", "f-school", "f-parent-first", "f-parent-last", "f-phone", "f-email"];
   function mkSaveDraft(){ try { var d = {}; MK_FIELDS.forEach(function(id){ var e = document.getElementById(id); if (e) d[id] = e.value; });
     var g = form.querySelector("input[name=group]:checked"); d.group = g ? g.value : ""; d.code = MARATHON_CODE || "";
     sessionStorage.setItem("mk_draft", JSON.stringify(d)); } catch (e) {} }
@@ -1576,7 +1573,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     bad("field-group", needGroup && !groupEl);
     bad("field-student-first", !v("f-student-first")); bad("field-student-last", !v("f-student-last")); bad("field-grade", !v("f-grade"));
     bad("field-student-phone", !isValidPhone(v("f-student-phone"))); bad("field-hakbatsa", needHak && !hakEl.value);
-    bad("field-school", !v("f-school")); bad("field-parent-first", !v("f-parent-first")); bad("field-phone", !isValidPhone(v("f-phone")));
+    bad("field-school", !v("f-school")); bad("field-parent-first", !v("f-parent-first")); bad("field-phone", !isValidPhone(v("f-phone"))); bad("field-parent-last", !v("f-parent-last")); bad("field-email", !isValidEmail(v("f-email")));
     topError.style.display = ok ? "none" : "block";
     var btn = document.getElementById("leadBtn");
     if (!ok) { if (window.TELEM_BAD) TELEM_BAD(btn); return; }
@@ -1588,7 +1585,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       courses: ["מרתון: " + mName + (when ? " (" + when + ")" : "")], filled_by: "טופס מרתון – רק פרטים",
       notes: "השאירו פרטים בטופס המרתון (בלי הרשמה)" + (gLbl ? " · " + gLbl : ""),
       student: { first_name: v("f-student-first"), last_name: v("f-student-last"), phone: v("f-student-phone"), grade: v("f-grade"), math_level: needHak ? hakEl.value : null, english_level: null, school: v("f-school") },
-      parent: { first_name: v("f-parent-first"), last_name: "", phone: v("f-phone"), email: null } };
+      parent: { first_name: v("f-parent-first"), last_name: v("f-parent-last"), phone: v("f-phone"), email: v("f-email") || null } };
     mkSaveDraft();
     try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "marathon_lead", name: v("f-student-first") + " " + v("f-student-last"), event: mName, meetings: ev.meetings || [] }));
       sessionStorage.setItem("reg_saved_at", String(Date.now()));
