@@ -515,6 +515,7 @@
   .field.invalid input, .field.invalid select, .field.invalid textarea{ border:1.5px solid #C9554F !important; }   /* הלקוחה: פחות אדום - רק מסגרת */
   .field.invalid .error-msg, .consent .error-msg:not(:empty), #sigError:not(:empty){ font-size:13.5px !important; font-weight:700 !important; color:#B8463F !important; margin-top:4px; }
   .field.invalid .error-msg::before{ content:"⚠ "; }
+  .consent .error-msg:not(:empty), #sigError:not(:empty), #termsConsentError:not(:empty), #consentError:not(:empty){ display:block !important; }   /* 28.10: ההודעות "יש לחתום" / "יש לאשר" לא הוצגו בכלל */
 
   /* ===== 5.19.83 (נועה): שדות לבנים כמו במערכת הניהול – לא שמנת. פינות 8, גובה 44 בכל הטפסים ===== */
   @media not all and (prefers-color-scheme: dark){
@@ -1107,7 +1108,29 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const paymentConsentEl = document.getElementById("f-consent");
   function updateSubmitAvailability(){
     submitBtn.disabled = MAR_BLOCKED || !(termsConsentEl.checked && paymentConsentEl.checked && sigHas === true);
+    if (typeof subShield === "function") subShield(submitBtn.disabled && !MAR_BLOCKED);
   }
+
+  // 28.10 (בדיקת המרתונים): לחיצה על הכפתור כשהוא עוד לא פעיל (חסרה חתימה / אישור) – מראים מה חסר, במקום ששום דבר לא יקרה
+  var subShield = (function(){ var sh = document.createElement("span"), par = submitBtn.parentNode;
+    sh.id = "submitShield"; sh.hidden = true; sh.style.cssText = "position:absolute; cursor:pointer; z-index:2;";
+    if (getComputedStyle(par).position === "static") par.style.position = "relative";
+    par.appendChild(sh);
+    sh.addEventListener("click", function(){
+      if (MAR_BLOCKED) return;
+      var first = null, mark = function(id, txt, el){ document.getElementById(id).textContent = txt; if (!first) first = el; };
+      if (!termsConsentEl.checked) mark("termsConsentError", "יש לאשר את תנאי ההתקשרות כדי להמשיך.", termsConsentEl);
+      if (!paymentConsentEl.checked) mark("consentError", "יש לאשר את התיבה כדי להמשיך.", paymentConsentEl);
+      if (typeof sigHas !== "undefined" && sigHas !== true) mark("sigError", "יש לחתום כדי להמשיך.", document.getElementById("sigCanvas"));
+      if (window.TELEM_BAD) TELEM_BAD(submitBtn);
+      if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    [termsConsentEl, paymentConsentEl].forEach(function(el){ el.addEventListener("change", function(){ if (el.checked) document.getElementById(el === termsConsentEl ? "termsConsentError" : "consentError").textContent = ""; }); });
+    window.addEventListener("resize", function(){ if (!sh.hidden) place(); });
+    if (window.ResizeObserver) new ResizeObserver(function(){ if (!sh.hidden) place(); }).observe(submitBtn);   // גם כשחלק ההרשמה נפתח אחרי הטעינה
+    function place(){ sh.style.left = submitBtn.offsetLeft + "px"; sh.style.top = submitBtn.offsetTop + "px"; sh.style.width = submitBtn.offsetWidth + "px"; sh.style.height = submitBtn.offsetHeight + "px"; }
+    return function(on){ sh.hidden = !on; if (on) place(); };
+  })();
   termsConsentEl.addEventListener("change", updateSubmitAvailability);
   paymentConsentEl.addEventListener("change", updateSubmitAvailability);
   updateSubmitAvailability();
@@ -1420,7 +1443,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function tsLoad(cb, fail){
     if (window.turnstile) { cb(); return; }
     var sc = document.getElementById("ts-script");
-    if (!sc) { sc = document.createElement("script"); sc.id = "ts-script"; sc.async = true; sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"; document.head.appendChild(sc); }
+    if (sc && sc.getAttribute("data-failed")) { sc.parentNode.removeChild(sc); sc = null; }   // 28.10: נכשל קודם – מנסים שוב מיד (קודם חיכה 20 שניות)
+    if (!sc) { sc = document.createElement("script"); sc.id = "ts-script"; sc.async = true; sc.addEventListener("error", function(){ sc.setAttribute("data-failed", "1"); }); sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"; document.head.appendChild(sc); }
     sc.addEventListener("load", cb); sc.addEventListener("error", fail);
   }
   function tsToken(){
@@ -1489,7 +1513,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     topError.textContent = "לא הצלחנו לשמור את ההרשמה. אפשר לנסות שוב בעוד רגע, ואם זה חוזר - ליצור איתנו קשר.";
     // 5.19.53: הודעות מהבדיקה בשרת (form-submit)
     var m = String((err && err.message) || "");
-    if (/bot_check/.test(m)) topError.textContent = "לא הצלחנו לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה.";
+    if (/bot_check/.test(m)) topError.textContent = "לא הצלחנו לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה. אם זה חוזר – אפשר להתקשר אלינו: 052-9067101";
     else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
     else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";

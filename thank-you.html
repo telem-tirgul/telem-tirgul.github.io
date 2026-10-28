@@ -202,7 +202,7 @@
       var al = null; try { al = JSON.parse(sessionStorage.getItem("reg_already") || "null"); } catch (e) {}
       $("title").textContent = "התלמיד/ה כבר רשום/ה למרתון";
       var chA = $("stChip"); chA.className = "st-chip ok"; chA.textContent = "✓ רשום/ה";
-      var ld = $("lead"); ld.textContent = "הפרטים כבר קיימים אצלנו – אין צורך לשלוח שוב את הטופס.";   // נועה 28.10 ld.appendChild(document.createElement("br")); ld.appendChild(document.createTextNode("נתראה במרתון!")); ld.hidden = false;
+      var ld = $("lead"); ld.textContent = "הפרטים כבר קיימים אצלנו – אין צורך לשלוח שוב את הטופס.";   /* נועה 28.10 */ ld.appendChild(document.createElement("br")); ld.appendChild(document.createTextNode("נתראה במרתון!")); ld.hidden = false;
       if (al && (al.name || al.event)) { if (al.name) row(tyT("ty.row_name"), al.name); if (al.event) row(tyT("ty.row_mar"), al.event); $("sumT").textContent = tyT("ty.sum_t"); $("sumT").hidden = false; box.hidden = false; }
       document.title = "כבר רשומים - תלם"; return;
     }
