@@ -1106,7 +1106,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const termsConsentEl = document.getElementById("f-terms-consent");
   const paymentConsentEl = document.getElementById("f-consent");
   function updateSubmitAvailability(){
-    submitBtn.disabled = MAR_BLOCKED || !(termsConsentEl.checked && paymentConsentEl.checked && (typeof sigHas === "undefined" || sigHas));
+    submitBtn.disabled = MAR_BLOCKED || !(termsConsentEl.checked && paymentConsentEl.checked && sigHas === true);
   }
   termsConsentEl.addEventListener("change", updateSubmitAvailability);
   paymentConsentEl.addEventListener("change", updateSubmitAvailability);
@@ -1162,8 +1162,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     sigCtx.lineWidth = 2.4; sigCtx.lineCap = "round"; sigCtx.lineJoin = "round"; sigCtx.strokeStyle = "#1b1b1b";
     if (old) { const im = new Image(); im.onload = () => sigCtx.drawImage(im, 0, 0, r.width, r.height); im.src = old; }
   }
+  function sigFix(){ if (!sigCanvas.width || !sigCanvas.height) sigResize(); }
   function sigPos(e){ const r = sigCanvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
-  sigCanvas.addEventListener("pointerdown", function(e){ e.preventDefault(); sigCanvas.setPointerCapture(e.pointerId); sigDrawing = true; sigLast = sigPos(e);
+  sigCanvas.addEventListener("pointerdown", function(e){ e.preventDefault(); sigFix(); sigCanvas.setPointerCapture(e.pointerId); sigDrawing = true; sigLast = sigPos(e);
     sigCtx.beginPath(); sigCtx.arc(sigLast.x, sigLast.y, 1.1, 0, Math.PI * 2); sigCtx.fillStyle = "#1b1b1b"; sigCtx.fill(); });
   sigCanvas.addEventListener("pointermove", function(e){ if (!sigDrawing) return; e.preventDefault(); const p = sigPos(e);
     sigCtx.beginPath(); sigCtx.moveTo(sigLast.x, sigLast.y); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); sigLast = p;
@@ -1174,7 +1175,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   window.addEventListener("resize", sigResize); sigResize();
   // תמונה קטנה (רוחב עד 600) על רקע לבן, לשמירה
   function signatureImage(){
-    if (!sigHas) return null;
+    if (!sigHas || !sigCanvas.width || !sigCanvas.height) return null;
     const w = Math.min(600, sigCanvas.width), h = Math.round(sigCanvas.height * w / sigCanvas.width);
     const c = document.createElement("canvas"); c.width = w; c.height = h;
     const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(sigCanvas, 0, 0, w, h);
@@ -1546,6 +1547,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var m = MK_MODE();
     document.querySelectorAll("#fsMode .price-option").forEach(function(l){ l.classList.toggle("selected", l.querySelector("input").checked); });
     document.getElementById("regPart").hidden = m !== "reg";
+    if (m === "reg" && typeof sigResize === "function") sigResize();   // נועה 28.10: משטח החתימה נמדד כשהחלק נפתח (כשהיה מוסתר – גודלו 0 ואי אפשר היה לחתום)
     document.getElementById("leadWrap").hidden = m !== "lead";
     document.getElementById("modeHint").hidden = !!m;
     if (m) document.getElementById("field-mode").classList.remove("invalid");
