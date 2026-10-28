@@ -78,6 +78,7 @@
   #lead{ color:#3B2A25 !important; font-weight:500 !important; }
   .top #paidLine, #paidLine{ color:#3B2A25 !important; } #paidLine small{ display:block; font-size:12.5px; font-weight:500; color:var(--ink-soft, #6B5F55); margin-top:1px; } .paid-line{ display:inline-block; margin:12px auto 0 !important; background:none; border-radius:0; padding:0; font-size:14px !important; font-weight:600 !important; line-height:1.45; }
   .ty-h{ margin:18px 0 8px !important; font-size:clamp(22px, 6.2vw, 30px) !important; line-height:1.25; }
+  .lead-cta{ margin:16px 0 4px; padding:18px; border-radius:16px; background:var(--warn-bg, #F6EAD0); text-align:center; } .lead-cta .t{ font-weight:800; font-size:18px; color:var(--accent, #7A1F2B); margin-bottom:4px; } .lead-cta .s{ color:var(--ink-soft, #5d544f); margin-bottom:12px; } .lead-cta a{ display:inline-block; background:#5A1216; color:#fff; font-weight:800; padding:12px 26px; border-radius:999px; text-decoration:none; font-family:'Heebo',sans-serif; } .lead-cta a:hover{ background:#3E0D10; }
   .st-chip{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 14px; font-weight:700; font-size:14.5px; margin:0 0 6px; }
   .st-chip.ok{ background:#E6F2E8; color:#2E6B3A; } .st-chip.wait{ background:#FFF3D6; color:#8A5A12; } .st-chip.info{ background:#F3EFEA; color:#6B5F55; }
   .st-chip[hidden]{ display:none; }
@@ -147,6 +148,12 @@
     ["ty.lead_register", "{שם} רשום/ה לתרגולים השוטפים{ · עיר}", "שורה מתחת לכותרת – תרגולים שוטפים", { "שם": "השם הפרטי של התלמיד/ה", " · עיר": "העיר עם נקודה לפניה (ריק אם אין עיר)" }, ["שם"]],
     ["ty.lead_event", "{שם} רשום/ה ל{מרתון / מסלול}", "שורה מתחת לכותרת – מרתון / מסלול", { "שם": "השם הפרטי של התלמיד/ה", "מרתון / מסלול": "שם המרתון או המסלול" }, ["שם"]],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
+    ["ty.lead_title", "הפרטים התקבלו – נחזור אליכם", "רק פרטים (מרתון) – כותרת", {}, []],
+    ["ty.lead_lead", "קיבלנו את הפרטים, ונחזור אליכם בהקדם עם הסבר ופרטים על המרתון.", "רק פרטים (מרתון) – שורה מתחת לכותרת", {}, []],
+    ["ty.lead_cta_t", "רוצים כבר להירשם?", "רק פרטים (מרתון) – כותרת התיבה", {}, []],
+    ["ty.lead_cta_s", "נשאר רק להשלים את ההרשמה והתשלום", "רק פרטים (מרתון) – טקסט התיבה", {}, []],
+    ["ty.lead_cta_btn", "להשלמת ההרשמה ←", "רק פרטים (מרתון) – כפתור", {}, []],
+    ["ty.lead_sum_t", "הפרטים שהשארתם", "רק פרטים (מרתון) – כותרת הפרטים", {}, []],
     ["ty.row_name", "שם התלמיד/ה", "פרטים – שם", {}, []],
     ["ty.row_mar", "מרתון", "פרטים – מרתון", {}, []],
     ["ty.row_track", "מסלול", "פרטים – מסלול", {}, []],
@@ -198,6 +205,21 @@
       var ld = $("lead"); ld.textContent = "ההרשמה והתשלום למרתון הזה כבר התקבלו אצלנו – אין צורך להירשם שוב."; ld.appendChild(document.createElement("br")); ld.appendChild(document.createTextNode("נתראה במרתון!")); ld.hidden = false;
       if (al && (al.name || al.event)) { if (al.name) row(tyT("ty.row_name"), al.name); if (al.event) row(tyT("ty.row_mar"), al.event); $("sumT").textContent = tyT("ty.sum_t"); $("sumT").hidden = false; box.hidden = false; }
       document.title = "כבר רשומים - תלם"; return;
+    }
+    // נועה 28.10: טופס המרתון – "רק להשאיר פרטים". כותרת, וקריאה בולטת להשלמת ההרשמה (חוזרת לטופס ממולא)
+    if ((/[?&]lead=1/.test(location.search) || (x && x.kind === "marathon_lead")) && !TY_EDIT) {
+      $("title").textContent = tyT("ty.lead_title"); $("title").classList.add("ty-ok"); $("stChip").hidden = true;
+      $("lead").textContent = tyT("ty.lead_lead"); $("lead").hidden = false;
+      var back = null; try { back = sessionStorage.getItem("reg_form_url"); } catch (e) {}
+      if (back) { var u = new URL(back, location.href); u.searchParams.set("cont", "1");
+        var cta = document.createElement("div"); cta.className = "lead-cta";
+        var t1 = document.createElement("div"); t1.className = "t"; t1.textContent = tyT("ty.lead_cta_t");
+        var t2 = document.createElement("div"); t2.className = "s"; t2.textContent = tyT("ty.lead_cta_s");
+        var a = document.createElement("a"); a.href = u.href; a.textContent = tyT("ty.lead_cta_btn");
+        cta.appendChild(t1); cta.appendChild(t2); cta.appendChild(a); $("lead").after(cta); }
+      if (x && (x.name || x.event)) { if (x.name) row(tyT("ty.row_name"), x.name); if (x.event) row(tyT("ty.row_mar"), x.event); $("sumT").textContent = tyT("ty.lead_sum_t"); $("sumT").hidden = false; box.hidden = false;
+        if (x.meetings && x.meetings.length) { var ul0 = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul0.appendChild(li); }); ul0.hidden = false; $("meetT").textContent = tyT("ty.meet_t"); $("meetT").hidden = false; } }
+      document.title = "הפרטים התקבלו - תלם"; return;
     }
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
     if (phone && pending && !preview) {

@@ -212,6 +212,16 @@
   .price-option:hover{ border-color:var(--gold-deep); }
   .price-option input{ margin-top:3px; }
   .price-option.selected{ border-color:var(--accent); background:rgba(90,18,22,.04); }
+  /* נועה 28.10: "רק להשאיר פרטים" / "להירשם עכשיו" */
+  #fsMode .mode-opts{ display:grid !important; grid-template-columns:1fr 1fr; gap:10px; }
+  #fsMode .price-option{ margin:0 !important; padding:14px 16px; }
+  #fsMode .opt-title{ font-size:17px; } #fsMode .opt-sub{ font-size:14px; color:var(--ink-soft); margin-top:4px; line-height:1.4; }
+  @media (max-width:600px){ #fsMode .mode-opts{ grid-template-columns:1fr; } }
+  .mode-hint{ text-align:center; color:var(--ink-soft); font-size:14px; margin:4px 0 14px; }
+  #leadWrap{ margin:4px 0 18px; }
+  .reg-part-h{ display:flex; align-items:center; gap:10px; margin:22px 4px 10px; color:var(--accent); font-weight:800; font-size:18px; font-family:'Heebo',sans-serif; }
+  html body button#leadBtn{ background:#5A1216 !important; border-radius:999px !important; box-shadow:none !important; font-family:'Heebo',sans-serif !important; font-weight:800 !important; } html body button#leadBtn:hover{ background:#3E0D10 !important; }
+  .reg-part-h::after{ content:""; flex:1; height:2px; background:var(--border); }
   .price-option .opt-title{ font-weight:700; font-size:14.5px; color:var(--ink); }
   .price-option .opt-price{ font-weight:800; color:var(--accent); }
   .mar-info{ border-radius:10px; padding:16px 18px; margin:0 0 22px; background:var(--paper); border:1px solid var(--border); border-inline-start:5px solid var(--accent);
@@ -295,7 +305,7 @@
   }
 
   .submit-wrap{ text-align:center; margin-top:30px; }
-  button#submitBtn{
+  button#submitBtn, button#leadBtn{
     font-family:'Heebo',sans-serif;
     font-weight:800;
     font-size:17px;
@@ -310,9 +320,9 @@
     width:100%;
     max-width:320px;
   }
-  button#submitBtn:hover{ background:var(--accent-light); }
-  button#submitBtn:active{ transform:scale(.98); }
-  button#submitBtn:disabled{ opacity:.55; cursor:not-allowed; }
+  button#submitBtn:hover, button#leadBtn:hover{ background:var(--accent-light); }
+  button#submitBtn:active, button#leadBtn:active{ transform:scale(.98); }
+  button#submitBtn:disabled, button#leadBtn:disabled{ opacity:.55; cursor:not-allowed; }
 
   .top-error{
     background:var(--error-bg); border:1px solid var(--error-border); color:var(--error);
@@ -372,7 +382,7 @@
   legend{ float:right; width:100%; border:none; padding:0; margin:0 0 14px; font-size:17.5px; display:flex; align-items:center; gap:10px; }
   fieldset > legend ~ *{ clear:both; }
   .layout-main{ counter-reset:step; }
-  .layout-main > fieldset:not([hidden]) > legend::before, .pay-card .card-title::before{ counter-increment:step; content:counter(step); flex:0 0 auto; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:13.5px; font-weight:800; }
+  .layout-main > fieldset:not([hidden]) > legend::before, .layout-main > #regPart > fieldset:not([hidden]) > legend::before, .pay-card .card-title::before{ counter-increment:step; content:counter(step); flex:0 0 auto; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:13.5px; font-weight:800; }
   .card-title{ font-family:'Heebo',sans-serif; font-weight:800; font-size:17.5px; color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:12px; }
   #groupFieldset legend::before{ content:""; width:22px; height:22px; flex:0 0 auto; background:var(--accent); -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E") center/contain no-repeat; }
 
@@ -402,7 +412,7 @@
   .terms-box{ margin:0 0 10px; border-radius:12px; max-height:190px; }
   .sig-box{ background:var(--field); border-radius:14px; }
   .submit-wrap{ margin-top:22px; }
-  button#submitBtn{ max-width:none; padding:16px 24px; font-size:18px; background:linear-gradient(160deg, var(--accent-light), var(--accent)); box-shadow:0 8px 22px rgba(90,18,22,.28); }
+  button#submitBtn, button#leadBtn{ max-width:none; padding:16px 24px; font-size:18px; background:linear-gradient(160deg, var(--accent-light), var(--accent)); box-shadow:0 8px 22px rgba(90,18,22,.28); }
   footer{ margin-top:26px; }
 
   /* מחשב: טופס לרוחב - פרטים משמאל (נדבקים בגלילה), הטופס מימין */
@@ -422,7 +432,7 @@
     .side-price span{ font-weight:700; color:#F1D9A6; } .side-price strong{ font-family:'Heebo',sans-serif; font-size:28px; font-weight:900; }
     .side-price strong.ph{ font-size:14px; font-weight:700; }
     .row{ gap:16px; }
-    button#submitBtn{ max-width:380px; }
+    button#submitBtn, button#leadBtn{ max-width:380px; }
   }
 
   .m-bar{ position:fixed; inset-inline:10px; bottom:10px; z-index:40; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 10px 10px 16px; padding-inline-start:18px;
@@ -432,7 +442,7 @@
   .m-bar button{ font-family:'Heebo',sans-serif; font-weight:800; font-size:15.5px; background:#fff; color:var(--hero1); border:none; border-radius:999px; padding:11px 20px; cursor:pointer; }
   .m-bar{ display:none !important; }   /* 5.19.55 (הלקוחה): בלי פס המחיר שקופץ למטה בגלילה - המחיר מופיע באזור התשלום */
   @media (max-width:899px){ body{ padding-bottom:96px; } }
-  @media (max-width:520px){ button#submitBtn{ font-size:16.5px; padding:15px 14px; white-space:nowrap; } }
+  @media (max-width:520px){ button#submitBtn, button#leadBtn{ font-size:16.5px; padding:15px 14px; white-space:nowrap; } }
 
   /* תלם 5.19.40: קודם מחיר ואופן תשלום, ואז התנאים, שתי תיבות האישור יחד, חתימה ושליחה */
   .pay-card .amount-row.main{ margin-top:0; }
@@ -658,19 +668,44 @@
           <input type="text" id="f-parent-first" maxlength="40" name="parentFirst" autocomplete="given-name" required>
           <div class="error-msg" data-t="t027">שדה חובה</div>
         </div>
-        <div class="field" id="field-parent-last">
-          <label for="f-parent-last"><span data-t="t028">שם משפחה הורה</span> <span class="req">*</span></label>
-          <input type="text" id="f-parent-last" maxlength="40" name="parentLast" autocomplete="family-name" required>
-          <div class="error-msg" data-t="t029">שדה חובה</div>
-        </div>
-      </div>
-
-      <div class="row">
         <div class="field" id="field-phone">
           <label for="f-phone"><span data-t="t030">טלפון הורה</span> <span class="req">*</span></label>
           <input type="tel" id="f-phone" name="phone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
           <div class="hint" data-t="t031">10 ספרות, ללא מקפים</div>
           <div class="error-msg" data-t="t032">יש להזין 10 ספרות</div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- נועה 28.10: שני חלקים – "רק להשאיר פרטים" (התעניינות) או "להירשם עכשיו" (שאר הטופס + תשלום) -->
+    <fieldset id="fsMode">
+      <legend data-t="mk.mode_t">איך תרצו להמשיך?</legend>
+      <div class="field" id="field-mode">
+        <div class="price-options mode-opts">
+          <label class="price-option" id="opt-mode-lead">
+            <input type="radio" name="mkmode" value="lead">
+            <div><div class="opt-title" data-t="mk.lead_t">📞 רק להשאיר פרטים</div><div class="opt-sub" data-t="mk.lead_s">נחזור אליכם עם הסבר ופרטים</div></div>
+          </label>
+          <label class="price-option" id="opt-mode-reg">
+            <input type="radio" name="mkmode" value="reg">
+            <div><div class="opt-title" data-t="mk.reg_t">✅ להירשם עכשיו</div><div class="opt-sub" data-t="mk.reg_s">שריון מקום, תשלום וסיום – כ-2 דקות</div></div>
+          </label>
+        </div>
+        <div class="error-msg" data-t="mk.mode_err">יש לבחור אחת מהאפשרויות</div>
+      </div>
+    </fieldset>
+    <div class="submit-wrap" id="leadWrap" hidden><button type="button" id="leadBtn" data-t="mk.lead_btn">שליחת הפרטים</button></div>
+    <p class="mode-hint" id="modeHint" data-t="mk.mode_hint">בחרו אחת מהאפשרויות כדי להמשיך</p>
+
+    <div id="regPart" hidden>
+    <div class="reg-part-h" data-t="mk.reg_h">השלמת ההרשמה</div>
+    <fieldset>
+      <legend data-t="mk.parent2_t">פרטים נוספים של ההורה</legend>
+      <div class="row keep2">
+        <div class="field" id="field-parent-last">
+          <label for="f-parent-last"><span data-t="t028">שם משפחה הורה</span> <span class="req">*</span></label>
+          <input type="text" id="f-parent-last" maxlength="40" name="parentLast" autocomplete="family-name" required>
+          <div class="error-msg" data-t="t029">שדה חובה</div>
         </div>
         <div class="field" id="field-email">
           <label for="f-email"><span data-t="t033">אימייל</span> <span class="req">*</span></label>
@@ -756,6 +791,7 @@
       <button type="submit" id="submitBtn">שליחת ההרשמה</button>
     </div>
     </section>
+    </div><!-- /regPart -->
     </div>
   </form>
 
@@ -975,6 +1011,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         setInvalid("field-group", false);
       });
     });
+    if (window.mkRestore) setTimeout(window.mkRestore, 0);   // נועה 28.10: חזרה מדף התודה ("להשלמת ההרשמה") – הפרטים ממולאים
   }
   function loadMarathon(){
     var s = CONFIG.supabase, headers = { "Content-Type": "application/json", "apikey": s.anonKey };
@@ -1079,7 +1116,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   updateSubmitAvailability();
   if (CONFIG.showSiteLink) document.getElementById("siteBackLink").hidden = false;
   (function(){ var mb = document.getElementById("mBar"), pc = document.querySelector(".pay-card"), hero = document.querySelector(".hero"); if (!mb || !pc || !("IntersectionObserver" in window)) return;
-    var payIn = false, heroIn = true, upd = function(){ mb.hidden = MAR_BLOCKED || !MARATHON; mb.classList.toggle("off", payIn || heroIn); };
+    var payIn = false, heroIn = true, upd = function(){ mb.hidden = MAR_BLOCKED || !MARATHON || MK_MODE() === "lead"; mb.classList.toggle("off", payIn || heroIn); };
     new IntersectionObserver(function(es){ payIn = es[0].isIntersecting; upd(); }, { rootMargin: "0px 0px -30% 0px" }).observe(pc);
     new IntersectionObserver(function(es){ heroIn = es[0].isIntersecting; upd(); }).observe(hero);
     document.getElementById("mBarGo").addEventListener("click", function(){
@@ -1506,8 +1543,70 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       });
   }
 
+  // ---------- נועה 28.10: שני חלקים – התעניינות / הרשמה ----------
+  function MK_MODE(){ var r = document.querySelector("input[name=mkmode]:checked"); return r ? r.value : ""; }
+  function mkPaint(){
+    var m = MK_MODE();
+    document.querySelectorAll("#fsMode .price-option").forEach(function(l){ l.classList.toggle("selected", l.querySelector("input").checked); });
+    document.getElementById("regPart").hidden = m !== "reg";
+    document.getElementById("leadWrap").hidden = m !== "lead";
+    document.getElementById("modeHint").hidden = !!m;
+    if (m) document.getElementById("field-mode").classList.remove("invalid");
+    if (window.__mBarUpd) window.__mBarUpd();
+  }
+  function mkNeedMode(){ var f = document.getElementById("field-mode"); f.classList.add("invalid"); f.scrollIntoView({ behavior: "smooth", block: "center" }); if (window.TELEM_BAD) TELEM_BAD(document.getElementById("leadBtn")); }
+  document.querySelectorAll("input[name=mkmode]").forEach(function(r){ r.addEventListener("change", function(){ mkPaint();
+    if (r.value === "reg" && r.checked) setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }); });
+  // הפרטים שמולאו – נשמרים בדפדפן (לשונית זו), כדי ש"להשלמת ההרשמה" בדף התודה יחזיר טופס ממולא
+  var MK_FIELDS = ["f-student-first", "f-student-last", "f-grade", "f-student-phone", "f-hakbatsa", "f-school", "f-parent-first", "f-phone"];
+  function mkSaveDraft(){ try { var d = {}; MK_FIELDS.forEach(function(id){ var e = document.getElementById(id); if (e) d[id] = e.value; });
+    var g = form.querySelector("input[name=group]:checked"); d.group = g ? g.value : ""; d.code = MARATHON_CODE || "";
+    sessionStorage.setItem("mk_draft", JSON.stringify(d)); } catch (e) {} }
+  window.mkRestore = function(){ var d = null; try { d = JSON.parse(sessionStorage.getItem("mk_draft") || "null"); } catch (e) {}
+    if (!d || (d.code || "") !== (MARATHON_CODE || "")) return;
+    MK_FIELDS.forEach(function(id){ var e = document.getElementById(id); if (e && d[id] && !e.value) { e.value = d[id]; e.dispatchEvent(new Event("change", { bubbles: true })); } });
+    if (d.group) { var g = form.querySelector('input[name=group][value="' + String(d.group).replace(/"/g, "") + '"]'); if (g && !g.disabled) { g.checked = true; g.dispatchEvent(new Event("change", { bubbles: true })); } }
+    if (/[?&]cont=1(&|$)/.test(location.search)) { var r = document.querySelector('input[name=mkmode][value=reg]'); r.checked = true; mkPaint();
+      setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ block: "start" }); }, 300); } };
+  function submitLead(){
+    var v = function(id){ var e = document.getElementById(id); return e ? e.value.trim() : ""; };
+    var groupEl = form.querySelector("input[name=group]:checked"), needGroup = !!MARATHON_CODE, ok = true;
+    var hakEl = document.getElementById("f-hakbatsa"), needHak = !document.getElementById("field-hakbatsa").hidden;
+    var bad = function(id, b){ setInvalid(id, b); if (b) ok = false; };
+    bad("field-group", needGroup && !groupEl);
+    bad("field-student-first", !v("f-student-first")); bad("field-student-last", !v("f-student-last")); bad("field-grade", !v("f-grade"));
+    bad("field-student-phone", !isValidPhone(v("f-student-phone"))); bad("field-hakbatsa", needHak && !hakEl.value);
+    bad("field-school", !v("f-school")); bad("field-parent-first", !v("f-parent-first")); bad("field-phone", !isValidPhone(v("f-phone")));
+    topError.style.display = ok ? "none" : "block";
+    var btn = document.getElementById("leadBtn");
+    if (!ok) { if (window.TELEM_BAD) TELEM_BAD(btn); return; }
+    if (window.TELEM_OK) TELEM_OK();
+    var ev = pdfEvent() || {}, gObj = groupEl && MARATHON && (MARATHON.groups || []).find(function(g){ return String(g.session_id) === String(groupEl.value); });
+    var gLbl = gObj ? (gObj.label || "") + (gObj.start_time ? " · " + String(gObj.start_time).slice(0, 5) + "–" + String(gObj.end_time || "").slice(0, 5) : "") : "";
+    var mName = ev.name || "מרתון מתמטיקה", when = (ev.meetings || []).join(" · ");
+    var payload = { website: document.getElementById("f-website").value, city: (MARATHON && MARATHON.city) || "", school: v("f-school"),
+      courses: ["מרתון: " + mName + (when ? " (" + when + ")" : "")], filled_by: "טופס מרתון – רק פרטים",
+      notes: "השאירו פרטים בטופס המרתון (בלי הרשמה)" + (gLbl ? " · " + gLbl : ""),
+      student: { first_name: v("f-student-first"), last_name: v("f-student-last"), phone: v("f-student-phone"), grade: v("f-grade"), math_level: needHak ? hakEl.value : null, english_level: null, school: v("f-school") },
+      parent: { first_name: v("f-parent-first"), last_name: "", phone: v("f-phone"), email: null } };
+    mkSaveDraft();
+    try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "marathon_lead", name: v("f-student-first") + " " + v("f-student-last"), event: mName, meetings: ev.meetings || [] }));
+      sessionStorage.setItem("reg_saved_at", String(Date.now()));
+      sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })()); } catch (e) {}
+    btn.disabled = true; btn.textContent = "שולחים…";
+    if (isPreviewNow() && EXPLICIT_PREVIEW) { setTimeout(function(){ goTop(tyUrl("lead=1&preview=1")); }, 500); return; }
+    callSupabase("submit_interest", payload).then(function(){ goTop(tyUrl("lead=1")); }).catch(function(){
+      btn.disabled = false; btn.textContent = "שליחת הפרטים";
+      topError.textContent = "לא הצלחנו לשלוח. נסו שוב בעוד רגע, או התקשרו: 052-9067101"; topError.style.display = "block"; });
+  }
+  document.getElementById("leadBtn").addEventListener("click", submitLead);
+  mkPaint();
+
   form.addEventListener("submit", function(e){
     e.preventDefault();
+    // נועה 28.10: קודם בוחרים "רק להשאיר פרטים" / "להירשם עכשיו"
+    if (MK_MODE() === "lead") { submitLead(); return; }
+    if (MK_MODE() !== "reg") { mkNeedMode(); return; }
 
     const school = document.getElementById("f-school").value.trim();
     const studentFirst = document.getElementById("f-student-first").value.trim();
