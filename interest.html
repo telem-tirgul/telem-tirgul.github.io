@@ -505,7 +505,7 @@
     window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
   })();
 </script>
-<link rel="stylesheet" href="site-look.css?v=4"><script src="site-look.js?v=4"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css?v=5"><script src="site-look.js?v=5"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 <div class="wrap">
@@ -844,7 +844,7 @@ $("intForm").addEventListener("submit", function(e){
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: $("f-school").value || null },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };
   const btn = $("submitBtn"); btn.disabled = true; btn.textContent = "שולח…";
-  const done = () => { $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; window.scrollTo(0, 0); };
+  const done = () => { if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "interest" }); $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; window.scrollTo(0, 0); };
   if (PREVIEW) { setTimeout(done, 400); return; }
   callSupabase("submit_interest", payload).then(done).catch(function(){ $("topError").textContent = "לא הצלחנו לשלוח. נסו שוב בעוד רגע, או התקשרו: 052-9067101"; $("topError").style.display = "block"; btn.disabled = false; btn.textContent = "שליחה"; });
 });

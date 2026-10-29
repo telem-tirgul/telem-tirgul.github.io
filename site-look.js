@@ -1,3 +1,30 @@
+// את-46 (נועה 29.10): Google Analytics בכל הטפסים – בלי מידע אישי.
+//  לגוגל נשלחת רק כתובת הדף בלי פרמטרים, חוץ מ: city, school, tracks, track, m, embed, lead, pending, already (קוד משפחה / טלפון / קוד תשלום / ref – לא).
+//  לא מודדים: תצוגה מקדימה / עורך הנוסחים / בדיקות, טופס שנפתח מתוך מערכת הניהול (וכל מה שנפתח אחריו באותה לשונית), ולא מחוץ לאתר.
+//  אירועים (TELEM_GA): generate_lead (השארת פרטים), sign_up (הרשמה נשלחה), begin_checkout (מעבר לתשלום), purchase (תשלום אושר – בלי סכום).
+(function(){
+  var ID = "G-VHQ6QEBVV9", KEEP = ["city", "school", "tracks", "track", "m", "embed", "lead", "pending", "already"];
+  var no = false, q = location.search;
+  try {
+    if (location.hostname !== "telem-tirgul.github.io") no = true;
+    if (/[?&](preview|cardtest|txedit|tyv|render|noga)=/.test(q)) no = true;
+    if (/\/telem-admin\//.test(document.referrer || "")) no = true;
+    try { if (window.top !== window && /\/telem-admin\//.test(window.top.location.pathname)) no = true; } catch (e) {}
+    if (no) sessionStorage.setItem("tl_noga", "1"); else if (sessionStorage.getItem("tl_noga")) no = true;
+  } catch (e) {}
+  window.TELEM_GA = function(){};
+  if (no) return;
+  var clean = function(u, keep){ try { var x = new URL(u, location.href), o = new URL(x.origin + x.pathname);
+    if (keep) KEEP.forEach(function(k){ var v = x.searchParams.get(k); if (v != null && v.length < 120) o.searchParams.set(k, v); });
+    return o.href; } catch (e) { return ""; } };
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+  gtag("js", new Date());
+  gtag("config", ID, { page_location: clean(location.href, true), page_referrer: document.referrer ? clean(document.referrer, false) : "",
+    allow_google_signals: false, allow_ad_personalization_signals: false });
+  var s = document.createElement("script"); s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + ID; document.head.appendChild(s);
+  window.TELEM_GA = function(name, params){ try { gtag("event", name, Object.assign({ transport_type: "beacon" }, params || {})); } catch (e) {} };
+})();
 // תלם – עיצוב אחיד לכל הטפסים (נועה 23.10.2026): הטפסים תמיד בהירים, כמו האתר.
 // כללי "רק במצב בהיר" חלים תמיד, וכללי "מצב כהה" יורדים. רץ מיד אחרי site-look.css (בסוף ה-head).
 // נועה 24.10: לא להראות טקסטים / מחירים זמניים לפני שהנתונים מהמערכת מגיעים – הדף מוסתר (עם "טוען…") עד שהנוסחים (TX.ready)
@@ -62,6 +89,8 @@
     var m = document.createElement("a"); m.className = "wa-link wa-mail"; m.target = "_blank"; m.rel = "noopener"; m.href = "mailto:" + MAIL; m.appendChild(document.createTextNode("✉️ אימייל: ")); var mb = document.createElement("bdi"); mb.textContent = MAIL; m.appendChild(mb);   // באותה בועה, כמו הוואטסאפ
     var h = document.createElement("div"); h.className = "wa-h"; h.textContent = "שאלות? כתבו לנו";   // נועה: הכול במסגרת אחת – כותרת, ומתחתיה וואטסאפ ואימייל
     box.appendChild(h); box.appendChild(a); box.appendChild(m);
+    var pv = document.createElement("a"); pv.className = "wa-privacy"; pv.target = "_blank"; pv.rel = "noopener"; pv.textContent = "מדיניות פרטיות";   // את-46: עד שהאתר החדש באוויר – העמוד באתר הישן
+    pv.href = "https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA"; box.appendChild(pv);
     if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
 })();
