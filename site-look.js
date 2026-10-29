@@ -12,7 +12,7 @@
     try { if (window.top !== window && /\/telem-admin\//.test(window.top.location.pathname)) no = true; } catch (e) {}
     if (no) sessionStorage.setItem("tl_noga", "1"); else if (sessionStorage.getItem("tl_noga")) no = true;
   } catch (e) {}
-  window.TELEM_GA = function(){};
+  window.TELEM_GA = function(){}; window.TELEM_GA_SET = function(){};
   if (no) return;
   var clean = function(u, keep){ try { var x = new URL(u, location.href), o = new URL(x.origin + x.pathname);
     if (keep) KEEP.forEach(function(k){ var v = x.searchParams.get(k); if (v != null && v.length < 120) o.searchParams.set(k, v); });
@@ -24,6 +24,7 @@
     allow_google_signals: false, allow_ad_personalization_signals: false });
   var s = document.createElement("script"); s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + ID; document.head.appendChild(s);
   window.TELEM_GA = function(name, params){ try { gtag("event", name, Object.assign({ transport_type: "beacon" }, params || {})); } catch (e) {} };
+  window.TELEM_GA_SET = function(params){ try { gtag("set", params || {}); } catch (e) {} };   // נועה 29.10: פרטי המרתון (בית ספר / שכבה) – לכל האירועים בדף
 })();
 // תלם – עיצוב אחיד לכל הטפסים (נועה 23.10.2026): הטפסים תמיד בהירים, כמו האתר.
 // כללי "רק במצב בהיר" חלים תמיד, וכללי "מצב כהה" יורדים. רץ מיד אחרי site-look.css (בסוף ה-head).

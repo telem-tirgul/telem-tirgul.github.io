@@ -557,7 +557,7 @@
   #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
   #field-first-time.invalid .price-options{ border-color:#C9554F; }
 </style>
-<link rel="stylesheet" href="site-look.css?v=5"><script src="site-look.js?v=6"></script>
+<link rel="stylesheet" href="site-look.css?v=5"><script src="site-look.js?v=7"></script>
 <script>
   // את-26: בתוך האתר (embed=1) – הגובה נשלח לאתר כדי שהמסגרת תגדל לבד (כמו בטופס ההתעניינות)
   (function(){ if (!document.documentElement.classList.contains("embed")) return;
@@ -1021,6 +1021,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         if (!MARATHON) { marNotice(ttx("mar.closed")); document.getElementById("groupOptions").innerHTML = ""; submitBtn.disabled = true; MAR_BLOCKED = true;
           form.hidden = true; return; }   // תלם 5.19.38: סגור - רק ההודעה, בלי שום תוכן
         lockSchool(MARATHON.school || "");
+        // נועה 29.10 (GA): לדעת לאיזה מרתון נכנסו – בית ספר, שכבה, עיר (לא פרטים אישיים). גם על השארת פרטים / הרשמה בהמשך
+        try { var gaM = { marathon_school: MARATHON.school || "", marathon_grade: MARATHON.grade || "", marathon_city: MARATHON.city || "", marathon_name: MARATHON.name || "" };
+              if (window.TELEM_GA_SET) TELEM_GA_SET(gaM); if (window.TELEM_GA) TELEM_GA("view_marathon", gaM); } catch (e) {}
         // תלם 5.19.38: בית הספר והשכבה קבועים לפי המרתון - לא שואלים את ההורה (השם של המרתון בכותרת אומר את זה)
         document.getElementById("field-school").hidden = true;
         // 5.19.55 (הלקוחה): כל מרתון הוא לשכבה אחת - אם אין שכבה במרתון, לוקחים אותה מהשם ("שכבת ז'" / "מרתון ז'")
