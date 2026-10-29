@@ -1,9 +1,9 @@
 // את-46 (נועה 29.10): Google Analytics בכל הטפסים – בלי מידע אישי.
-//  לגוגל נשלחת רק כתובת הדף בלי פרמטרים, חוץ מ: city, school, tracks, track, m, embed, lead, pending, already (קוד משפחה / טלפון / קוד תשלום / ref – לא).
+//  לגוגל נשלחת רק כתובת הדף בלי פרמטרים, חוץ מ: city, school, tracks, track, m, embed, lead, pending, already + utm_* (נועה 29.10: לדעת כמה נכנסו מכל SMS) (קוד משפחה / טלפון / קוד תשלום / ref – לא).
 //  לא מודדים: תצוגה מקדימה / עורך הנוסחים / בדיקות, טופס שנפתח מתוך מערכת הניהול (וכל מה שנפתח אחריו באותה לשונית), ולא מחוץ לאתר.
 //  אירועים (TELEM_GA): generate_lead (השארת פרטים), sign_up (הרשמה נשלחה), begin_checkout (מעבר לתשלום), purchase (תשלום אושר – בלי סכום).
 (function(){
-  var ID = "G-VHQ6QEBVV9", KEEP = ["city", "school", "tracks", "track", "m", "embed", "lead", "pending", "already"];
+  var ID = "G-VHQ6QEBVV9", KEEP = ["city", "school", "tracks", "track", "m", "embed", "lead", "pending", "already", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
   var no = false, q = location.search;
   try {
     if (location.hostname !== "telem-tirgul.github.io") no = true;
