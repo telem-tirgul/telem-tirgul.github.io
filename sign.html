@@ -515,7 +515,7 @@
   <form id="payForm" novalidate hidden>
     <div class="top-error form-error" id="topError" style="display:none;"></div>
     <div id="fieldsBox"></div>
-    <div class="sg-note">פרט לא נכון? כתבו לנו בוואטסאפ: <a href="https://wa.me/972529067101">052-9067101</a></div>
+    <div class="sg-note">אפשר לעדכן או להשלים את הפרטים. שינוי בקורס, במסלול או בבית הספר – כתבו לנו בוואטסאפ: <a href="https://wa.me/972529067101">052-9067101</a></div>
     <section class="sec-card"><div class="sec-h">תנאי ההתקשרות</div>
       <div class="terms-box" id="termsBox"><p>טוען את התנאים...</p></div>
     </section>
@@ -881,18 +881,31 @@ function roField(label, val){
   const el = document.createElement("input"); el.type = "text"; el.readOnly = true; el.tabIndex = -1; el.className = "sg-hid"; el.value = val || "—"; wrap.appendChild(el);   // ל-PDF
   return wrap;
 }
-function roSection(title, rows){
+// 5.20.1 (נועה): ההורה יכול לעדכן / להשלים – הפרטים הקיימים כבר בפנים
+const GRADES = ["ה'", "ו'", "ז'", "ח'", "ט'", "י'", "יא'", "יב'"];
+function edField(key, label, val, type, req){
+  const wrap = document.createElement("div"); wrap.className = "field"; wrap.id = "field-" + key;
+  const lab = document.createElement("label"); lab.htmlFor = "f-" + key; lab.textContent = label + " "; if (req) { const r = document.createElement("span"); r.className = "req"; r.textContent = "*"; lab.appendChild(r); } wrap.appendChild(lab);
+  let el;
+  if (type === "grade") { el = document.createElement("select"); el.innerHTML = '<option value="">בחירה</option>'; const g0 = String(val || "").replace(/['"׳]/g, "") + "'";
+    GRADES.concat(val && GRADES.indexOf(g0) < 0 ? [val] : []).forEach(function(g){ const o = document.createElement("option"); o.value = g; o.textContent = g; if (g === g0 || g === val) o.selected = true; el.appendChild(o); }); }
+  else { el = document.createElement("input"); el.type = type || "text"; el.maxLength = 80; el.value = val || ""; if (type === "tel") el.inputMode = "tel"; if (key === "class_num") el.inputMode = "numeric"; }
+  el.id = "f-" + key; el.dataset.key = key; el.dataset.req = req ? "1" : "";
+  wrap.appendChild(el);
+  const err = document.createElement("div"); err.className = "error-msg"; err.textContent = "שדה חובה"; wrap.appendChild(err);
+  return wrap;
+}
+function section(title, rows){
   const fs = document.createElement("fieldset"), lg = document.createElement("legend"); lg.textContent = title; fs.appendChild(lg);
-  rows.forEach(function(r){ const row = document.createElement("div"); row.className = "row"; r.filter(Boolean).forEach(function(x){ row.appendChild(roField(x[0], x[1])); }); if (row.children.length) fs.appendChild(row); });
+  rows.forEach(function(r){ const row = document.createElement("div"); row.className = "row"; r.filter(Boolean).forEach(function(x){ row.appendChild(x); }); if (row.children.length) fs.appendChild(row); });
   $("fieldsBox").appendChild(fs);
 }
 function fillDetails(d){
   const ph = (t) => { const x = String(t || "").replace(/\D/g, ""); return x.length === 10 ? x.slice(0, 3) + "-" + x.slice(3) : x; };
-  const grade = [d.grade, d.class_num].filter(Boolean).join(" ");
-  roSection("פרטי התלמיד/ה", [[["שם פרטי תלמיד/ה", d.student_first], ["שם משפחה תלמיד/ה", d.student_last]], [d.student_phone ? ["נייד תלמיד/ה", ph(d.student_phone)] : null]]);
-  roSection("בית הספר", [[["עיר", d.city], ["בית ספר", d.school]], [["שכבת לימוד", d.grade], ["מספר כיתה", d.class_num]]]);
-  roSection("הקורס", [[["קורס", d.course], d.track === "double" ? null : ["מקצוע", d.subject]], [["מסלול", TRK[d.track] || "—"]]]);
-  roSection("פרטי ההורה", [[["שם פרטי הורה", d.parent_first], ["שם משפחה הורה", d.parent_last]], [["טלפון הורה", ph(d.parent_phone)], ["אימייל", d.parent_email]]]);
+  section("פרטי התלמיד/ה", [[edField("student_first", "שם פרטי תלמיד/ה", d.student_first, "text", true), edField("student_last", "שם משפחה תלמיד/ה", d.student_last)], [edField("student_phone", "נייד תלמיד/ה", ph(d.student_phone), "tel")]]);
+  section("בית הספר", [[roField("עיר", d.city), roField("בית ספר", d.school)], [edField("grade", "שכבת לימוד", d.grade, "grade"), edField("class_num", "מספר כיתה", d.class_num)]]);
+  section("הקורס", [[roField("קורס", d.course), d.track === "double" ? null : roField("מקצוע", d.subject)], [roField("מסלול", TRK[d.track] || "—")]]);
+  section("פרטי ההורה", [[edField("parent_first", "שם פרטי הורה", d.parent_first, "text", true), edField("parent_last", "שם משפחה הורה", d.parent_last)], [edField("parent_phone", "טלפון הורה", ph(d.parent_phone), "tel", true), edField("parent_email", "אימייל", d.parent_email, "email")]]);
 }
 var TERMS_OK = false;
 function updateSubmitAvailability(){ submitBtn.disabled = !(TERMS_OK && $("f-consent").checked && $("f-terms").checked && sigHas); }
@@ -919,22 +932,28 @@ else rpcRaw("sign_link_get", { p_code: CODE }).then(function(d){
 
 $("payForm").addEventListener("submit", function(e){
   e.preventDefault();
-  let ok = true;
+  let ok = true; const values = {};
+  document.querySelectorAll("#fieldsBox [data-key]").forEach(function(el){ const k = el.dataset.key, v = (el.value || "").trim();
+    let bad = el.dataset.req === "1" && !v;
+    if (!bad && v && /phone/.test(k)) bad = !/^0\d{8,9}$/.test(v.replace(/\D/g, ""));
+    if (!bad && v && k === "parent_email") bad = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+    const f = $("field-" + k); if (f) { f.classList.toggle("invalid", bad); const em = f.querySelector(".error-msg"); if (em) em.textContent = !v ? "שדה חובה" : /phone/.test(k) ? "מספר לא תקין" : "כתובת לא תקינה"; }
+    if (bad) ok = false; values[k] = v; });
   $("termsError").textContent = $("f-terms").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-terms").checked) ok = false;
   $("consentError").textContent = $("f-consent").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-consent").checked) ok = false;
   const signature = signatureImage(); if (!signature) { $("sigError").textContent = "יש לחתום כדי להמשיך."; ok = false; }
   if (!ok || !TERMS_OK) { topError.textContent = "יש להשלים את המסומן."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); else topError.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
   if (window.TELEM_OK) TELEM_OK();
   topError.style.display = "none"; submitBtn.disabled = true; submitBtn.textContent = "שומרים…";
-  const signer = [LINK.parent_first, LINK.parent_last].filter(Boolean).join(" ");
+  const signer = [($("f-parent_first") || {}).value, ($("f-parent_last") || {}).value].filter(Boolean).join(" ").trim() || [LINK.parent_first, LINK.parent_last].filter(Boolean).join(" ");
   makeSignedPdf("אישור תנאי התקשרות" + (LINK.course ? " - " + LINK.course : ""), signer).then(function(pdf){
     if (PREVIEW) { if (pdf) { const a = document.createElement("a"); a.href = pdf; a.download = "טופס-חתימה-תצוגה-מקדימה.pdf"; document.body.appendChild(a); a.click(); }
       showDone("תצוגה מקדימה – הטופס לא נשמר."); return; }
-    callSupabase("submit_sign_link", { code: CODE, terms_accepted: true, signature: signature, pdf: pdf, website: $("f-website").value })
+    callSupabase("submit_sign_link", { code: CODE, terms_accepted: true, values: values, signature: signature, pdf: pdf, website: $("f-website").value })
       .then(function(){ showDone("תודה! הטופס נחתם ונשמר אצלנו."); })
       .catch(function(err){
         const m = String(err && err.message || "");
-        topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: " + PHONE : /signature/.test(m) ? "יש לחתום כדי להמשיך." : "לא הצלחנו לשמור. נסו שוב, ואם זה חוזר – התקשרו: " + PHONE;
+        topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: " + PHONE : /signature/.test(m) ? "יש לחתום כדי להמשיך." : /invalid (phone|email|name|field)/.test(m) ? "יש לבדוק את הפרטים המסומנים." : "לא הצלחנו לשמור. נסו שוב, ואם זה חוזר – התקשרו: " + PHONE;
         topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = "אישור וחתימה";
       });
   });
