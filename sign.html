@@ -851,21 +851,23 @@ var LINK = null;
 function showBad(msg){ $("introBox").hidden = true; $("loadBox").hidden = true; $("payForm").hidden = true; $("doneBox").hidden = false; $("doneBox").innerHTML = '<div class="bad-box"></div>'; $("doneBox").firstChild.textContent = msg; }
 function showDone(msg){ $("introBox").hidden = true; $("loadBox").hidden = true; $("payForm").hidden = true; $("doneBox").hidden = false; $("doneBox").innerHTML = '<div class="done-box"></div>'; $("doneBox").firstChild.textContent = msg; window.scrollTo(0, 0); }
 // התנאים – מטופס ההרשמה עצמו (אותו נוסח), כולל הנוסח שפורסם במערכת
-function loadTerms(city){
+// מרתון (נועה 1.11): אחרי התעניינות + הרשמה טלפונית – התנאים של טופס המרתון
+function loadTerms(city, mar){
   const box = $("termsBox");
-  return fetch("register.html", { cache: "no-cache" }).then(r => r.text()).then(function(html){
+  return fetch(mar ? "marathon.html" : "register.html", { cache: "no-cache" }).then(r => r.text()).then(function(html){
     const doc = new DOMParser().parseFromString(html, "text/html"), src = doc.getElementById("termsBox");
     if (!src) throw new Error("no terms");
     src.querySelectorAll("script, style, input, button").forEach(n => n.remove());
     box.innerHTML = ""; [].slice.call(src.childNodes).forEach(n => box.appendChild(document.importNode(n, true)));
-    const tc = doc.querySelector('[data-t="t077"]'); if (tc) $("termsText").textContent = tc.textContent.trim();
+    const CK = mar ? "t057" : "t077";
+    const tc = doc.querySelector('[data-t="' + CK + '"]'); if (tc) $("termsText").textContent = tc.textContent.trim();
     const s = CONFIG.supabase;
-    const texts = fetch(s.url + "/rest/v1/form_texts?select=key,value&form=eq.register", { headers: { apikey: s.anonKey } }).then(r => r.ok ? r.json() : []).then(function(rows){
+    const texts = fetch(s.url + "/rest/v1/form_texts?select=key,value&form=eq." + (mar ? "marathon" : "register"), { headers: { apikey: s.anonKey } }).then(r => r.ok ? r.json() : []).then(function(rows){
       const m = {}; (rows || []).forEach(x => { m[x.key] = x.value; });
       box.querySelectorAll("[data-t]").forEach(function(el){ const v = m[el.getAttribute("data-t")]; if (v != null && window.TX && TX.clean) el.innerHTML = TX.clean(v); });
-      if (m.t077 != null && window.TX && TX.toPlain) { const d = document.createElement("div"); d.innerHTML = TX.clean(m.t077); $("termsText").textContent = d.textContent.trim(); }
+      if (m[CK] != null && window.TX && TX.toPlain) { const d = document.createElement("div"); d.innerHTML = TX.clean(m[CK]); $("termsText").textContent = d.textContent.trim(); }
     }).catch(function(){});
-    const mats = rpcRaw("reg_prices_public", { payload: null }).catch(() => rpcRaw("reg_prices_public", {})).then(function(all){
+    const mats = mar ? Promise.resolve() : rpcRaw("reg_prices_public", { payload: null }).catch(() => rpcRaw("reg_prices_public", {})).then(function(all){
       const x = all && city && all[city], note = document.getElementById("materialsTermsNote");
       if (note) note.style.display = (x && Number(x.materialsFee) > 0) ? "block" : "none";
     }).catch(function(){});
@@ -916,7 +918,7 @@ function fill(d){
   const t1 = document.createElement("div"); t1.textContent = "שלום" + (d.parent_first ? " " + d.parent_first : "") + ", זה הטופס לאישור תנאי ההתקשרות עבור "; const st = document.createElement("strong"); st.textContent = d.student_first || "התלמיד/ה"; t1.appendChild(st); t1.appendChild(document.createTextNode(d.course ? " – " + d.course + "." : "."));
   const t2 = document.createElement("div"); t2.className = "sg-sub"; t2.textContent = "קוראים את התנאים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.";
   ib.appendChild(t1); ib.appendChild(t2);
-  loadTerms(d.city).then(function(){ TERMS_OK = true; updateSubmitAvailability(); }).catch(function(){});
+  loadTerms(d.city, /^מרתון/.test(String(d.course || ""))).then(function(){ TERMS_OK = true; updateSubmitAvailability(); }).catch(function(){});
   $("loadBox").hidden = true; $("payForm").hidden = false; sigResize();
 }
 const SAMPLE = { ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", grade: "ז'", class_num: "3", school: "בית ספר לדוגמה", city: "ראש העין", course: "תרגול שוטף תשפ\"ז", track: "single", subject: "מתמטיקה", parent_first: "מיכל", parent_last: "לוי", parent_phone: "0500000001", parent_email: "parent@example.com" };
