@@ -557,6 +557,7 @@
   #fsFirstTime .price-option:is(.selected, :has(input:checked)) :is(.opt-title, .opt-price){ color:#fff !important; }
   #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
   #field-first-time.invalid .price-options{ border-color:#C9554F; }
+  .top-error.amt-note{ background:#FFF7E0 !important; border-color:#E0B84F !important; color:#5A4300 !important; }
 </style>
 <link rel="stylesheet" href="site-look.css?v=5"><script src="site-look.js?v=7"></script>
 <script>
@@ -1762,10 +1763,23 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       saveRegPdf(signedPdf, false);
       try {
         sessionStorage.setItem("reg_studentFullName", studentFirst + " " + studentLast);
-        sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(Number(res.amount))));
+        // אבטחה (כל-16, icredit-33): המחיר נקבע בשרת לפי ההרשמות שלנו – מציגים את הסכום שהשרת קבע; אם שונה ממה שסומן בטופס – אומרים
+        var srvAmt = Number(res && res.amount), cliAmt = getAmount(), amtChanged = !!(srvAmt && cliAmt && srvAmt !== Number(cliAmt));
+        var fmtA = function(n){ return Number(n).toLocaleString("he-IL") + " ₪"; };
+        var sm = regSummary(srvAmt || cliAmt); if (amtChanged) sm.amount_note = (srvAmt < cliAmt
+          ? "בהתאם לרישומים במערכת, התלמיד/ה זכאי/ת למחיר המוזל למשתתפים חוזרים, ולכן הסכום לתשלום הוא " + fmtA(srvAmt) + " (ולא " + fmtA(cliAmt) + " כפי שצוין בטופס)."
+          : "בהתאם לרישומים במערכת, זהו המרתון הראשון של התלמיד/ה בשנת הלימודים הנוכחית, ולכן הסכום לתשלום הוא " + fmtA(srvAmt) + " (ולא " + fmtA(cliAmt) + " כפי שצוין בטופס). לבירורים: 052-9067101.");
+        sessionStorage.setItem("reg_summary", JSON.stringify(sm));
         sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })());   // את-26: "לנסות שוב" – הטופס הרגיל (לא מצב הטמעה)
       } catch (err) {}
       if (CONFIG.provider === "none" || isPhonePay()) { goTop(tyUrl("pending=1" + (isPhonePay() ? "&phone=1" : ""))); return; }
+      if (amtChanged) {   // לפני המעבר לתשלום באשראי – רואים את הסכום הנכון
+        topError.style.display = "block"; topError.classList.add("amt-note"); topError.textContent = "";
+        var t = document.createElement("div"); t.textContent = "ההרשמה נקלטה בהצלחה. " + sm.amount_note;
+        var b = document.createElement("button"); b.type = "button"; b.className = "btn primary"; b.style.marginTop = "10px"; b.textContent = "המשך לתשלום";
+        b.onclick = function(){ goToPayment("marathon", res.order_id, res.pay_secret); };
+        topError.appendChild(t); topError.appendChild(b); try { topError.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
+        return; }
       goToPayment("marathon", res.order_id, res.pay_secret);
     }).catch(function(err){
       console.error("submit_marathon failed:", err);

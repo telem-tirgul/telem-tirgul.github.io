@@ -244,6 +244,7 @@
     if (x.event || x.track) row(x.event ? tyT("ty.row_mar") : tyT("ty.row_track"), x.event || x.track);
     if (x.amount != null && !isNaN(x.amount)) row(pending || preview ? tyT("ty.row_due") : tyT("ty.row_paid"), Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
     if (x.amount != null && !isNaN(x.amount) && pending && !preview) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = tyT("ty.unpaid"); ab.appendChild(nt); } }   // 5.19.93 (נועה)
+    if (x.amount_note) row("", x.amount_note);   // אבטחה (כל-16): הסכום נקבע בשרת – אם שונה ממה שסומן בטופס
     $("sumT").textContent = tyT("ty.sum_t"); $("meetT").textContent = tyT("ty.meet_t");
     $("sumT").hidden = false; box.hidden = false;
     if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false; }
