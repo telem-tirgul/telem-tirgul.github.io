@@ -862,6 +862,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     ["mar.line2", "במפגשים אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור – שורה שנייה (כמה מפגשים)", {}, []],
     ["mar.line2_one", "במפגש אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור – שורה שנייה (מפגש אחד)", {}, []],
     ["mar.extra_rh", "ניתן להגיע גם למועדי תרגול נוספים עד מועד המבחן, בתיאום מראש איתנו.", "תיאור – תוספת בראש העין", {}, []],
+    // 5.20.36 (נועה 2.11): תוספת לכל עיר – ריק = בלי תוספת
+    ["mar.extra_hs", "", "תיאור – תוספת בהוד השרון (ריק = בלי תוספת)", {}, []],
+    ["mar.extra_ks", "", "תיאור – תוספת בכפר סבא (ריק = בלי תוספת)", {}, []],
     ["mar.legend1", "המפגשים - ימים ושעות", "כותרת המפגשים (כשיש קבוצה אחת)", {}, []],
     ["mar.intro1", "ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח.", "הסבר מתחת למפגשים (כשיש קבוצה אחת)", {}, []],
     ["mar.full", "הקבוצה מלאה", "קבוצה מלאה", {}, []],
@@ -957,12 +960,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
   // 5.19.100: בעורך הנוסחים במערכת – תיאור המרתון מתעדכן בתצוגה
   if (/[?&]txedit=1(&|$)/.test(location.search)) document.addEventListener("telem-texts", function(){ if (MARATHON) { try { renderGroups(); } catch(e) {} } });
-  function renderGroups(){
-    var box = document.getElementById("groupOptions"), gs = (MARATHON && MARATHON.groups) || [];
-    box.innerHTML = "";
-    if (!gs.length) { box.innerHTML = '<div class="hint">אין כרגע קבוצות פתוחות להרשמה.</div>'; return; }
     // תלם 5.19.37: התיאור לפי המפגשים האמיתיים (מספר ומשך), לא טקסט קבוע
-    (function(){ var ms = meetingsOf(gs[0]) || [], mins = function(m){ var a = String(m.start || "").split(":"), z = String(m.end || "").split(":"); return (Number(z[0]) * 60 + Number(z[1] || 0)) - (Number(a[0]) * 60 + Number(a[1] || 0)); };
+  function marDesc(ms, city){ ms = ms || []; var mins = function(m){ var a = String(m.start || "").split(":"), z = String(m.end || "").split(":"); return (Number(z[0]) * 60 + Number(z[1] || 0)) - (Number(a[0]) * 60 + Number(a[1] || 0)); };
       // תלם 5.19.38: משך בעברית רגילה - שעה ורבע, שעתיים וחצי, שעתיים ו-40 דקות...
       var durTxt = function(d){ var h = Math.floor(d / 60), m = d % 60, H = ["", "שעה", "שעתיים", "שלוש שעות", "ארבע שעות", "חמש שעות"][h] || (h + " שעות");
         if (!h) return d + " דקות"; if (!m) return H; var M = m === 15 ? "ורבע" : m === 30 ? "וחצי" : m === 45 ? "ושלושה רבעים" : "ו-" + m + " דקות"; return H + " " + M; };
@@ -981,9 +980,17 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         : "המרתון כולל " + nTxt + (!same ? "" : " של " + durTxt(ds[0]) + (n > 1 ? " כל אחד" : "")) + ".";
       var line2 = n > 1 ? tt("mar.line2") : tt("mar.line2_one");
       // תלם 5.19.41: ראש העין - אפשר להגיע גם למועדי תרגול נוספים עד המבחן, בתיאום
-      var extra = MARATHON && MARATHON.city === "ראש העין" ? '<span class="mar-extra">' + tt("mar.extra_rh") + '</span>' : "";
-      if (n) document.getElementById("marInfoDesc").innerHTML = line1 + "<br>" + line2 + extra;
-    })();
+      // 5.20.36: תוספת לפי העיר (נערכת במערכת: ⚙ ← נוסחי הטפסים ← מרתון); ריק = בלי
+      var xk = { "ראש העין": "mar.extra_rh", "הוד השרון": "mar.extra_hs", "כפר סבא": "mar.extra_ks" }[city], xt = xk ? (window.TX ? window.TX.text(xk) : MTD[xk]) : "";
+      var extra = xt ? '<span class="mar-extra">' + tt(xk) + '</span>' : "";
+      return n ? line1 + "<br>" + line2 + extra : "";
+  }
+  window.MAR_DESC = marDesc;   // 5.20.36: מערכת הניהול מציגה בעריכת המרתון את אותו תיאור
+  function renderGroups(){
+    var box = document.getElementById("groupOptions"), gs = (MARATHON && MARATHON.groups) || [];
+    box.innerHTML = "";
+    if (!gs.length) { box.innerHTML = '<div class="hint">אין כרגע קבוצות פתוחות להרשמה.</div>'; return; }
+    { var dh = marDesc(meetingsOf(gs[0]) || [], MARATHON && MARATHON.city); if (dh) document.getElementById("marInfoDesc").innerHTML = dh; }
     gs.forEach(function(g){
       var full = g.seats_left != null && g.seats_left <= 0;
       var lab = document.createElement("label"); lab.className = "price-option" + (full ? " full" : "");
