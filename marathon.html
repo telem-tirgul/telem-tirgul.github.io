@@ -1533,6 +1533,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       try { var nmA = ((document.getElementById("f-student-first").value || "") + " " + (document.getElementById("f-student-last").value || "")).trim();
             sessionStorage.setItem("reg_already", JSON.stringify({ name: nmA, event: (MARATHON && MARATHON.name) || "מרתון מתמטיקה" })); } catch (e) {}
       goTop(tyUrl("already=1")); return; }
+    else if (/needs review/.test(m)) {   // אבטחה (כל-21, 3.11): אותו שם בלי טלפון מוכר וכבר רשום – לא שומרים, לא מגלים; נחזור אליהם
+      topError.style.display = "none"; var rn = document.getElementById("reviewNote");
+      if (!rn) { rn = document.createElement("div"); rn.id = "reviewNote"; rn.setAttribute("role", "status"); rn.style.cssText = "background:#EAF6EC;border:1.5px solid #8CC79A;color:#1E5B2C;border-radius:12px;padding:14px 16px;margin:12px 0;font-size:16px;line-height:1.6;white-space:pre-line;font-weight:600;"; topError.parentNode.insertBefore(rn, topError.nextSibling); }
+      rn.textContent = "קיבלנו את הפרטים, נחזור אליכם בקרוב.\nלשאלות: 052-9067101"; rn.scrollIntoView({ behavior: "smooth", block: "center" });
+      submitBtn.disabled = true; submitBtn.textContent = "הפרטים נשלחו"; return; }
     else if (m) console.warn("submit error:", m);   // נועה 25.10: בלי קוד שגיאה בטופס
     topError.style.display = "block";
     topError.scrollIntoView({ behavior: "smooth", block: "center" });
