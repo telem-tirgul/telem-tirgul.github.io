@@ -942,6 +942,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
   if (NO_TERMINAL) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; document.getElementById("payPhoneOnly").hidden = false; }
+  // נועה 3.11: קישור "נרשמו בטלפון" (register.html?city=…&phone=1) – ממלאים את כל הפרטים וחותמים; התשלום מטופל מולנו בטלפון (בלי אשראי בטופס)
+  var PHONE_REG = /[?&]phone=1(&|$)/.test(location.search);
+  if (PHONE_REG) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; var po = document.getElementById("payPhoneOnly"); po.hidden = false; po.removeAttribute("data-t");
+    po.innerHTML = "<b>📞 נרשמתם אצלנו בטלפון</b> – התשלום מטופל מולנו בטלפון. נא למלא את כל הפרטים, לחתום ולשלוח כדי להשלים את ההרשמה."; }
   document.querySelectorAll('input[name="paymethod"]').forEach(function(r){ r.addEventListener("change", paintPayPhone); });
   if (EXPLICIT_PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר ולא עובר לתשלום"; document.body.insertBefore(pb, document.body.firstChild); }
   paintPayPhone();
