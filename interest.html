@@ -537,11 +537,11 @@
       <div class="row">
         <div class="field" id="field-city"><label for="f-city"><span data-t="t010">עיר</span> <span class="req">*</span></label><select id="f-city"><option value="" disabled selected data-t="t011">בחרו עיר</option><option>הוד השרון</option><option>כפר סבא</option><option>ראש העין</option><option value="אחר">עיר אחרת</option></select><div class="error-msg" data-t="t012">שדה חובה</div></div>
         <div class="field" id="field-school"><label for="f-school"><span data-t="t013">בית ספר</span></label><select id="f-school"><option value="">בחרו עיר תחילה</option></select><div class="error-msg">שדה חובה</div></div>
-        <div class="field" id="field-school-other" hidden><label for="f-school-other"><span>שם בית הספר</span> <span class="req">*</span></label><input type="text" id="f-school-other" maxlength="60"><div class="error-msg">נא לכתוב את שם בית הספר</div></div>
       </div>
       <div class="row">
+        <div class="field" id="field-school-other" hidden><label for="f-school-other"><span>שם בית הספר</span> <span class="req">*</span></label><input type="text" id="f-school-other" maxlength="60"><div class="error-msg">נא לכתוב את שם בית הספר</div></div><!-- נועה 3.11: "אחר" – בשורה של השכבה, השכבה עוברת לעמודה השנייה -->
         <div class="field"><label for="f-grade" data-t="t014">שכבת לימוד</label><select id="f-grade"><option value="" data-t="t015">בחרו</option><option>ה'</option><option>ו'</option><option>ז'</option><option>ח'</option><option>ט'</option><option>י'</option><option>יא'</option><option>יב'</option></select></div>
-        <div></div>
+        <div id="gradePad"></div>
       </div>
       <div class="row">
         <div class="field"><label for="f-math" data-t="t016">רמה במתמטיקה</label><select id="f-math"><option value="" data-t="t017">בחרו</option><option data-t="t018">עוד אין הקבצות</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select><input id="f-math-other" type="text" maxlength="40" placeholder="איזו הקבצה?" aria-label="הקבצה במתמטיקה - אחר" hidden style="margin-top:6px"></div>
@@ -649,7 +649,7 @@ function schoolOpts(city){
   [...$("f-school").options].slice(1).forEach((o, i) => { o.textContent = all[i]; o.value = all[i]; });
   schOther();
 }
-function schOther(){ const w = $("field-school-other"); if (!w) return; const on = $("f-school").value === "אחר"; w.hidden = !on; if (!on) $("f-school-other").value = ""; }
+function schOther(){ const w = $("field-school-other"); if (!w) return; const on = $("f-school").value === "אחר"; w.hidden = !on; const gp = $("gradePad"); if (gp) gp.hidden = on; if (!on) $("f-school-other").value = ""; }
 $("f-school").addEventListener("change", () => { schOther(); $("field-school").classList.remove("invalid"); });
 const schVal = () => $("f-school").value === "אחר" ? ($("f-school-other").value.trim() || null) : ($("f-school").value || null);
 $("f-city").addEventListener("change", () => { schoolOpts($("f-city").value); renderTracks(); });
