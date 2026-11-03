@@ -1743,7 +1743,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // תלם 5.19.40: הטופס החתום נשמר בדפדפן (בלשונית הזו בלבד) - בדף התודה יש כפתור "הורדת פרטי ההרשמה"
     // תלם 5.19.40: סיכום לדף התודה - שם, המרתון, המפגשים, סכום
     function regSummary(amount){ var ev = pdfEvent() || {};
-      return { kind: "marathon", name: studentFirst + " " + studentLast, event: ev.name || "מרתון מתמטיקה", track: ev.name || "מרתון מתמטיקה", meetings: (ev.meetings || []), amount: amount }; }
+      return { kind: "marathon", city: (MARATHON && MARATHON.city) || "", school: (MARATHON && MARATHON.school) || "", name: studentFirst + " " + studentLast, event: ev.name || "מרתון מתמטיקה", track: ev.name || "מרתון מתמטיקה", meetings: (ev.meetings || []), amount: amount }; }
     function saveRegPdf(pdf, isPreview){
       try { sessionStorage.removeItem("reg_pdf"); sessionStorage.removeItem("reg_pdf_name"); } catch (e) {}
       if (!pdf) return;

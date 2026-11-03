@@ -1839,7 +1839,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     makeSignedPdf("טופס הרשמה לתרגולים", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
     if (isPreviewNow()) {
       saveRegPdf(signedPdf, true);   // תלם 5.19.42: לא מורידים אוטומטית - כפתור הורדה בדף התודה (כמו במרתון)
-      try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: (cityEl && cityEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
+      try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
       setTimeout(function(){ location.href = new URL("thank-you.html?preview=1", location.href).href; }, 600); return;
     }
     const payload = {
@@ -1866,7 +1866,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       saveRegPdf(signedPdf, false);
       try {
         sessionStorage.setItem("reg_studentFullName", studentFirst + " " + studentLast);
-        sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: (cityEl && cityEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
+        sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
         sessionStorage.setItem("reg_form_url", location.href);
       } catch (err) {}
       if (CONFIG.provider === "none" || isPhonePay()) { location.href = new URL("thank-you.html?pending=1" + (isPhonePay() ? "&phone=1" : ""), location.href).href; return; }
