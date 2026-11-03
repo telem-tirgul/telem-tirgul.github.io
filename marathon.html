@@ -375,6 +375,9 @@
   .hero h1 .line{ width:26px; height:1.5px; background:rgba(241,217,166,.6); } .hero h1 .line::before{ display:none; }
   .hero .subtitle{ color:#fff; font-family:'Heebo',sans-serif; font-weight:900; font-size:clamp(22px,6vw,30px); line-height:1.25; letter-spacing:0; margin:0; text-wrap:balance; }
 
+  html.sig-only .reg-part-h{ display:none !important; }
+  html.sig-only #termsBox{ max-height:none !important; overflow:visible !important; }
+  html.sig-only .amount-row, html.sig-only #amountBreakdown, html.sig-only #field-payphone, html.sig-only .pm-lock, html.sig-only #fsFirstTime{ display:none !important; }
   /* כרטיסים */
   .mar-info, .layout-side > fieldset, .layout-main > fieldset, .pay-card{ background:var(--paper); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:18px 16px 6px; margin:0 0 14px; }
   .mar-info{ border-inline-start:1px solid var(--border); padding:16px; font-size:15.5px; line-height:1.7; position:relative; padding-inline-start:52px; }
@@ -1057,7 +1060,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         // 5.19.91 (נועה): "הרשמה ותשלום ל<מרתון>" ובשורה השנייה בתוך התגית – השכבה ובית הספר
         { var baseN = String(MARATHON.name || "").replace(/\s*·.*$/, "").replace(/\s*שכבת\s*\S+/, "").trim() || "מרתון מתמטיקה";
           var gr0 = MARATHON.grade ? "שכבה " + String(MARATHON.grade).replace(/['"׳]/g, "") + "'" : "";
-          document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") });
+          document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") }); if (document.documentElement.classList.contains("sig-only")) document.querySelector(".subtitle").firstChild.textContent = "אישור תנאי התקשרות";
           var sl2 = document.getElementById("subtitleLocation"); sl2.textContent = [gr0, MARATHON.school].filter(Boolean).join(" · "); sl2.className = "sub-l2"; }
         document.title = (MARATHON.name || "מרתון מתמטיקה") + " - תלם";
         // הקבצה: (1) מה שהוגדר במרתון (5.19.35), (2) אחרת - הרשימה של בית הספר (מסך "בתי ספר", קובץ 78, תלם 5.19.70), (3) אחרת - ברירת המחדל. שדה חובה.
@@ -1169,11 +1172,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const isPhonePay = () => payPhoneEl.checked;
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
   const isCardPay = () => document.getElementById("f-paycard").checked;
-  const SUBMIT_TXT = () => isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
+  const SUBMIT_TXT = () => /[?&]phone=1(&|$)/.test(location.search) ? "אישור וחתימה" : isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
-    const c = document.getElementById("consentText"); c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;
-    if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
+    const c = document.getElementById("consentText"); c.textContent = /[?&]phone=1(&|$)/.test(location.search) ? "אני מאשר/ת שהפרטים נכונים." : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
+    if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור וחתימה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
     document.getElementById("field-payphone").classList.remove("invalid");
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
@@ -1599,8 +1602,13 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (r.value === "reg" && r.checked) setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }); });
   // נועה 3.11: קישור "נרשמו בטלפון" (marathon.html?m=…&phone=1) – ישר להרשמה (בלי "רק להשאיר פרטים" ובלי בחירת אופן תשלום); ממלאים, חותמים ושולחים. התשלום מטופל מולנו בטלפון
   if (/[?&]phone=1(&|$)/.test(location.search)) { var rr = document.querySelector('input[name=mkmode][value=reg]'); if (rr) { rr.checked = true; document.getElementById("fsMode").hidden = true; mkPaint(); }
-    payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; var po = document.getElementById("payPhoneOnly"); po.hidden = false; po.removeAttribute("data-t");
-    po.innerHTML = "<b>📞 נרשמתם אצלנו בטלפון</b> – התשלום מטופל מולנו בטלפון. נא למלא את כל הפרטים, לחתום ולשלוח כדי להשלים את ההרשמה."; }
+    payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var ct = document.querySelector(".pay-card .card-title"); if (ct) { ct.removeAttribute("data-t"); ct.textContent = "אישור וחתימה"; }
+    // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
+    document.title = "תלם - אישור תנאי התקשרות";
+    var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "אישור תנאי התקשרות"; }
+    var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.textContent = "החתימה נשמרת יחד עם הטופס."; }
+    var tb = document.getElementById("termsBox"), pc = document.querySelector(".pay-card");
+    if (tb && pc) { var tc = document.createElement("section"); tc.className = "pay-card"; tc.innerHTML = '<div class="card-title">תנאי ההתקשרות</div>'; tc.appendChild(tb); pc.before(tc); } }   // נועה 3.11: בלי שום דבר על תשלום
   // הפרטים שמולאו – נשמרים בדפדפן (לשונית זו), כדי ש"להשלמת ההרשמה" בדף התודה יחזיר טופס ממולא
   var MK_FIELDS = ["f-student-first", "f-student-last", "f-grade", "f-student-phone", "f-hakbatsa", "f-school", "f-parent-first", "f-parent-last", "f-phone", "f-email"];
   function mkSaveDraft(){ try { var d = {}; MK_FIELDS.forEach(function(id){ var e = document.getElementById(id); if (e) d[id] = e.value; });
@@ -1788,6 +1796,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         sessionStorage.setItem("reg_summary", JSON.stringify(sm));
         sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })());   // את-26: "לנסות שוב" – הטופס הרגיל (לא מצב הטמעה)
       } catch (err) {}
+      if (/[?&]phone=1(&|$)/.test(location.search)) { goTop(tyUrl("signed=1")); return; }   // נועה 3.11: חתימה על התנאים – בלי הודעות תשלום
       if (CONFIG.provider === "none" || isPhonePay()) { goTop(tyUrl("pending=1" + (isPhonePay() ? "&phone=1" : ""))); return; }
       if (amtChanged) {   // לפני המעבר לתשלום באשראי – רואים את הסכום הנכון
         topError.style.display = "block"; topError.classList.add("amt-note"); topError.textContent = "";

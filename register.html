@@ -293,6 +293,19 @@
   .terms-box ol{ padding-inline-start:20px; margin:4px 0; }
   .terms-box li{ margin:3px 0; }
 
+  /* נועה 3.11: כמו המרתון – תיבה בז' בראש, בחירת מסלול בכרטיסים (בלי מספר), כפתור השליחה בתוך הכרטיס האחרון */
+  .reg-info{ background:#F3E3C3; border-radius:18px; padding:14px 16px; margin:0 0 14px; font-size:15.5px; line-height:1.7; color:#3A2A1F; }
+  #trackFs > legend::before{ content:""; counter-increment:none; width:22px; height:22px; border-radius:0; background:var(--accent); -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5z'/%3E%3Cpath d='m2 13 10 5 10-5'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5z'/%3E%3Cpath d='m2 13 10 5 10-5'/%3E%3C/svg%3E") center/contain no-repeat; }
+  #field-subject > label, #field-subject > select{ display:none !important; } #field-subject{ margin:0; } #trackInfo, #trackCard{ display:none !important; }
+  .trk-pick-list{ display:flex; flex-direction:column; gap:12px; margin-bottom:10px; } .trk-pick-list .tk{ margin:0 !important; }
+  .tp-radio{ flex:none; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; cursor:pointer; } .tp-radio input{ width:22px; height:22px; margin:0; accent-color:#5A1216; pointer-events:none; }
+  .tp-note{ font-size:13.5px; color:#4A3F38; }
+  #regForm .sec-card .submit-wrap{ margin:18px 0 4px !important; }
+  html.sig-only .subtitle #subtitleLocation, html.sig-only .subtitle #subLoc{ display:none !important; }
+  html.sig-only #trackFs > legend::before{ counter-increment:step; content:counter(step); -webkit-mask:none; mask:none; width:28px; height:28px; border-radius:50%; color:#fff; display:grid; place-items:center; font-size:14px; font-weight:800; }
+  html.sig-only #termsBox{ max-height:none !important; overflow:visible !important; }
+  html.sig-only .reg-info .sg-sub{ margin-top:6px; font-size:.93em; }
+  html.sig-only .amount-row, html.sig-only #amountBreakdown, html.sig-only #field-payphone, html.sig-only .pm-lock{ display:none !important; }
   .submit-wrap{ text-align:center; margin-top:30px; }
   button#submitBtn{
     font-family:'Heebo',sans-serif;
@@ -496,10 +509,45 @@
   <div class="subtitle"><span data-t="t003">טופס הרשמה לתרגולים השוטפים</span><span id="subtitleLocation" hidden></span><span class="sub-loc" id="subLoc" hidden></span></div>
 
   <!-- תלם 5.19.46: ההסבר על התשלום והאבטחה עבר למטה, ל"אופן התשלום" (כמו בטופס המרתון) -->
+  <div class="reg-info" id="regInfo"><span data-t="ri1">בוחרים מסלול, ממלאים את הפרטים וחותמים על טופס ההרשמה – ובסיום עוברים לתשלום מאובטח.</span></div><!-- נועה 3.11: כמו התיבה של המרתון -->
 
   <div class="top-error form-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
 
   <form id="regForm" novalidate>
+
+    <fieldset id="trackFs">
+      <legend>בחירת מסלול</legend>
+      <div id="trackPick" class="trk-pick-list"></div>
+
+      <div class="field" id="field-subject">
+        <label for="f-subject"><span data-t="t025">מסלול</span> <span class="req">*</span></label>
+        <select id="f-subject" name="subject" required>
+          <option value="" disabled selected data-t="t026">בחרו מסלול</option>
+          <option value="single" data-t="t027">מקצוע אחד - מתמטיקה או אנגלית, פעמיים בשבוע</option>
+          <option value="unlimited-single" data-t="t028">מקצוע אחד - מתמטיקה או אנגלית, ללא הגבלה בכמות המפגשים</option>
+          <option value="double" data-t="t029">שני מקצועות - מתמטיקה ואנגלית</option>
+        </select>
+        <div class="error-msg" data-t="t030">שדה חובה</div>
+      </div>
+
+      <div class="field" id="field-subject-choice" style="display:none;">
+        <label for="f-subject-choice"><span data-t="t031">מקצוע</span> <span class="req">*</span></label>
+        <select id="f-subject-choice" name="subjectChoice">
+          <option value="" disabled selected data-t="t032">בחרו מקצוע</option>
+          <option value="מתמטיקה">מתמטיקה</option>
+          <option value="אנגלית">אנגלית</option>
+        </select>
+        <div class="error-msg" data-t="t033">שדה חובה</div>
+      </div>
+
+      <div class="track-info empty" id="trackInfo">
+        <div class="track-info-title" id="trackInfoTitle">פרטים על המסלול כולל המחירים יופיעו לאחר בחירת המסלול</div>
+        <div class="track-info-body" id="trackInfoBody"></div>
+        <div class="track-info-prices" id="trackInfoPrices"></div>
+        <div class="track-info-note" id="trackInfoNote"></div>
+      </div>
+      <div id="trackCard" hidden></div><!-- את-37: כרטיס המסלול כמו באתר -->
+    </fieldset>
 
     <fieldset>
       <legend data-t="t004">פרטי התלמיד/ה</legend>
@@ -582,32 +630,7 @@
           <div class="error-msg" data-t="t023">שדה חובה</div>
         </div>
       </div>
-    </fieldset>
-
-    <fieldset>
-      <legend data-t="t024">מסלול ומקצוע</legend>
-
-      <div class="field" id="field-subject">
-        <label for="f-subject"><span data-t="t025">מסלול</span> <span class="req">*</span></label>
-        <select id="f-subject" name="subject" required>
-          <option value="" disabled selected data-t="t026">בחרו מסלול</option>
-          <option value="single" data-t="t027">מקצוע אחד - מתמטיקה או אנגלית, פעמיים בשבוע</option>
-          <option value="unlimited-single" data-t="t028">מקצוע אחד - מתמטיקה או אנגלית, ללא הגבלה בכמות המפגשים</option>
-          <option value="double" data-t="t029">שני מקצועות - מתמטיקה ואנגלית</option>
-        </select>
-        <div class="error-msg" data-t="t030">שדה חובה</div>
-      </div>
-
-      <div class="field" id="field-subject-choice" style="display:none;">
-        <label for="f-subject-choice"><span data-t="t031">מקצוע</span> <span class="req">*</span></label>
-        <select id="f-subject-choice" name="subjectChoice">
-          <option value="" disabled selected data-t="t032">בחרו מקצוע</option>
-          <option value="מתמטיקה">מתמטיקה</option>
-          <option value="אנגלית">אנגלית</option>
-        </select>
-        <div class="error-msg" data-t="t033">שדה חובה</div>
-      </div>
-
+      <div class="row">
       <div class="field" id="field-math-level" style="display:none;">
         <label for="f-math-level" data-t="t034">רמת לימוד מתמטיקה</label>
         <select id="f-math-level" name="mathLevel">
@@ -622,7 +645,7 @@
         </select>
       </div>
 
-      <div class="field" id="field-english-level" style="display:none;">
+        <div class="field" id="field-english-level" style="display:none;">
         <label for="f-english-level" data-t="t040">רמת לימוד אנגלית</label>
         <select id="f-english-level" name="englishLevel">
           <option value="" selected data-t="t041">בחר</option>
@@ -636,13 +659,7 @@
         </select>
       </div>
 
-      <div class="track-info empty" id="trackInfo">
-        <div class="track-info-title" id="trackInfoTitle">פרטים על המסלול כולל המחירים יופיעו לאחר בחירת המסלול</div>
-        <div class="track-info-body" id="trackInfoBody"></div>
-        <div class="track-info-prices" id="trackInfoPrices"></div>
-        <div class="track-info-note" id="trackInfoNote"></div>
       </div>
-      <div id="trackCard" hidden></div><!-- את-37: כרטיס המסלול כמו באתר -->
     </fieldset>
 
     <fieldset>
@@ -736,12 +753,12 @@
       <div class="sig-tools"><span id="sigHint" data-t="t080">החתימה נשמרת יחד עם טופס ההרשמה.</span><button type="button" id="sigClear" data-t="t081">ניקוי</button></div>
       <div class="error-msg" id="sigError"></div>
     </div>
+    <div class="submit-wrap"><!-- נועה 3.11: כפתור השליחה בתוך הכרטיס האחרון, כמו במרתון -->
+      <button type="submit" id="submitBtn">המשך לתשלום מאובטח</button>
+    </div>
     </section>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></label></div>
 
-    <div class="submit-wrap">
-      <button type="submit" id="submitBtn">המשך לתשלום מאובטח</button>
-    </div>
   </form>
 
   <footer><span data-t="t082">תלם - המרכז לשיעורי תרגול</span><br>
@@ -934,18 +951,28 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const payPhoneEl = document.getElementById("f-payphone");
   const isPhonePay = () => payPhoneEl.checked;
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
-  const SUBMIT_TXT = () => isPhonePay() ? "שליחת ההרשמה" : "המשך לתשלום מאובטח";
+  const PHONE_REG_ = /[?&]phone=1(&|$)/.test(location.search);
+  const SUBMIT_TXT = () => PHONE_REG_ ? "אישור וחתימה" : isPhonePay() ? "שליחת ההרשמה" : "המשך לתשלום מאובטח";
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
-    const c = document.getElementById("consentText"); c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;
-    if (!submitBtn.disabled || submitBtn.textContent === "המשך לתשלום מאובטח" || submitBtn.textContent === "שליחת ההרשמה") submitBtn.textContent = SUBMIT_TXT();
+    const c = document.getElementById("consentText"); c.textContent = /[?&]phone=1(&|$)/.test(location.search) ? "אני מאשר/ת שהפרטים נכונים." : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
+    if (!submitBtn.disabled || submitBtn.textContent === "המשך לתשלום מאובטח" || submitBtn.textContent === "שליחת ההרשמה" || submitBtn.textContent === "אישור וחתימה") submitBtn.textContent = SUBMIT_TXT();
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
   if (NO_TERMINAL) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; document.getElementById("payPhoneOnly").hidden = false; }
   // נועה 3.11: קישור "נרשמו בטלפון" (register.html?city=…&phone=1) – ממלאים את כל הפרטים וחותמים; התשלום מטופל מולנו בטלפון (בלי אשראי בטופס)
   var PHONE_REG = /[?&]phone=1(&|$)/.test(location.search);
-  if (PHONE_REG) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; var po = document.getElementById("payPhoneOnly"); po.hidden = false; po.removeAttribute("data-t");
-    po.innerHTML = "<b>📞 נרשמתם אצלנו בטלפון</b> – התשלום מטופל מולנו בטלפון. נא למלא את כל הפרטים, לחתום ולשלוח כדי להשלים את ההרשמה."; }
+  // נועה 3.11: בלי שום דבר על תשלום – רק הפרטים, התנאים והחתימה
+  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var sh = document.querySelector(".sec-card > .sec-h"); if (sh) { sh.removeAttribute("data-t"); sh.textContent = "אישור וחתימה"; }
+    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>זה הטופס לאישור תנאי ההתקשרות – תרגול שוטף תשפ\"ז.</div><div class=\"sg-sub\">ממלאים את הפרטים, קוראים את התנאים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.</div>";
+    // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
+    document.title = "תלם - אישור תנאי התקשרות";
+    var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.textContent = "החתימה נשמרת יחד עם הטופס."; }
+    var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "אישור תנאי התקשרות"; }
+    var tf = document.getElementById("trackFs"), fss = document.querySelectorAll("#regForm > fieldset");
+    if (tf && fss.length > 2) { fss[2].after(tf); var lg = tf.querySelector("legend"); if (lg) lg.textContent = "הקורס"; }
+    var tb = document.getElementById("termsBox"), card = document.querySelector("#regForm > .sec-card");
+    if (tb && card) { var tc = document.createElement("section"); tc.className = "sec-card"; tc.innerHTML = '<div class="sec-h">תנאי ההתקשרות</div>'; tc.appendChild(tb); card.before(tc); } }
   document.querySelectorAll('input[name="paymethod"]').forEach(function(r){ r.addEventListener("change", paintPayPhone); });
   if (EXPLICIT_PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר ולא עובר לתשלום"; document.body.insertBefore(pb, document.body.firstChild); }
   paintPayPhone();
@@ -1633,6 +1660,28 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     }
   }
 
+  // נועה 3.11: בחירת מסלול – כל המסלולים ככרטיסים (כמו בהתעניינות ובאתר); עיגול בחירה בתחילת שורת הכותרת, הצד השמאלי – פתיחת הפרטים
+  function trackPickPaint(){
+    var box = document.getElementById("trackPick"); if (!box || !window.TELEM_TK) return;
+    var city = cityEl.value, tbl = CONFIG.trackPricing[city], cur = subjectEl.value, jo = city ? juneOffset(city) : {};
+    var keys = [].slice.call(subjectEl.options).filter(function(o){ return o.value && !o.disabled && o.style.display !== "none" && !o.hidden; }).map(function(o){ return o.value; });
+    box.innerHTML = "";
+    keys.forEach(function(k){
+      var info = CONFIG.trackInfo[k]; if (!info) return; var pr = tbl && tbl[k];
+      var fees = tbl ? [{ amount: tbl.registrationFee, label: "דמי שיבוץ והרשמה", offset: !!jo.registration }].concat(tbl.materialsFee ? [{ amount: tbl.materialsFee, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: !!jo.materials }] : []) : [];
+      var extra = []; if (k === cur && tbl) { var ri = getRecurInfo(); if (ri) { var fm = String(firstMonthText(city) || "").replace(/<\/?li>/g, ""); if (fm) extra.push(fm); } if ((ri || {}).juneFree) extra.push("הקיזוז גדול מהתשלום החודשי - לכן אין תשלום על חודש יוני."); }
+      var w = document.createElement("div");
+      w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true });
+      var c = w.firstChild, h = c.querySelector(".tk-head") || c;
+      h.insertAdjacentHTML("afterbegin", '<label class="tp-radio" title="בחירת המסלול"><input type="radio" name="trkpick" value="' + k + '"' + (k === cur ? " checked" : "") + ' aria-label="בחירת המסלול: ' + String(info.title).replace(/"/g, "") + '"></label>');
+      c.classList.toggle("tp-on", k === cur); if (k === cur && c.tagName === "DETAILS") c.open = true; box.appendChild(c);
+    });
+    if (!tbl) box.insertAdjacentHTML("beforeend", '<div class="tp-note">המחירים יופיעו אחרי בחירת העיר (בחלק "בית הספר").</div>');
+  }
+  document.getElementById("trackPick").addEventListener("click", function(e){ var l = e.target.closest && e.target.closest(".tp-radio"); if (!l) return; e.preventDefault(); e.stopPropagation();
+    var v = l.querySelector("input").value; if (subjectEl.value === v) return; subjectEl.value = v; subjectEl.dispatchEvent(new Event("change", { bubbles: true })); setInvalid("field-subject", false); }, true);
+  var _updTrack = updateTrackInfo; updateTrackInfo = function(){ _updTrack(); var tc = document.getElementById("trackCard"); if (tc) tc.hidden = true; trackInfoBox.style.display = "none"; trackPickPaint(); };
+
   cityEl.addEventListener("change", function(){
     setInvalid("field-city", false);
     updateAmountDisplay();
@@ -1873,6 +1922,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
         sessionStorage.setItem("reg_form_url", location.href);
       } catch (err) {}
+      if (PHONE_REG) { location.href = new URL("thank-you.html?signed=1", location.href).href; return; }   // נועה 3.11: חתימה על התנאים – בלי הודעות תשלום
       if (CONFIG.provider === "none" || isPhonePay()) { location.href = new URL("thank-you.html?pending=1" + (isPhonePay() ? "&phone=1" : ""), location.href).href; return; }
       goToPayment("registration", res.order_id, res.pay_secret);
     }).catch(function(err){

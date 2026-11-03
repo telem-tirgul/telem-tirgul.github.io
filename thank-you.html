@@ -194,6 +194,7 @@
   // 5.19.100: אחרי שהנוסחים מהמערכת הגיעו (TX.ready; בכניסה הראשונה – עד 2 שניות)
   var tyMain = function(){
     var $ = function(id){ return document.getElementById(id); };
+    var signed = /[?&]signed=1/.test(location.search);   // נועה 3.11: "חתימה על התנאים" – בלי שום דבר על תשלום
     var pending = /[?&]pending=1/.test(location.search), phone = /[?&]phone=1/.test(location.search), preview = /[?&]preview=1/.test(location.search), paidRef = /[?&]ref=/.test(location.search);
     if (TY_EDIT) { preview = false; pending = phone = TYV === "phone"; paidRef = TYV === "paid"; }
     var box = $("sum");
@@ -245,6 +246,7 @@
     if (!x) return;
     if (x.name) row(tyT("ty.row_name"), x.name);
     if (x.event || x.track) row(x.event ? tyT("ty.row_mar") : tyT("ty.row_track"), x.event || x.track);
+    if (signed && x) x.amount = null;
     if (x.amount != null && !isNaN(x.amount)) row(pending || preview ? tyT("ty.row_due") : tyT("ty.row_paid"), Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
     if (x.amount != null && !isNaN(x.amount) && pending && !preview) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = tyT("ty.unpaid"); ab.appendChild(nt); } }   // 5.19.93 (נועה)
     if (x.amount_note) row("", x.amount_note);   // אבטחה (כל-16): הסכום נקבע בשרת – אם שונה ממה שסומן בטופס

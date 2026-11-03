@@ -190,12 +190,10 @@
     box-shadow:0 0 0 3px rgba(90,18,22,.12);
   }
 
-  /* נועה 3.11: "מעניין אותי" בתוך שורת הכותרת של הכרטיס; מסומן – כל המסגרת */
-  .ti-pick{ flex:none; margin-inline-start:auto; display:inline-flex; align-items:center; gap:7px; padding:6px 12px 6px 14px; border-radius:999px; border:1.5px solid #D9C8B4; background:#fff; color:#5A1216; font-weight:800; font-size:13.5px; white-space:nowrap; cursor:pointer; line-height:1; }
-  .ti-pick input{ width:20px; height:20px; margin:0; accent-color:#5A1216; pointer-events:none; }
-  .ti-card{ transition:box-shadow .15s, outline-color .15s; outline:3px solid transparent; outline-offset:2px; } .ti-card.ti-on{ outline-color:#5A1216; box-shadow:0 4px 14px rgba(90,18,22,.18) !important; }
-  .ti-card.ti-on .ti-pick{ background:#5A1216; border-color:#5A1216; color:#fff; } .ti-card.ti-on .ti-pick input{ accent-color:#fff; }
-  @media (max-width:520px){ .ti-card .tk-head{ flex-wrap:wrap; row-gap:10px; } .ti-card .tk-head > div:first-child{ flex:1 1 calc(100% - 50px); min-width:0; } .ti-card .ti-pick{ order:3; margin-inline-start:0; } }
+  /* נועה 3.11: תיבת סימון בלבד, בתחילת שורת הכותרת (מימין); הצד השמאלי – פתיחת הפרטים */
+  .ti-pick{ flex:none; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; margin-inline-end:2px; cursor:pointer; }
+  .ti-pick input{ width:24px; height:24px; margin:0; accent-color:#5A1216; pointer-events:none; cursor:pointer; }
+  /* נועה 3.11: בלי מסגרת סביב הכרטיס (כדי לא לפגוע בצבע של המסלול) – רק תיבת הסימון */
   .error-msg{ font-size:12.5px; color:var(--error); font-weight:700; min-height:15px; display:none; }
   .field.invalid .error-msg{ display:block; }
   .field.invalid input, .field.invalid select{ border-color:var(--error); }
@@ -291,6 +289,9 @@
   .terms-box ol{ padding-inline-start:20px; margin:4px 0; }
   .terms-box li{ margin:3px 0; }
 
+  #tracksFs > legend::before{ content:""; counter-increment:none; width:22px; height:22px; border-radius:0; background:var(--accent); -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5z'/%3E%3Cpath d='m2 13 10 5 10-5'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5z'/%3E%3Cpath d='m2 13 10 5 10-5'/%3E%3C/svg%3E") center/contain no-repeat; }
+  #tracksFs .tp-sub{ font-size:14px; color:#4A3F38; margin:-4px 0 12px; } #tracksBox{ display:flex; flex-direction:column; gap:12px; } #tracksBox .tk{ margin:0 !important; } #tracksFs[hidden]{ display:none; }
+  #intForm fieldset .submit-wrap{ margin:16px 0 6px !important; } #intForm fieldset .disclaimer{ margin:14px 0 0; }
   .submit-wrap{ text-align:center; margin-top:30px; }
   button#submitBtn{
     font-family:'Heebo',sans-serif;
@@ -520,8 +521,8 @@
   <div class="subtitle"><span data-t="t002">טופס התעניינות בתרגולים השוטפים</span><span id="subtitleLocation" class="sub-l2"></span></div>
   <div class="intro"><div id="introText">השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.</div></div>
   <div class="trk-pick" id="trackPick" hidden><div class="field"><label for="f-track" data-t="t037">מסלול</label><select id="f-track"></select></div></div><!-- את-25 (נועה 23.10): בחירת / החלפת מסלול -->
-  <div id="tracksBox"></div>
   <form id="intForm" novalidate>
+    <fieldset id="tracksFs"><legend>המסלולים</legend><div class="tp-sub">אפשר לסמן מסלול אחד או יותר שמעניין אתכם (לא חובה). לחיצה על המסלול – כל הפרטים והמחירים.</div><div id="tracksBox"></div></fieldset><!-- נועה 3.11: כמו המרתון – כרטיס בחירה בלי מספר -->
     <div class="top-error form-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
     <fieldset>
       <legend data-t="t003">פרטי התלמיד/ה</legend>
@@ -559,10 +560,10 @@
       </div>
       <div class="field"><label for="f-filled" data-t="t030">מי ממלא/ת את הטופס?</label><select id="f-filled"><option>הורה</option><option>תלמיד</option></select></div>
       <div class="field"><label for="f-notes" data-t="t031">הערות (לא חובה)</label><textarea id="f-notes" maxlength="2000" rows="3"></textarea></div>
+      <p class="disclaimer" data-t="t032">מילוי הטופס הוא להתעניינות בלבד ואינו מחייב בהרשמה, בתשלום או בכל התחייבות שהיא.</p>
+      <div class="submit-wrap"><button type="submit" id="submitBtn">שליחה</button></div><!-- נועה 3.11: כפתור השליחה בתוך הכרטיס האחרון -->
     </fieldset>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" tabindex="-1" autocomplete="off"></label></div>
-    <p class="disclaimer" data-t="t032">מילוי הטופס הוא להתעניינות בלבד ואינו מחייב בהרשמה, בתשלום או בכל התחייבות שהיא.</p>
-    <div class="submit-wrap"><button type="submit" id="submitBtn">שליחה</button></div>
   </form>
   <div id="doneBox" hidden><div class="done-box" data-t="t033">תודה! הפרטים התקבלו ונחזור אליכם בהקדם.</div></div>
 
@@ -701,9 +702,10 @@ function foldTrack(d){
 const IS_MAR = P_TRACKS.includes("marathon"), P_REG = P_TRACKS.filter(t => t !== "marathon");
 const TRK_SEL = new Set(P_REG);   // נועה 3.11: המסלולים שסומנו "מעניין אותי" (מהקישור – מסומנים מראש)
 // נועה 3.11: הסימון בתוך הכרטיס (בשורת הכותרת), וכשמסומן – כל המסגרת של הכרטיס מסומנת
-const trkPick = (t) => '<label class="ti-pick" title="המסלול הזה מעניין אותי"><input type="checkbox" data-trk="' + t + '"' + (TRK_SEL.has(t) ? " checked" : "") + '><span>מעניין אותי</span></label>';
-function trkPut(card, t){ const h = card.querySelector(".tk-head") || card.querySelector("summary") || card; const car = h.querySelector(".tk-car");
-  if (car) car.insertAdjacentHTML("beforebegin", trkPick(t)); else h.insertAdjacentHTML("beforeend", trkPick(t));
+// נועה 3.11: רק תיבת סימון (בלי טקסט), בתחילת שורת הכותרת – כמו ברשימת סימון; מסומן – כל המסגרת
+const trkPick = (t) => '<label class="ti-pick" title="סימון המסלול שמעניין אתכם"><input type="checkbox" data-trk="' + t + '"' + (TRK_SEL.has(t) ? " checked" : "") + ' aria-label="המסלול הזה מעניין אותי"></label>';
+function trkPut(card, t){ const h = card.querySelector(".tk-head") || card.querySelector("summary") || card;
+  h.insertAdjacentHTML("afterbegin", trkPick(t));
   card.classList.add("ti-card"); card.classList.toggle("ti-on", TRK_SEL.has(t)); card.dataset.trkc = t; return card; }
 let TRK_INIT = P_REG.length === 1 ? P_REG[0] : "";
 function trackPickFill(shutT){
@@ -765,6 +767,7 @@ function renderTracks(){
         + intFeesLi(city, cityT) + intMonthLi(city) + '</ul>' : '');
     d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; const fd = foldTrack(d); box.appendChild(trkPut(fd, t));   // את-25: מסלול שנבחר – פתוח
   });
+  { const tf = $("tracksFs"); if (tf) tf.hidden = !tracks.length; }
   $("introText").textContent = tracks.length ? "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה." : "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.";
 }
 renderTracks();
