@@ -190,6 +190,12 @@
     box-shadow:0 0 0 3px rgba(90,18,22,.12);
   }
 
+  /* נועה 3.11: "מעניין אותי" בתוך שורת הכותרת של הכרטיס; מסומן – כל המסגרת */
+  .ti-pick{ flex:none; margin-inline-start:auto; display:inline-flex; align-items:center; gap:7px; padding:6px 12px 6px 14px; border-radius:999px; border:1.5px solid #D9C8B4; background:#fff; color:#5A1216; font-weight:800; font-size:13.5px; white-space:nowrap; cursor:pointer; line-height:1; }
+  .ti-pick input{ width:20px; height:20px; margin:0; accent-color:#5A1216; pointer-events:none; }
+  .ti-card{ transition:box-shadow .15s, outline-color .15s; outline:3px solid transparent; outline-offset:2px; } .ti-card.ti-on{ outline-color:#5A1216; box-shadow:0 4px 14px rgba(90,18,22,.18) !important; }
+  .ti-card.ti-on .ti-pick{ background:#5A1216; border-color:#5A1216; color:#fff; } .ti-card.ti-on .ti-pick input{ accent-color:#fff; }
+  @media (max-width:520px){ .ti-card .tk-head{ flex-wrap:wrap; row-gap:10px; } .ti-card .tk-head > div:first-child{ flex:1 1 calc(100% - 50px); min-width:0; } .ti-card .ti-pick{ order:3; margin-inline-start:0; } }
   .error-msg{ font-size:12.5px; color:var(--error); font-weight:700; min-height:15px; display:none; }
   .field.invalid .error-msg{ display:block; }
   .field.invalid input, .field.invalid select{ border-color:var(--error); }
@@ -521,7 +527,7 @@
       <legend data-t="t003">פרטי התלמיד/ה</legend>
       <div class="row">
         <div class="field" id="field-sfirst"><label for="f-sfirst"><span data-t="t004">שם פרטי תלמיד/ה</span> <span class="req">*</span></label><input type="text" id="f-sfirst" maxlength="60"><div class="error-msg" data-t="t005">שדה חובה</div></div>
-        <div class="field"><label for="f-slast" data-t="t006">שם משפחה תלמיד/ה</label><input type="text" id="f-slast" maxlength="60"></div>
+        <div class="field" id="field-slast"><label for="f-slast"><span data-t="t006">שם משפחה תלמיד/ה</span> <span class="req">*</span></label><input type="text" id="f-slast" maxlength="60"><div class="error-msg">שדה חובה</div></div>
       </div>
       <div class="field" id="field-sphone"><label for="f-sphone" data-t="t007">נייד תלמיד/ה</label><input type="text" id="f-sphone" type="tel" inputmode="numeric" maxlength="15"><div class="error-msg" data-t="t008">מספר לא תקין</div></div>
     </fieldset>
@@ -529,10 +535,11 @@
       <legend data-t="t009">בית הספר</legend>
       <div class="row">
         <div class="field" id="field-city"><label for="f-city"><span data-t="t010">עיר</span> <span class="req">*</span></label><select id="f-city"><option value="" disabled selected data-t="t011">בחרו עיר</option><option>הוד השרון</option><option>כפר סבא</option><option>ראש העין</option><option value="אחר">עיר אחרת</option></select><div class="error-msg" data-t="t012">שדה חובה</div></div>
-        <div class="field" id="field-school"><label for="f-school" data-t="t013">בית ספר</label><select id="f-school"><option value="">בחרו עיר תחילה</option></select></div>
+        <div class="field" id="field-school"><label for="f-school"><span data-t="t013">בית ספר</span></label><select id="f-school"><option value="">בחרו עיר תחילה</option></select><div class="error-msg">שדה חובה</div></div>
+        <div class="field" id="field-school-other" hidden><label for="f-school-other"><span>שם בית הספר</span> <span class="req">*</span></label><input type="text" id="f-school-other" maxlength="60"><div class="error-msg">נא לכתוב את שם בית הספר</div></div>
       </div>
       <div class="row">
-        <div class="field"><label for="f-grade" data-t="t014">שכבת לימוד</label><select id="f-grade"><option value="" data-t="t015">בחרו</option><option>ו'</option><option>ז'</option><option>ח'</option><option>ט'</option><option>י'</option><option>יא'</option><option>יב'</option></select></div>
+        <div class="field"><label for="f-grade" data-t="t014">שכבת לימוד</label><select id="f-grade"><option value="" data-t="t015">בחרו</option><option>ה'</option><option>ו'</option><option>ז'</option><option>ח'</option><option>ט'</option><option>י'</option><option>יא'</option><option>יב'</option></select></div>
         <div></div>
       </div>
       <div class="row">
@@ -635,9 +642,15 @@ const marDates = () => { if (!MAR) return ""; const d = [...new Set((MAR.groups 
 const P_TRACKS = (Q.get("tracks") || "").split(",").map(s => s.trim()).filter(t => CONFIG.trackInfo[t] || t === "marathon");
 function schoolOpts(city){
   const list = CONFIG.citySchools[city] || [];
-  $("f-school").innerHTML = '<option value="">' + (list.length ? "בחרו בית ספר" : "—") + '</option>' + list.map(s => '<option></option>').join("");
-  [...$("f-school").options].slice(1).forEach((o, i) => { o.textContent = list[i]; o.value = list[i]; });
+  // נועה 3.11: גם "אחר" – ואז מקלידים את שם בית הספר
+  const all = list.concat(city ? ["אחר"] : []);
+  $("f-school").innerHTML = '<option value="">' + (city ? "בחרו בית ספר" : "בחרו עיר תחילה") + '</option>' + all.map(s => '<option></option>').join("");
+  [...$("f-school").options].slice(1).forEach((o, i) => { o.textContent = all[i]; o.value = all[i]; });
+  schOther();
 }
+function schOther(){ const w = $("field-school-other"); if (!w) return; const on = $("f-school").value === "אחר"; w.hidden = !on; if (!on) $("f-school-other").value = ""; }
+$("f-school").addEventListener("change", () => { schOther(); $("field-school").classList.remove("invalid"); });
+const schVal = () => $("f-school").value === "אחר" ? ($("f-school-other").value.trim() || null) : ($("f-school").value || null);
 $("f-city").addEventListener("change", () => { schoolOpts($("f-city").value); renderTracks(); });
 if (P_CITY && CONFIG.citySchools[P_CITY]) { $("f-city").value = P_CITY; schoolOpts(P_CITY); $("f-city").disabled = true; }
 if (P_SCHOOL) { if (![...$("f-school").options].some(o => o.value === P_SCHOOL)) { const o = document.createElement("option"); o.value = o.textContent = P_SCHOOL; $("f-school").appendChild(o); } $("f-school").value = P_SCHOOL; $("f-school").disabled = true; }
@@ -686,6 +699,12 @@ function foldTrack(d){
 }
 // את-25 (נועה 23.10): בחירת מסלול ברשימה – המסלולים של העיר (בלי סגורים); מהקישור (tracks=) – בחור מראש ואפשר להחליף. בקישור למרתון – בלי בחירה.
 const IS_MAR = P_TRACKS.includes("marathon"), P_REG = P_TRACKS.filter(t => t !== "marathon");
+const TRK_SEL = new Set(P_REG);   // נועה 3.11: המסלולים שסומנו "מעניין אותי" (מהקישור – מסומנים מראש)
+// נועה 3.11: הסימון בתוך הכרטיס (בשורת הכותרת), וכשמסומן – כל המסגרת של הכרטיס מסומנת
+const trkPick = (t) => '<label class="ti-pick" title="המסלול הזה מעניין אותי"><input type="checkbox" data-trk="' + t + '"' + (TRK_SEL.has(t) ? " checked" : "") + '><span>מעניין אותי</span></label>';
+function trkPut(card, t){ const h = card.querySelector(".tk-head") || card.querySelector("summary") || card; const car = h.querySelector(".tk-car");
+  if (car) car.insertAdjacentHTML("beforebegin", trkPick(t)); else h.insertAdjacentHTML("beforeend", trkPick(t));
+  card.classList.add("ti-card"); card.classList.toggle("ti-on", TRK_SEL.has(t)); card.dataset.trkc = t; return card; }
 let TRK_INIT = P_REG.length === 1 ? P_REG[0] : "";
 function trackPickFill(shutT){
   const sel = $("f-track"), pick = $("trackPick"); if (!sel || !pick) return;
@@ -705,9 +724,11 @@ function trackPickFill(shutT){
 function renderTracks(){
   const city = $("f-city").value, box = $("tracksBox");
   const shutT = (city && typeof INT_OPEN !== "undefined" && INT_OPEN && INT_OPEN[city] && Array.isArray(INT_OPEN[city].interestClosedTracks)) ? INT_OPEN[city].interestClosedTracks : [];
-  trackPickFill(shutT);
-  const pickT = !IS_MAR && $("f-track") ? $("f-track").value : "";
-  const tracks = (IS_MAR ? P_TRACKS : pickT ? [pickT] : P_REG.length ? P_REG : (city && CONFIG.trackPricing[city] ? Object.keys(CONFIG.trackInfo) : [])).filter(t => !shutT.includes(t));   // 5.19.56: בלי מסלולים סגורים
+  // נועה 3.11: קודם רואים את כל המסלולים, ובכל כרטיס – "✓ המסלול הזה מעניין אותי" (אפשר כמה, לא חובה). הרשימה שלמעלה הוסרה
+  { const pk = $("trackPick"); if (pk) pk.hidden = true; }
+  const pickT = "";
+  const tracks = (IS_MAR ? P_TRACKS : (city && CONFIG.trackPricing[city] ? Object.keys(CONFIG.trackInfo).filter(t => CONFIG.trackPricing[city][t]) : P_REG)).filter(t => !shutT.includes(t));
+  [...TRK_SEL].forEach(t => { if (!tracks.includes(t)) TRK_SEL.delete(t); });   // 5.19.56: בלי מסלולים סגורים
   box.innerHTML = "";
   tracks.forEach(t => {
     const d = document.createElement("div"); d.className = "ti-box";
@@ -732,22 +753,24 @@ function renderTracks(){
       let om, orr; if (!J.on) { om = false; orr = false; } else if (cc && typeof cc === "object") { om = !!cc.materials && mat > 0; orr = !!cc.registration; } else { om = mat > 0; orr = !om; }
       const fees = cityT ? [{ amount: cityT.registrationFee, label: "דמי שיבוץ והרשמה", offset: orr }].concat(mat ? [{ amount: mat, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: om }] : []) : [];
       const monthLi = cityT ? intMonthLi(city).replace(/<\/?li>/g, "") : "";
-      const one = tracks.length === 1 || !!pickT, w = document.createElement("div");
+      const one = tracks.length === 1, w = document.createElement("div");
       w.innerHTML = TELEM_TK({ key: t, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: earlyOn, cut: cut,
         fees: fees, extra: monthLi ? [monthLi] : [], fold: !one });
-      box.appendChild(w.firstChild); return;
+      box.appendChild(trkPut(w.firstChild, t)); return;
     }
     d.className = "track-info " + (info.color || "");
     d.innerHTML = '<div class="track-info-title"></div><div class="track-info-body"></div>' + (pr ? '<div class="track-info-label">תשלום חודשי:</div><ul class="track-info-list">'
         + (earlyOn ? '<li><b>' + pr.early + ' ₪</b> להרשמה מוקדמת' + (cut ? ' (עד ' + cut + ')' : '') + '</li><li><b>' + pr.regular + ' ₪</b> להרשמה רגילה' + (cut ? ' (מ-' + cut + ' ואילך)' : '') + '</li>' : '<li><b>' + pr.regular + ' ₪</b> לחודש</li>') + '</ul>'
         + '<div class="track-info-label">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div><ul class="track-info-list">'
         + intFeesLi(city, cityT) + intMonthLi(city) + '</ul>' : '');
-    d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; const fd = foldTrack(d); if (pickT) fd.open = true; box.appendChild(fd);   // את-25: מסלול שנבחר – פתוח
+    d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; const fd = foldTrack(d); box.appendChild(trkPut(fd, t));   // את-25: מסלול שנבחר – פתוח
   });
   $("introText").textContent = tracks.length ? "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה." : "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.";
 }
 renderTracks();
-if ($("f-track")) $("f-track").addEventListener("change", renderTracks);   // את-25
+// הלחיצה על "מעניין אותי" לא פותחת / סוגרת את הכרטיס (הוא בתוך שורת הכותרת)
+$("tracksBox").addEventListener("click", (e) => { const l = e.target.closest && e.target.closest(".ti-pick"); if (!l) return; e.preventDefault(); e.stopPropagation();
+  const c = l.querySelector("[data-trk]"), on = !c.checked; c.checked = on; on ? TRK_SEL.add(c.dataset.trk) : TRK_SEL.delete(c.dataset.trk); const k = l.closest(".ti-card"); if (k) k.classList.toggle("ti-on", on); }, true);
 if (P_MAR) (window.TELEM_HOLD || function(p){ return p; })(callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){}));
 // 5.19.58: כמו בטופס ההרשמה - שכר הלימוד של חודש ההרשמה לפי חוק "הצטרפות מאוחרת" ממסך חוקי החיוב (billing_rules_public)
 var LATE_RULES = [], JUNE = { on: true, cities: {} };
@@ -835,13 +858,14 @@ $("intForm").addEventListener("submit", function(e){
   e.preventDefault();
   let ok = true; const bad = (id, b) => { $(id).classList.toggle("invalid", b); if (b) ok = false; };
   const city = $("f-city").value, ph = digits($("f-pphone").value), sph = digits($("f-sphone").value), em = $("f-email").value.trim();
-  bad("field-city", !city); bad("field-sfirst", !$("f-sfirst").value.trim()); bad("field-pfirst", !$("f-pfirst").value.trim());
+  bad("field-city", !city); bad("field-sfirst", !$("f-sfirst").value.trim()); bad("field-slast", !$("f-slast").value.trim()); bad("field-pfirst", !$("f-pfirst").value.trim());
+  bad("field-school-other", $("f-school").value === "אחר" && !$("f-school-other").value.trim());
   bad("field-pphone", !/^0\d{8,9}$/.test(ph)); bad("field-sphone", !!sph && !/^0\d{8,9}$/.test(sph)); bad("field-email", !!em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em));
   $("topError").style.display = ok ? "none" : "block"; if (!ok) { if (window.TELEM_BAD) TELEM_BAD($("submitBtn")); return; } if (window.TELEM_OK) TELEM_OK();
-  const pickT = !IS_MAR && $("f-track") ? $("f-track").value : "";   // את-25: המסלול שנבחר בטופס (במקום tracks מהקישור)
-  const courses = (pickT ? [pickT] : P_TRACKS.length ? P_TRACKS : []).map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title);
-  const payload = { website: $("f-website").value, city: city === "אחר" ? "" : city, school: $("f-school").value || null, courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),
-    student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: $("f-school").value || null },
+  const picked = IS_MAR ? P_TRACKS.filter(t => t === "marathon" || TRK_SEL.has(t)) : Object.keys(CONFIG.trackInfo).filter(t => TRK_SEL.has(t));   // נועה 3.11: מה שסומן (בלי סימון – כל המסלולים)
+  const courses = picked.map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title);
+  const payload = { website: $("f-website").value, city: city === "אחר" ? "" : city, school: schVal(), courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),
+    student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: schVal() },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };
   const btn = $("submitBtn"); btn.disabled = true; btn.textContent = "שולח…";
   const done = () => { if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "interest" }); $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; window.scrollTo(0, 0); };
