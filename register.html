@@ -953,11 +953,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const isPhonePay = () => payPhoneEl.checked;
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
   const PHONE_REG_ = /[?&]phone=1(&|$)/.test(location.search);
-  const SUBMIT_TXT = () => PHONE_REG_ ? "אישור וחתימה" : isPhonePay() ? "שליחת ההרשמה" : "המשך לתשלום מאובטח";
+  const SUBMIT_TXT = () => PHONE_REG_ ? "אישור ושליחה" : isPhonePay() ? "שליחת ההרשמה" : "המשך לתשלום מאובטח";
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
     const c = document.getElementById("consentText"); c.textContent = /[?&]phone=1(&|$)/.test(location.search) ? "אני מאשר/ת שהפרטים נכונים." : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
-    if (!submitBtn.disabled || submitBtn.textContent === "המשך לתשלום מאובטח" || submitBtn.textContent === "שליחת ההרשמה" || submitBtn.textContent === "אישור וחתימה") submitBtn.textContent = SUBMIT_TXT();
+    if (!submitBtn.disabled || submitBtn.textContent === "המשך לתשלום מאובטח" || submitBtn.textContent === "שליחת ההרשמה" || submitBtn.textContent === "אישור ושליחה") submitBtn.textContent = SUBMIT_TXT();
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
   if (NO_TERMINAL) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; document.getElementById("payPhoneOnly").hidden = false; }
@@ -965,11 +965,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   var PHONE_REG = /[?&]phone=1(&|$)/.test(location.search);
   // נועה 3.11: בלי שום דבר על תשלום – רק הפרטים, התנאים והחתימה
   if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var sh = document.querySelector(".sec-card > .sec-h"); if (sh) { sh.removeAttribute("data-t"); sh.textContent = "אישור וחתימה"; }
-    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>זה הטופס לאישור תנאי ההתקשרות – תרגול שוטף תשפ\"ז.</div><div class=\"sg-sub\">ממלאים את הפרטים, קוראים את התנאים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.</div>";
+    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>זה טופס ההרשמה – תרגול שוטף תשפ\"ז.</div><div class=\"sg-sub\">ממלאים את הפרטים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.</div>";
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
-    document.title = "תלם - אישור תנאי התקשרות";
+    document.title = "תלם - טופס הרשמה";
     var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.textContent = "החתימה נשמרת יחד עם הטופס."; }
-    var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "אישור תנאי התקשרות"; }
+    var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "טופס הרשמה"; }   /* נועה 4.11: להורה – "טופס הרשמה" (אצלנו: אישור תנאי התקשרות) */
     var tf = document.getElementById("trackFs"), fss = document.querySelectorAll("#regForm > fieldset");
     if (tf && fss.length > 2) { fss[2].after(tf); var lg = tf.querySelector("legend"); if (lg) lg.textContent = "הקורס"; }
     var tb = document.getElementById("termsBox"), card = document.querySelector("#regForm > .sec-card");

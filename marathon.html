@@ -1061,7 +1061,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         // 5.19.91 (נועה): "הרשמה ותשלום ל<מרתון>" ובשורה השנייה בתוך התגית – השכבה ובית הספר
         { var baseN = String(MARATHON.name || "").replace(/\s*·.*$/, "").replace(/\s*שכבת\s*\S+/, "").trim() || "מרתון מתמטיקה";
           var gr0 = MARATHON.grade ? "שכבה " + String(MARATHON.grade).replace(/['"׳]/g, "") + "'" : "";
-          document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") }); if (document.documentElement.classList.contains("sig-only")) document.querySelector(".subtitle").firstChild.textContent = "אישור תנאי התקשרות";
+          document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") }); if (document.documentElement.classList.contains("sig-only")) document.querySelector(".subtitle").firstChild.textContent = "טופס הרשמה";
           var sl2 = document.getElementById("subtitleLocation"); sl2.textContent = [gr0, MARATHON.school].filter(Boolean).join(" · "); sl2.className = "sub-l2"; }
         document.title = (MARATHON.name || "מרתון מתמטיקה") + " - תלם";
         // הקבצה: (1) מה שהוגדר במרתון (5.19.35), (2) אחרת - הרשימה של בית הספר (מסך "בתי ספר", קובץ 78, תלם 5.19.70), (3) אחרת - ברירת המחדל. שדה חובה.
@@ -1173,11 +1173,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const isPhonePay = () => payPhoneEl.checked;
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
   const isCardPay = () => document.getElementById("f-paycard").checked;
-  const SUBMIT_TXT = () => /[?&]phone=1(&|$)/.test(location.search) ? "אישור וחתימה" : isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
+  const SUBMIT_TXT = () => /[?&]phone=1(&|$)/.test(location.search) ? "אישור ושליחה" : isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
     const c = document.getElementById("consentText"); c.textContent = /[?&]phone=1(&|$)/.test(location.search) ? "אני מאשר/ת שהפרטים נכונים." : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
-    if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור וחתימה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
+    if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור ושליחה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
     document.getElementById("field-payphone").classList.remove("invalid");
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
@@ -1605,8 +1605,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   if (/[?&]phone=1(&|$)/.test(location.search)) { var rr = document.querySelector('input[name=mkmode][value=reg]'); if (rr) { rr.checked = true; document.getElementById("fsMode").hidden = true; mkPaint(); }
     payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var ct = document.querySelector(".pay-card .card-title"); if (ct) { ct.removeAttribute("data-t"); ct.textContent = "אישור וחתימה"; }
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
-    document.title = "תלם - אישור תנאי התקשרות";
-    var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "אישור תנאי התקשרות"; }
+    document.title = "תלם - טופס הרשמה";
+    var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "טופס הרשמה"; }   /* נועה 4.11 */
     var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.textContent = "החתימה נשמרת יחד עם הטופס."; }
     var tb = document.getElementById("termsBox"), pc = document.querySelector(".pay-card");
     if (tb && pc) { var tc = document.createElement("section"); tc.className = "pay-card"; tc.innerHTML = '<div class="card-title">תנאי ההתקשרות</div>'; tc.appendChild(tb); pc.before(tc); } }   // נועה 3.11: בלי שום דבר על תשלום
