@@ -512,7 +512,7 @@
     window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
   })();
 </script>
-<link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=7"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 <div class="wrap">
@@ -522,7 +522,7 @@
   <div class="intro"><div id="introText">השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.</div></div>
   <div class="trk-pick" id="trackPick" hidden><div class="field"><label for="f-track" data-t="t037">מסלול</label><select id="f-track"></select></div></div><!-- את-25 (נועה 23.10): בחירת / החלפת מסלול -->
   <form id="intForm" novalidate>
-    <fieldset id="tracksFs"><legend>המסלולים</legend><div class="tp-sub">אפשר לסמן מסלול אחד או יותר שמעניין אתכם (לא חובה). לחיצה על המסלול – כל הפרטים והמחירים.</div><div id="tracksBox"></div></fieldset><!-- נועה 3.11: כמו המרתון – כרטיס בחירה בלי מספר -->
+    <fieldset id="tracksFs"><legend data-t="i.trk_h">המסלולים</legend><div class="tp-sub" data-t="i.trk_sub">אפשר לסמן מסלול אחד או יותר שמעניין אתכם (לא חובה). לחיצה על המסלול – כל הפרטים והמחירים.</div><div id="tracksBox"></div></fieldset><!-- נועה 3.11: כמו המרתון – כרטיס בחירה בלי מספר -->
     <div class="top-error form-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
     <fieldset>
       <legend data-t="t003">פרטי התלמיד/ה</legend>
@@ -561,7 +561,7 @@
       <div class="field"><label for="f-filled" data-t="t030">מי ממלא/ת את הטופס?</label><select id="f-filled"><option>הורה</option><option>תלמיד</option></select></div>
       <div class="field"><label for="f-notes" data-t="t031">הערות (לא חובה)</label><textarea id="f-notes" maxlength="2000" rows="3"></textarea></div>
       <p class="disclaimer" data-t="t032">מילוי הטופס הוא להתעניינות בלבד ואינו מחייב בהרשמה, בתשלום או בכל התחייבות שהיא.</p>
-      <div class="submit-wrap"><button type="submit" id="submitBtn">שליחה</button></div><!-- נועה 3.11: כפתור השליחה בתוך הכרטיס האחרון -->
+      <div class="submit-wrap"><button type="submit" id="submitBtn" data-t="i.btn">שליחה</button></div><!-- נועה 3.11: כפתור השליחה בתוך הכרטיס האחרון -->
     </fieldset>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" tabindex="-1" autocomplete="off"></label></div>
   </form>
@@ -570,7 +570,7 @@
   <footer><span data-t="t034">תלם - המרכז לשיעורי תרגול</span><br>
     <span class="contact"><span data-t="t035">טלפון:</span> <a href="tel:0529067101">052-9067101</a> <span data-t="t036">· אימייל:</span> <a href="mailto:telem.tr@gmail.com">telem.tr@gmail.com</a></span></footer>
 </div>
-<script src="texts.js?v=1"></script><!-- תלם 5.19.100: נוסחי הטפסים מהמערכת -->
+<script src="texts.js?v=2"></script><!-- תלם 5.19.100: נוסחי הטפסים מהמערכת -->
 <script>
 (function(){
 "use strict";
@@ -768,7 +768,7 @@ function renderTracks(){
     d.querySelector(".track-info-title").textContent = info.title; d.querySelector(".track-info-body").textContent = info.body; const fd = foldTrack(d); box.appendChild(trkPut(fd, t));   // את-25: מסלול שנבחר – פתוח
   });
   { const tf = $("tracksFs"); if (tf) tf.hidden = !tracks.length; }
-  $("introText").textContent = tracks.length ? "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה." : "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.";
+  $("introText").innerHTML = tracks.length ? IH("i.intro_trk", "מלאו את הפרטים ונחזור אליכם עם כל המידע ולהשלמת ההרשמה.", "פתיחה – כשיש מסלולים") : IH("i.intro", "השאירו פרטים ונחזור אליכם עם כל המידע על התרגולים בעיר ובבית הספר שלכם.", "פתיחה – בלי מסלולים");
 }
 renderTracks();
 // הלחיצה על "מעניין אותי" לא פותחת / סוגרת את הכרטיס (הוא בתוך שורת הכותרת)
@@ -783,11 +783,12 @@ function intFeesLi(city, t){
   if (!J.on) { m = false; r = false; } else if (c && typeof c === "object") { m = !!c.materials && mat > 0; r = !!c.registration; } else { m = mat > 0; r = !m; }
   return '<li><b>' + t.registrationFee + ' ₪</b> דמי שיבוץ והרשמה' + (r ? jt : '') + '</li>' + (mat ? '<li><b>' + mat + ' ₪</b> חומרי תרגול ועזרי לימוד דיגיטליים' + (m ? jt : '') + '</li>' : '');
 }
+// נועה 4.11: טקסט שנבנה בקוד – עריך מ"נוסחי הטפסים"
+function IH(k, def, lbl, vals){ return window.TX && TX.h ? TX.h(k, def, lbl, "טופס ההתעניינות – טקסטים שנבנים בטופס", vals) : String(def).replace(/\{([^{}]+)\}/g, function(m, n){ return vals && vals[n] != null ? String(vals[n]).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }) : ""; }); }
 function intMonthLi(city){
   var m = null, LR = LATE_RULES || []; LR.forEach(function(r){ if (r.city === city) m = r; }); if (!m) LR.forEach(function(r){ if (!r.city && !m) m = r; });
-  var full = "שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו)";
-  if (!m || m.apply !== "first") return "<li>שכר הלימוד עבור חודש ההרשמה - " + full + ".</li>";
-  return "<li>שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-" + (m.from_day - 1) + " לחודש - " + full + ". הרשמה מה-" + m.from_day + " לחודש ואילך - " + m.percent + "% מהתשלום החודשי.</li>";
+  if (!m || m.apply !== "first") return "<li>" + IH("i.first_month", "שכר הלימוד עבור חודש ההרשמה - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו).", "כרטיס המסלול – חודש ההרשמה") + "</li>";
+  return "<li>" + IH("i.first_month_late", "שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-{יום אחרון} לחודש - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו). הרשמה מה-{מיום} לחודש ואילך - {אחוז}% מהתשלום החודשי.", "כרטיס המסלול – חודש ההרשמה (כשיש הנחה להצטרפות מאוחרת)", { "יום אחרון": m.from_day - 1, "מיום": m.from_day, "אחוז": m.percent }) + "</li>";
 }
 (window.TELEM_HOLD || function(p){ return p; })(callSupabase("billing_rules_public", null)).then(function(x){
   var list = x && Array.isArray(x.late_join) ? x.late_join : [];
@@ -870,10 +871,10 @@ $("intForm").addEventListener("submit", function(e){
   const payload = { website: $("f-website").value, city: city === "אחר" ? "" : city, school: schVal(), courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: schVal() },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };
-  const btn = $("submitBtn"); btn.disabled = true; btn.textContent = "שולח…";
+  const btn = $("submitBtn"); btn.__lbl = btn.innerHTML; btn.disabled = true; btn.textContent = "שולח…";
   const done = () => { if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "interest" }); $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; window.scrollTo(0, 0); };
   if (PREVIEW) { setTimeout(done, 400); return; }
-  callSupabase("submit_interest", payload).then(done).catch(function(){ $("topError").textContent = "לא הצלחנו לשלוח. נסו שוב בעוד רגע, או התקשרו: 052-9067101"; $("topError").style.display = "block"; btn.disabled = false; btn.textContent = "שליחה"; });
+  callSupabase("submit_interest", payload).then(done).catch(function(){ $("topError").textContent = "לא הצלחנו לשלוח. נסו שוב בעוד רגע, או התקשרו: 052-9067101"; $("topError").style.display = "block"; btn.disabled = false; btn.innerHTML = btn.__lbl || "שליחה"; });
 });
 })();
 </script>

@@ -508,7 +508,7 @@
   .amount-row.amount-row-recur > strong{ font-size:20px !important; font-weight:900 !important; color:var(--accent) !important; }
   .amount-row.amount-row-recur .recur-sub{ color:#6B5F55 !important; font-weight:500 !important; }
 </style>
-<link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=7"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 
@@ -529,7 +529,7 @@
   <form id="regForm" novalidate>
 
     <fieldset id="trackFs">
-      <legend>בחירת מסלול</legend>
+      <legend data-t="r.trk_h">בחירת מסלול</legend>
       <div id="trackPick" class="trk-pick-list"></div>
 
       <div class="field" id="field-subject">
@@ -783,7 +783,7 @@
 
 </div>
 
-<script src="texts.js?v=1"></script><!-- תלם 5.19.100: נוסחי הטפסים מהמערכת -->
+<script src="texts.js?v=2"></script><!-- תלם 5.19.100: נוסחי הטפסים מהמערכת -->
 <script>
 function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:" ? x.href : null; } catch(e) { return null; } }   // אבטחה 5.19.52: מעבר לתשלום רק לכתובת https
 
@@ -969,26 +969,29 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const isPhonePay = () => payPhoneEl.checked;
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
   const PHONE_REG_ = /[?&]phone=1(&|$)/.test(location.search);
-  const SUBMIT_TXT = () => PHONE_REG_ ? "אישור ושליחה" : isPhonePay() ? "שליחת ההרשמה" : "שליחה ומעבר לתשלום מאובטח ←";   // נועה 4.11: הכפתורים בדיוק כמו בטופס המרתון
+  // נועה 4.11: טקסט שנבנה בקוד – עריך מ"נוסחי הטפסים" (RH – HTML עטוף, מתעדכן לבד; RS – טקסט פשוט)
+  var RH = function(k, def, lbl, vals){ return window.TX && TX.h ? TX.h(k, def, lbl, "טופס ההרשמה – טקסטים שנבנים בטופס", vals) : String(def).replace(/\{([^{}]+)\}/g, function(m, n){ return vals && vals[n] != null ? String(vals[n]).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }) : ""; }); };
+  var RS = function(k, def, lbl, vals){ if (window.TX && TX.s) return TX.s(k, def, lbl, "טופס ההרשמה – טקסטים שנבנים בטופס", vals); var d = document.createElement("div"); d.innerHTML = RH(k, def, lbl, vals); return (d.textContent || "").trim(); };
+  const SUBMIT_TXT = () => PHONE_REG_ ? RS("r.btn_paid", "אישור ושליחה", "כפתור השליחה – שילמו בטלפון / מהכרטיס") : isPhonePay() ? RS("r.btn_phone", "שליחת ההרשמה", "כפתור השליחה – תשלום טלפוני") : RS("r.btn_card", "שליחה ומעבר לתשלום מאובטח ←", "כפתור השליחה – אשראי");   // נועה 4.11: הכפתורים בדיוק כמו בטופס המרתון
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
-    const c = document.getElementById("consentText"); c.textContent = /[?&]phone=1(&|$)/.test(location.search) ? "אני מאשר/ת שהפרטים נכונים." : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
-    if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור ושליחה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
+    const c = document.getElementById("consentText"); if (/[?&]phone=1(&|$)/.test(location.search)) c.innerHTML = RH("r.consent_paid", "אני מאשר/ת שהפרטים נכונים.", "האישור השני – שילמו בטלפון / מהכרטיס"); else c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
+    if (!submitBtn.disabled || !/…$|^הפרטים נשלחו$/.test(submitBtn.textContent.trim())) submitBtn.textContent = SUBMIT_TXT();
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
   if (NO_TERMINAL) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; document.getElementById("payPhoneOnly").hidden = false; }
   // נועה 3.11: קישור "נרשמו בטלפון" (register.html?city=…&phone=1) – ממלאים את כל הפרטים וחותמים; התשלום מטופל מולנו בטלפון (בלי אשראי בטופס)
   var PHONE_REG = /[?&]phone=1(&|$)/.test(location.search);
   // נועה 3.11: בלי שום דבר על תשלום – רק הפרטים, התנאים והחתימה
-  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום."; } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.textContent = "תשלום ראשון – שולם בטלפון"; }
-    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>זה טופס ההרשמה – תרגול שוטף תשפ\"ז.</div><div class=\"sg-sub\">ממלאים את הפרטים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.</div>";
+  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = RH("r.paid_note", "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום.", "במקום אופן התשלום – שילמו בטלפון"); } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.innerHTML = RH("r.first_paid", "תשלום ראשון – שולם בטלפון", "הסכום הראשון – שילמו בטלפון"); }
+    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_paid", "זה טופס ההרשמה – תרגול שוטף תשפ\"ז.", "פתיחה – שילמו בטלפון") + "</div><div class=\"sg-sub\">" + RH("r.intro_paid_sub", "ממלאים את הפרטים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – שילמו בטלפון (שורה שנייה)") + "</div>";
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
-    var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.textContent = "החתימה נשמרת יחד עם הטופס."; }
+    var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.innerHTML = RH("r.sig_hint_paid", "החתימה נשמרת יחד עם הטופס.", "הסבר מתחת לחתימה – שילמו בטלפון"); }
     /* נועה 4.11: הכותרת וכותרת המשנה – בדיוק כמו בטופס ההרשמה */
     var tf = document.getElementById("trackFs"), fss = document.querySelectorAll("#regForm > fieldset");
-    if (tf && fss.length > 2) { fss[2].after(tf); var lg = tf.querySelector("legend"); if (lg) lg.textContent = "הקורס"; }
+    if (tf && fss.length > 2) { fss[2].after(tf); var lg = tf.querySelector("legend"); if (lg) lg.innerHTML = RH("r.course_h", "הקורס", "כותרת – הקורס (שילמו בטלפון)"); }
     var tb = document.getElementById("termsBox"), card = document.querySelector("#regForm > .sec-card");
-    if (tb && card) { var tc = document.createElement("section"); tc.className = "sec-card"; tc.innerHTML = '<div class="sec-h">תנאי ההתקשרות</div>'; tc.appendChild(tb); card.before(tc); } }
+    if (tb && card) { var tc = document.createElement("section"); tc.className = "sec-card"; tc.innerHTML = '<div class="sec-h">' + RH("r.terms_h", "תנאי ההתקשרות", "כותרת – תנאי ההתקשרות (שילמו בטלפון)") + '</div>'; tc.appendChild(tb); card.before(tc); } }
   document.querySelectorAll('input[name="paymethod"]').forEach(function(r){ r.addEventListener("change", paintPayPhone); });
   if (EXPLICIT_PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר ולא עובר לתשלום"; document.body.insertBefore(pb, document.body.firstChild); }
   paintPayPhone();
@@ -1422,7 +1425,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
 
   function updateAmountDisplay(){
     var amount = getAmount();
-    amountDisplay.textContent = amount != null ? "₪" + amount.toFixed(2) : "יש לבחור עיר ומסלול";
+    if (amount != null) amountDisplay.textContent = "₪" + amount.toFixed(2); else amountDisplay.innerHTML = RH("r.amount_none", "יש לבחור עיר ומסלול", "במקום הסכום – כשעוד לא נבחר מסלול");
     amountDisplay.classList.toggle("ph", amount == null);   // 5.19.84: כמו במרתון – הודעה במקום סכום בכתב קטן
 
     // פירוט קצר של מה שמרכיב את הסכום המיידי (חשוב לשקיפות, כי הוא
@@ -1431,13 +1434,13 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var cityTable = CONFIG.trackPricing[city];
     var recurInfo = getRecurInfo();
     if (cityTable && recurInfo){
-      var parts = [ ["דמי שיבוץ והרשמה", cityTable.registrationFee] ];
-      if (cityTable.materialsFee) parts.push(["חומרי לימוד", cityTable.materialsFee]);
-      parts.push([recurInfo.firstMonthHalf ? "שכר לימוד חודש נוכחי (" + recurInfo.firstMonthPct + "%)" : "שכר לימוד חודש נוכחי", recurInfo.firstMonthAmount]);
+      var parts = [ [RH("r.bd_reg", "דמי שיבוץ והרשמה", "פירוט התשלום – דמי שיבוץ"), cityTable.registrationFee] ];
+      if (cityTable.materialsFee) parts.push([RH("r.bd_mat", "חומרי לימוד", "פירוט התשלום – חומרי לימוד"), cityTable.materialsFee]);
+      parts.push([recurInfo.firstMonthHalf ? RH("r.bd_month_pct", "שכר לימוד חודש נוכחי ({אחוז}%)", "פירוט התשלום – חלק מהחודש", { "אחוז": recurInfo.firstMonthPct }) : RH("r.bd_month", "שכר לימוד חודש נוכחי", "פירוט התשלום – חודש נוכחי"), recurInfo.firstMonthAmount]);
       amountBreakdown.textContent = "";
       parts.forEach(function(p){
         var d = document.createElement("div"); d.className = "bd-row";
-        var a = document.createElement("span"); a.textContent = p[0];
+        var a = document.createElement("span"); a.innerHTML = p[0];
         var b = document.createElement("b"); b.textContent = "₪" + Number(p[1]).toFixed(2);
         d.appendChild(a); d.appendChild(b); amountBreakdown.appendChild(d);
       });
@@ -1504,11 +1507,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     return m;
   }
   function firstMonthText(city){
-    var r = lateJoinRule(city), full = "שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו)";
+    var r = lateJoinRule(city);
     // 5.19.58: השרת מחשב רק apply="first" (icredit-18) - חוק "last" לא מוצג
-    if (!r || r.apply !== "first") return "<li>שכר הלימוד עבור חודש ההרשמה - " + full + ".</li>";
-    return "<li>שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-" + (r.from_day - 1) + " לחודש - " + full + ". הרשמה מה-" + r.from_day + " לחודש ואילך - " + r.percent + "% מהתשלום החודשי" +
-      ".</li>";
+    if (!r || r.apply !== "first") return "<li>" + RH("r.first_month", "שכר הלימוד עבור חודש ההרשמה - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו).", "כרטיס המסלול – חודש ההרשמה") + "</li>";
+    return "<li>" + RH("r.first_month_late", "שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-{יום אחרון} לחודש - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו). הרשמה מה-{מיום} לחודש ואילך - {אחוז}% מהתשלום החודשי.", "כרטיס המסלול – חודש ההרשמה (כשיש הנחה להצטרפות מאוחרת)", { "יום אחרון": r.from_day - 1, "מיום": r.from_day, "אחוז": r.percent }) + "</li>";
   }
   function firstOfNextMonth(dateStr){
     var d = new Date(dateStr + "T00:00:00");
@@ -1800,7 +1802,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (!pick(cityEl, q.get("city"))) return;
     // העיר נקבעת לפי הקישור ואי אפשר לשנות אותה
     cityEl.disabled = true; cityEl.classList.add("locked");
-    var lockNote = document.createElement("div"); lockNote.className = "lock-note"; lockNote.textContent = "העיר נקבעה לפי הקישור שקיבלתם";
+    var lockNote = document.createElement("div"); lockNote.className = "lock-note"; lockNote.innerHTML = RH("r.city_lock", "העיר נקבעה לפי הקישור שקיבלתם", "הסבר מתחת לעיר");
     cityEl.parentNode.appendChild(lockNote);
     var sl = document.getElementById("subtitleLocation"); if (sl && !sl.textContent) { sl.textContent = cityEl.value; subLocSet(cityEl.value); }
     // תלם 5.19.45: כשהמסלול נקבע בקישור (שורת מסלול במערכת) - לא מציגים את בחירת המסלול; כרטיס המסלול נשאר
@@ -1824,10 +1826,12 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
     setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
     [cityEl, schoolEl, schoolOtherEl, subjectEl, subjectChoiceEl].forEach(function(el){ if (el) { el.disabled = true; el.classList.add("sg-lock"); } }); document.documentElement.classList.add("sg-prefill");
-    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>שלום" + (d.parent_first ? " " + escHtml(d.parent_first) : "") + ", זה טופס ההרשמה של <b>" + escHtml(d.student_first || "") + "</b>" + (d.course ? " – " + escHtml(d.course) : "") + ".</div><div class=\"sg-sub\">הפרטים כבר ממולאים. בודקים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.</div>";
+    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_card", "שלום {שם ההורה}, זה טופס ההרשמה של <b>{שם התלמיד/ה}</b> – {קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": d.course || "" }) + "</div><div class=\"sg-sub\">" + RH("r.intro_card_sub", "הפרטים כבר ממולאים. בודקים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
   }
   function escHtml(t){ return String(t).replace(/[&<>"']/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function signBad(msg){ var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + escHtml(msg) + "</div>"; form.hidden = true; }
+  // עורך הנוסחים במערכת: הקישור מהכרטיס עם נתוני דוגמה (c=sample, בלי שרת)
+  if (PHONE_REG && /[?&]c=sample(&|$)/.test(location.search)) setTimeout(function(){ signFill({ ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", grade: "ז'", class_num: "3", school: (CONFIG.citySchools[cityEl.value] || [""])[0], city: cityEl.value, course: "תרגול שוטף תשפ\"ז", track: "single", subject: "מתמטיקה", parent_first: "מיכל", parent_last: "לוי", parent_phone: "0500000001", parent_email: "parent@example.com" }); }, 300);
   if (SIGN_CODE) {
     var sgp = { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey };
     fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: sgp, body: JSON.stringify({ p_code: SIGN_CODE }) }).then(function(r){ return r.json(); }).then(function(d){

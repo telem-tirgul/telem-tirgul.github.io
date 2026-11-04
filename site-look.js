@@ -86,28 +86,34 @@
     var t = form === "payment-failed" ? "שלום, ניסיתי לשלם והתשלום לא הושלם" : ("שלום, יש לי שאלה " + (MSG[form] || "")).trim();
     var box = document.createElement("div"); box.className = "wa-contact";
     var a = document.createElement("a"); a.className = "wa-link"; a.target = "_blank"; a.rel = "noopener"; a.href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(t);
-    a.appendChild(document.createTextNode("💬 וואטסאפ: ")); var n = document.createElement("bdi"); n.textContent = PHONE; a.appendChild(n);
-    var m = document.createElement("a"); m.className = "wa-link wa-mail"; m.target = "_blank"; m.rel = "noopener"; m.href = "mailto:" + MAIL; m.appendChild(document.createTextNode("✉️ אימייל: ")); var mb = document.createElement("bdi"); mb.textContent = MAIL; m.appendChild(mb);   // באותה בועה, כמו הוואטסאפ
-    var h = document.createElement("div"); h.className = "wa-h"; h.textContent = "שאלות? כתבו לנו";   // נועה: הכול במסגרת אחת – כותרת, ומתחתיה וואטסאפ ואימייל
+    var FT = function(k, d, l){ var sp = document.createElement("span"); sp.innerHTML = window.TELEM_TXH(k, d, l, "תחתית העמוד"); return sp; };   // נועה 4.11: עריך
+    a.appendChild(FT("foot.wa", "💬 וואטסאפ:", "תחתית – וואטסאפ")); a.appendChild(document.createTextNode(" ")); var n = document.createElement("bdi"); n.textContent = PHONE; a.appendChild(n);
+    var m = document.createElement("a"); m.className = "wa-link wa-mail"; m.target = "_blank"; m.rel = "noopener"; m.href = "mailto:" + MAIL; m.appendChild(FT("foot.mail", "✉️ אימייל:", "תחתית – אימייל")); m.appendChild(document.createTextNode(" ")); var mb = document.createElement("bdi"); mb.textContent = MAIL; m.appendChild(mb);   // באותה בועה, כמו הוואטסאפ
+    var h = document.createElement("div"); h.className = "wa-h"; h.appendChild(FT("foot.h", "שאלות? כתבו לנו", "תחתית – כותרת"));   // נועה: הכול במסגרת אחת – כותרת, ומתחתיה וואטסאפ ואימייל
     box.appendChild(h); box.appendChild(a); box.appendChild(m);
-    var pv = document.createElement("a"); pv.className = "wa-privacy"; pv.target = "_blank"; pv.rel = "noopener"; pv.textContent = "מדיניות פרטיות";   // את-46: עד שהאתר החדש באוויר – העמוד באתר הישן
+    var pv = document.createElement("a"); pv.className = "wa-privacy"; pv.target = "_blank"; pv.rel = "noopener"; pv.appendChild(FT("foot.privacy", "מדיניות פרטיות", "תחתית – מדיניות פרטיות"));   // את-46: עד שהאתר החדש באוויר – העמוד באתר הישן
     pv.href = "https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA"; box.appendChild(pv);
     if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
 })();
 // את-37 (נועה 23.10): כרטיס מסלול – אותו מבנה ועיצוב כמו באתר (פס בצבע המסלול, מספר, שם קצר + המשך, התיאור, התשלום החודשי, החד-פעמיים).
 // o: {key, color, title, body, early, regular, earlyOn, cut ("8.10.26"), fees:[{amount, label, offset}], offMonth, extra:[html], fold}
+// נועה 4.11: הטקסטים הקבועים בכרטיס המסלול ובתחתית – עריכים מ"נוסחי הטפסים" (כשהטופס טוען את texts.js); בלי – ברירת המחדל
+window.TELEM_TXH = function(k, def, lbl, grp, vals){ if (window.TX && TX.h) return TX.h(k, def, lbl, grp, vals);
+  return String(def).replace(/\{([^{}]+)\}/g, function(m, n){ return vals && vals[n] != null ? String(vals[n]).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }) : ""; }); };
 window.TELEM_TK = function(o){
   var e = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var NUM = { single: 1, "unlimited-single": 2, double: 3 };
   var SHORT = { single: "מסלול מקצוע אחד", "unlimited-single": "מסלול מקצוע אחד ללא הגבלה", double: "מסלול שני מקצועות" };
   var SUB = { single: "מתמטיקה או אנגלית", "unlimited-single": "מתמטיקה או אנגלית ללא הגבלה בכמות המפגשים", double: "מתמטיקה וגם אנגלית ללא הגבלה בכמות המפגשים" };
-  var head = '<div class="tk-head"><div><h3>' + e(SHORT[o.key] || o.title) + '</h3>' + (SUB[o.key] ? '<span class="tk-sub">' + e(SUB[o.key]) + '</span>' : "") + '</div>' + (o.fold ? '<span class="tk-car" aria-hidden="true"></span>' : "") + '</div>';
+  var G = "כרטיסי המסלולים", T = function(k, d, l, v){ return window.TELEM_TXH(k, d, l, G, v); };
+  var head = '<div class="tk-head"><div><h3>' + (SHORT[o.key] ? T("tk." + o.key + ".name", SHORT[o.key], "שם המסלול – " + SHORT[o.key]) : e(o.title)) + '</h3>' + (SUB[o.key] ? '<span class="tk-sub">' + T("tk." + o.key + ".sub", SUB[o.key], "שורה מתחת לשם – " + SHORT[o.key]) + '</span>' : "") + '</div>' + (o.fold ? '<span class="tk-car" aria-hidden="true"></span>' : "") + '</div>';
   var price = o.regular == null ? "" : (o.earlyOn && o.early != null
-    ? '<div class="tk-price"><span class="tk-lbl">תשלום חודשי</span><div class="tk-row"><b>' + e(o.early) + ' ₪</b><span>להרשמה מוקדמת<br><small>עד ' + e(o.cut) + '</small></span></div><div class="tk-row"><b>' + e(o.regular) + ' ₪</b><span>להרשמה רגילה<br><small>מ-' + e(o.cut) + ' ואילך</small></span></div></div>'
-    : '<div class="tk-price tk-one"><span class="tk-lbl">תשלום חודשי</span><b>' + e(o.regular) + ' ₪</b></div>');
-  var fees = (o.fees || []).filter(function(f){ return f && f.amount; }).map(function(f){ return '<b>' + e(f.amount) + ' ₪</b> ' + e(f.label) + (f.offset ? ' (יקוזז מתשלום חודש ' + e(o.offMonth || "יוני") + ')' : ""); });
-  var once = fees.length ? '<p class="tk-once">בנוסף, בעת ההרשמה: ' + fees.join(" ו-") + '</p>' : "";
+    ? '<div class="tk-price"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><div class="tk-row"><b>' + e(o.early) + ' ₪</b><span>' + T("tk.early", "להרשמה מוקדמת<br><small>עד {תאריך}</small>", "מחיר להרשמה מוקדמת", { "תאריך": o.cut }) + '</span></div><div class="tk-row"><b>' + e(o.regular) + ' ₪</b><span>' + T("tk.regular", "להרשמה רגילה<br><small>מ-{תאריך} ואילך</small>", "מחיר להרשמה רגילה", { "תאריך": o.cut }) + '</span></div></div>'
+    : '<div class="tk-price tk-one"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><b>' + e(o.regular) + ' ₪</b></div>');
+  var FL = { "דמי שיבוץ והרשמה": ["tk.fee_reg", "דמי שיבוץ והרשמה"], "חומרי תרגול ועזרי לימוד דיגיטליים": ["tk.fee_mat", "חומרי תרגול ועזרי לימוד דיגיטליים"] };
+  var fees = (o.fees || []).filter(function(f){ return f && f.amount; }).map(function(f){ var fl = FL[f.label]; return '<b>' + e(f.amount) + ' ₪</b> ' + (fl ? T(fl[0], fl[1], "תשלום בעת ההרשמה – " + fl[1]) : e(f.label)) + (f.offset ? " " + T("tk.offset", "(יקוזז מתשלום חודש {חודש})", "הערת קיזוז", { "חודש": o.offMonth || "יוני" }) : ""); });
+  var once = fees.length ? '<p class="tk-once">' + T("tk.once", "בנוסף, בעת ההרשמה:", "פתיחת השורה של התשלום בעת ההרשמה") + " " + fees.join(" ו-") + '</p>' : "";
   var extra = (o.extra || []).filter(Boolean).map(function(x){ return '<p class="tk-once tk-more">' + x + '</p>'; }).join("");
   var body = '<div class="tk-body">' + (o.body ? '<p class="tk-desc">' + e(o.body) + '</p>' : "") + price + once + extra + '</div>';
   var cls = 'tk c-' + e(o.color || "red");
