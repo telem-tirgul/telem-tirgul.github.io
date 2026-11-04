@@ -197,7 +197,7 @@
     var $ = function(id){ return document.getElementById(id); };
     var signed = /[?&]signed=1/.test(location.search);   // נועה 3.11: "חתימה על התנאים" – בלי שום דבר על תשלום
     var pending = /[?&]pending=1/.test(location.search), phone = /[?&]phone=1/.test(location.search), preview = /[?&]preview=1/.test(location.search), paidRef = /[?&]ref=/.test(location.search);
-    if (TY_EDIT) { preview = false; pending = phone = TYV === "phone"; paidRef = TYV === "paid"; }
+    if (TY_EDIT) { preview = false; pending = phone = TYV === "phone" || TYV === "phpaid"; paidRef = TYV === "paid"; }
     var box = $("sum");
     function row(label, value, cls){ var d = document.createElement("div"); if (cls) d.className = cls; var a = document.createElement("span"); a.textContent = label; var b = document.createElement("b"); b.textContent = value; d.appendChild(a); d.appendChild(b); box.appendChild(d); }
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
@@ -231,7 +231,7 @@
       $("title").textContent = tyT("ty.title_phone");
       // 5.19.57: גם בתשלום טלפוני - הוי הירוק ליד הכותרת (הטופס התקבל); הסטטוס בתיבה הצהובה
       var ch0 = $("stChip"); ch0.className = "st-chip wait"; ch0.textContent = tyT("ty.chip_wait");
-      var pm0 = $("pendingMsg"); pm0.innerHTML = /[?&]paid=1/.test(location.search) ? '<span class="ic">🔍</span><span>' + tyH("ty.pending_paidphone") + '</span>' : '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
+      var pm0 = $("pendingMsg"); pm0.innerHTML = (/[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid")) ? '<span class="ic">🔍</span><span>' + tyH("ty.pending_paidphone") + '</span>' : '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
     }
     var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
     if (regLike && !(phone && pending && !preview)) {
