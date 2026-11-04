@@ -377,7 +377,9 @@
 
   html.sig-only .reg-part-h{ display:none !important; }
   html.sig-only #termsBox{ max-height:none !important; overflow:visible !important; }
-  html.sig-only .amount-row, html.sig-only #amountBreakdown, html.sig-only #field-payphone, html.sig-only .pm-lock, html.sig-only #fsFirstTime{ display:none !important; }
+  /* נועה 4.11: "שילמו בטלפון" – הסכום כמו בטופס; במקום אופן התשלום – "✓ התשלום בוצע בטלפון" */
+  html.sig-only #field-payphone .pm-title, html.sig-only #pmOpts, html.sig-only .pm-lock, html.sig-only #payMethodError, html.sig-only #fsFirstTime{ display:none !important; }
+  html.sig-only #payPhoneOnly{ display:block !important; background:#EEF6EF; border:1px solid #BFD9C4; color:#2F6B3D; border-radius:12px; padding:10px 14px; font-size:14.5px; }
   /* כרטיסים */
   .mar-info, .layout-side > fieldset, .layout-main > fieldset, .pay-card{ background:var(--paper); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:18px 16px 6px; margin:0 0 14px; }
   .mar-info{ border-inline-start:1px solid var(--border); padding:16px; font-size:15.5px; line-height:1.7; position:relative; padding-inline-start:52px; }
@@ -1603,7 +1605,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (r.value === "reg" && r.checked) setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }); });
   // נועה 3.11: קישור "נרשמו בטלפון" (marathon.html?m=…&phone=1) – ישר להרשמה (בלי "רק להשאיר פרטים" ובלי בחירת אופן תשלום); ממלאים, חותמים ושולחים. התשלום מטופל מולנו בטלפון
   if (/[?&]phone=1(&|$)/.test(location.search)) { var rr = document.querySelector('input[name=mkmode][value=reg]'); if (rr) { rr.checked = true; document.getElementById("fsMode").hidden = true; mkPaint(); }
-    payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var ct = document.querySelector(".pay-card .card-title"); if (ct) { ct.removeAttribute("data-t"); ct.textContent = "אישור וחתימה"; }
+    payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום."; } var a1 = document.querySelector('.amount-row > [data-t="t040"]'); if (a1) { a1.removeAttribute("data-t"); a1.textContent = "הסכום – שולם בטלפון"; }
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
     document.title = "תלם - טופס הרשמה";
     var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "טופס הרשמה"; }   /* נועה 4.11 */

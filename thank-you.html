@@ -234,7 +234,7 @@
     }
     var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
     if (regLike && !(phone && pending && !preview)) {
-      $("title").textContent = preview ? "כך ייראה האישור" : tyT("ty.title_reg");
+      $("title").textContent = preview ? "כך ייראה האישור" : signed ? tyT("ty.paid_title_reg") : tyT("ty.title_reg");   // נועה 4.11: אישור תנאים (שולם בטלפון לפני החתימה) – "ההרשמה אושרה"
       var first = String(x.name || "").trim().split(/\s+/)[0];
       if (x.kind === "register" && x.name) { $("lead").innerHTML = tyH("ty.lead_register", { "שם": first, " · עיר": x.city ? " · " + x.city : "" }); $("lead").hidden = false; }   // 5.19.91 (נועה)
       else if (x.name && (x.event || x.track)) { $("lead").innerHTML = tyH("ty.lead_event", { "שם": first, "מרתון / מסלול": (x.event || x.track).replace(/^ל/, "") }); $("lead").hidden = false; }
