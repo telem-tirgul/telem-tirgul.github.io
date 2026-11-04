@@ -915,6 +915,9 @@ function updateSubmitAvailability(){ submitBtn.disabled = !(TERMS_OK && $("f-con
 function fill(d){
   LINK = d;
   fillDetails(d);
+  { const mar = /^מרתון/.test(String(d.course || "")), sb = document.querySelector(".subtitle");   // נועה 4.11: הכותרת וכותרת המשנה – כמו בטופס ההרשמה / המרתון
+    if (sb) sb.textContent = (mar ? "טופס הרשמה למרתון מתמטיקה" : "טופס הרשמה לתרגולים השוטפים") + (d.city ? " · " + d.city : "");
+    document.title = mar ? "טופס הרשמה למרתון מתמטיקה - תלם" : "טופס הרשמה לתרגולים - תלם"; }
   const ib = $("introBox"); ib.hidden = false; ib.innerHTML = "";
   const t1 = document.createElement("div"); t1.textContent = "שלום" + (d.parent_first ? " " + d.parent_first : "") + ", זה טופס ההרשמה עבור "; const st = document.createElement("strong"); st.textContent = d.student_first || "התלמיד/ה"; t1.appendChild(st); t1.appendChild(document.createTextNode(d.course ? " – " + d.course + "." : "."));
   const t2 = document.createElement("div"); t2.className = "sg-sub"; t2.textContent = "קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.";

@@ -1063,7 +1063,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         // 5.19.91 (נועה): "הרשמה ותשלום ל<מרתון>" ובשורה השנייה בתוך התגית – השכבה ובית הספר
         { var baseN = String(MARATHON.name || "").replace(/\s*·.*$/, "").replace(/\s*שכבת\s*\S+/, "").trim() || "מרתון מתמטיקה";
           var gr0 = MARATHON.grade ? "שכבה " + String(MARATHON.grade).replace(/['"׳]/g, "") + "'" : "";
-          document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") }); if (document.documentElement.classList.contains("sig-only")) document.querySelector(".subtitle").firstChild.textContent = "טופס הרשמה";
+          document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") });
           var sl2 = document.getElementById("subtitleLocation"); sl2.textContent = [gr0, MARATHON.school].filter(Boolean).join(" · "); sl2.className = "sub-l2"; }
         document.title = (MARATHON.name || "מרתון מתמטיקה") + " - תלם";
         // הקבצה: (1) מה שהוגדר במרתון (5.19.35), (2) אחרת - הרשימה של בית הספר (מסך "בתי ספר", קובץ 78, תלם 5.19.70), (3) אחרת - ברירת המחדל. שדה חובה.
@@ -1607,8 +1607,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   if (/[?&]phone=1(&|$)/.test(location.search)) { var rr = document.querySelector('input[name=mkmode][value=reg]'); if (rr) { rr.checked = true; document.getElementById("fsMode").hidden = true; mkPaint(); }
     payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום."; } var a1 = document.querySelector('.amount-row > [data-t="t040"]'); if (a1) { a1.removeAttribute("data-t"); a1.textContent = "הסכום – שולם בטלפון"; }
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
-    document.title = "תלם - טופס הרשמה";
-    var st = document.querySelector('.subtitle [data-t="t003"]'); if (st) { st.removeAttribute("data-t"); st.textContent = "טופס הרשמה"; }   /* נועה 4.11 */
+    /* נועה 4.11: הכותרת וכותרת המשנה – בדיוק כמו בטופס המרתון */
     var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.textContent = "החתימה נשמרת יחד עם הטופס."; }
     var tb = document.getElementById("termsBox"), pc = document.querySelector(".pay-card");
     if (tb && pc) { var tc = document.createElement("section"); tc.className = "pay-card"; tc.innerHTML = '<div class="card-title">תנאי ההתקשרות</div>'; tc.appendChild(tb); pc.before(tc); } }   // נועה 3.11: בלי שום דבר על תשלום

@@ -58,10 +58,17 @@
   TX.t = function(key, vals, raw){
     var r = reg[key], tpl = MAP[key] != null && MAP[key] !== "" ? MAP[key] : (r ? r.def : key);
     var h = fmt(tpl).replace(/\{([^{}<>]{1,40})\}/g, function(m, n){ n = n.trim(); return vals && vals[n] != null ? esc(vals[n]) : ""; });
-    return raw ? h : '<span data-tx="' + esc(key) + '">' + h + "</span>";
+    if (raw) { seen[toPlain(h)] = key; return h; }
+    return '<span data-tx="' + esc(key) + '"' + (vals ? ' data-txv="' + esc(JSON.stringify(vals)) + '"' : "") + ">" + h + "</span>";
   };
+  // 4.11 (נועה: "כל טקסט עריך, עריכה על הטופס"): טקסט שנבנה בקוד – מגדירים ומציגים בפעם אחת.
+  //   TX.h – HTML עטוף ב-span data-tx (מתעדכן לבד כשהנוסח משתנה, גם בעורך); TX.s – טקסט פשוט (ל-textContent / תכונות)
+  TX.h = function(key, def, label, group, vals){ TX.def(key, def, label || key, vals ? Object.keys(vals).reduce(function(o, k){ o[k] = ""; return o; }, {}) : {}, { group: group || "טקסטים נוספים" }); return TX.t(key, vals); };
+  TX.s = function(key, def, label, group, vals){ TX.def(key, def, label || key, vals ? Object.keys(vals).reduce(function(o, k){ o[k] = ""; return o; }, {}) : {}, { group: group || "טקסטים נוספים" }); return TX.text(key, vals); };
+  // איזה מפתח הציג את הטקסט הזה (לעריכה על הטופס, כשהטקסט נכנס כ-textContent)
+  var seen = {}; TX.seen = seen;
   // אותו דבר כטקסט פשוט (לכותרות / תכונות)
-  TX.text = function(key, vals){ var d = document.createElement("div"); d.innerHTML = TX.t(key, vals, true).replace(/<br\s*\/?>/gi, "\n"); return (d.textContent || "").trim(); };
+  TX.text = function(key, vals){ var d = document.createElement("div"); d.innerHTML = TX.t(key, vals, true).replace(/<br\s*\/?>/gi, "\n"); var t = (d.textContent || "").trim(); seen[t] = key; return t; };
   // ---------- ניסוח המשבצות (5.19.102): איך מספרים, משך ומחיר נכתבים בתוך המשבצות ----------
   var WG = "ניסוח המשבצות (המילים שנכנסות לתוך המשבצות)";
   var WD = [
@@ -98,7 +105,7 @@
   TX.obj = function(prefix, obj, fields, label){ objs.push({ p: prefix, o: obj, f: fields, l: label, d: JSON.parse(JSON.stringify(obj)) }); applyObjs(); };
   function applyObjs(){ objs.forEach(function(x){ Object.keys(x.d).forEach(function(k){ x.f.forEach(function(f){ if (x.d[k] && typeof x.d[k][f] === "string") {
     var key = x.p + "." + k + "." + f; if (!reg[key]) reg[key] = { def: x.d[k][f], label: (x.d[k].title || k) + " – " + ({ title: "כותרת", body: "תיאור" }[f] || f), vars: {}, req: [], group: x.l || "", plain: true };
-    var v = MAP[key]; x.o[k][f] = v != null && v !== "" ? toPlain(fmt(v)) : x.d[k][f]; } }); }); }); }
+    var v = MAP[key]; x.o[k][f] = v != null && v !== "" ? toPlain(fmt(v)) : x.d[k][f]; seen[String(x.o[k][f]).trim()] = key; } }); }); }); }
 
   // ---------- טקסטים קבועים (data-t) ----------
   function apply(){
@@ -117,6 +124,9 @@
       else if (el.__txSet) { el.innerHTML = el.__txDef; el.__txSet = 0; }
     }
     applyObjs();
+    // טקסט שנבנה בקוד (span data-tx) – מתעדכן לבד לנוסח החדש, עם אותם ערכים
+    var tx = document.querySelectorAll("[data-tx]");
+    for (var j = 0; j < tx.length; j++) { var t = tx[j], k2 = t.getAttribute("data-tx"); if (!reg[k2] || t.isContentEditable) continue; var vv2 = null; try { vv2 = JSON.parse(t.getAttribute("data-txv") || "null"); } catch(e) {} var nh = TX.t(k2, vv2, true); if (t.innerHTML !== nh) t.innerHTML = nh; }
     try { document.dispatchEvent(new CustomEvent("telem-texts")); } catch(e) {}
   }
   function set(m, save){ MAP = m || {}; if (save) { try { localStorage.setItem(LS, JSON.stringify(MAP)); } catch(e) {} } apply(); }
