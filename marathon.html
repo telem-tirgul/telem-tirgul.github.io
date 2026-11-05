@@ -267,6 +267,7 @@
   /* אופן התשלום: שתי אפשרויות (כשהאשראי באתר מחובר), או הודעה אחת (כל עוד התשלום טלפוני בלבד) */
   .pay-method{ margin-bottom:12px; } .pm-title{ font-weight:800; margin-bottom:6px; }
   .pm-opts{ display:grid; grid-template-columns:1fr; gap:8px; }
+  .pm-opt[hidden]{ display:none !important; }
   .pm-opt{ display:flex; gap:8px; align-items:flex-start; border:1.5px solid #E2D6C6; border-radius:10px; padding:10px 12px; cursor:pointer; background:#fff; }
   .pm-opt:has(input:checked){ border-color:#8B1E23; background:#FBF3F1; }
   .pm-opt input{ margin-top:3px; accent-color:#8B1E23; } .pm-opt small{ display:block; font-size:12.5px; color:#6b5f55; font-weight:400; }
@@ -756,6 +757,7 @@
       <div class="pm-opts" id="pmOpts">
         <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard"><span><b data-t="t042">💳 תשלום באשראי עכשיו</b><small data-t="t043">אחרי השליחה עוברים לעמוד תשלום מאובטח</small></span></label>
         <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b data-t="t044">📞 תשלום טלפוני</b><small data-t="t045">שולחים את טופס ההרשמה, וניצור איתכם קשר לתשלום</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="m.pm_paid">✅ כבר שילמתי בטלפון</b><small data-t="m.pm_paid_sub">נוודא שהתשלום התקבל ונאשר את ההרשמה</small></span></label>
       </div>
       <div class="lock-line pm-lock" data-t="t046">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
       <div class="error-msg" id="payMethodError" data-t="t047">יש לבחור אופן תשלום</div>
@@ -1172,18 +1174,20 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const PREVIEW = EXPLICIT_PREVIEW || NO_TERMINAL;
   // תשלום טלפוני: נשמר גם כשהאשראי באתר עוד לא מחובר (רק לא בתצוגה מקדימה מהמערכת)
   const payPhoneEl = document.getElementById("f-payphone");
-  const isPhonePay = () => payPhoneEl.checked;
+  const payPaidEl = document.getElementById("f-paypaid");   /* נועה 5.11: "כבר שילמתי בטלפון" – כמו תשלום טלפוני (ממתין לתשלום), מסומן paid_before; בלי טופס נפרד */
+  const isPaidBefore = () => !!(payPaidEl && payPaidEl.checked);
+  const isPhonePay = () => payPhoneEl.checked || isPaidBefore();
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
   const isCardPay = () => document.getElementById("f-paycard").checked;
-  const SUBMIT_TXT = () => /[?&]phone=1(&|$)/.test(location.search) ? "אישור ושליחה" : isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
+  const SUBMIT_TXT = () => isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
-    const c = document.getElementById("consentText"); c.textContent = /[?&]phone=1(&|$)/.test(location.search) ? "אני מאשר/ת שהפרטים נכונים." : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
+    const c = document.getElementById("consentText"); c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
     if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור ושליחה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
     document.getElementById("field-payphone").classList.remove("invalid");
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
-  if (NO_TERMINAL) { payPhoneEl.checked = true; document.getElementById("pmOpts").hidden = true; document.getElementById("payPhoneOnly").hidden = false; }
+  if (NO_TERMINAL) { payPhoneEl.checked = true; var pc0 = document.getElementById("f-paycard"); if (pc0) pc0.closest(".pm-opt").hidden = true; var lk0 = document.querySelector(".pm-lock"); if (lk0) lk0.hidden = true; }   /* נועה 5.11: בלי מסוף – "תשלום טלפוני" או "כבר שילמתי" */
   document.querySelectorAll('input[name="paymethod"]').forEach(function(r){ r.addEventListener("change", paintPayPhone); });
   initMarathon();
   if (EXPLICIT_PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר ולא עובר לתשלום"; document.body.insertBefore(pb, document.body.firstChild); }
@@ -1422,7 +1426,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var g = (MARATHON.groups || []).filter(function(x){ return x.session_id === sid; })[0] || (MARATHON.groups || [])[0];
     var dEl = document.getElementById("marInfoDesc"), desc = dEl ? (dEl.innerText || dEl.textContent || "").replace(/\s*\n\s*/g, " ") : "";
     return { name: MARATHON.name || "מרתון מתמטיקה", desc: desc.trim(), meetings: g ? meetingsOf(g).map(meetingText) : [],
-      payMethod: document.getElementById("f-payphone").checked ? "תשלום טלפוני - ניצור קשר לתשלום" : document.getElementById("f-paycard").checked ? "כרטיס אשראי (עמוד תשלום מאובטח)" : "" };
+      payMethod: isPaidBefore() ? "שולם בטלפון (לפי ההורה) - נוודא שהתשלום התקבל" : document.getElementById("f-payphone").checked ? "תשלום טלפוני - ניצור קשר לתשלום" : document.getElementById("f-paycard").checked ? "כרטיס אשראי (עמוד תשלום מאובטח)" : "" };
   }
   function makeSignedPdf(title, signerName){
     return new Promise(function(resolve){
@@ -1605,12 +1609,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (r.value === "reg" && r.checked) setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }); });
   // נועה 3.11: קישור "נרשמו בטלפון" (marathon.html?m=…&phone=1) – ישר להרשמה (בלי "רק להשאיר פרטים" ובלי בחירת אופן תשלום); ממלאים, חותמים ושולחים. התשלום מטופל מולנו בטלפון
   if (/[?&]phone=1(&|$)/.test(location.search)) { var rr = document.querySelector('input[name=mkmode][value=reg]'); if (rr) { rr.checked = true; document.getElementById("fsMode").hidden = true; mkPaint(); }
-    payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום."; } var a1 = document.querySelector('.amount-row > [data-t="t040"]'); if (a1) { a1.removeAttribute("data-t"); a1.textContent = "הסכום – שולם בטלפון"; }
-    // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
-    /* נועה 4.11: הכותרת וכותרת המשנה – בדיוק כמו בטופס המרתון */
-    var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.textContent = "החתימה נשמרת יחד עם הטופס."; }
-    var tb = document.getElementById("termsBox"), pc = document.querySelector(".pay-card");
-    if (tb && pc) { var tc = document.createElement("section"); tc.className = "pay-card"; tc.innerHTML = '<div class="card-title">תנאי ההתקשרות</div>'; tc.appendChild(tb); pc.before(tc); } }   // נועה 3.11: בלי שום דבר על תשלום
+    if (payPaidEl) { payPaidEl.checked = true; paintPayPhone(); } }   /* נועה 5.11: קישור "שילמו בטלפון" = הטופס הרגיל, ישר להרשמה, עם "כבר שילמתי" מסומן (בלי טופס אישור תנאים נפרד) */
   // הפרטים שמולאו – נשמרים בדפדפן (לשונית זו), כדי ש"להשלמת ההרשמה" בדף התודה יחזיר טופס ממולא
   var MK_FIELDS = ["f-student-first", "f-student-last", "f-grade", "f-student-phone", "f-hakbatsa", "f-school", "f-parent-first", "f-parent-last", "f-phone", "f-email"];
   function mkSaveDraft(){ try { var d = {}; MK_FIELDS.forEach(function(id){ var e = document.getElementById(id); if (e) d[id] = e.value; });
@@ -1776,7 +1775,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       is_first_this_year: firstTime === "yes",
       terms_accepted: termsConsent,
       details_confirmed: consent,
-      pay_by_phone: isPhonePay(),
+      pay_by_phone: isPhonePay(), paid_before: isPaidBefore(),
       marathon_code: MARATHON_CODE,
       session_id: sessionId,
       hakbatsa: hakbatsa || null,
@@ -1798,8 +1797,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         sessionStorage.setItem("reg_summary", JSON.stringify(sm));
         sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })());   // את-26: "לנסות שוב" – הטופס הרגיל (לא מצב הטמעה)
       } catch (err) {}
-      if (/[?&]phone=1(&|$)/.test(location.search)) { goTop(tyUrl("signed=1")); return; }   // נועה 3.11: חתימה על התנאים – בלי הודעות תשלום
-      if (CONFIG.provider === "none" || isPhonePay()) { goTop(tyUrl("pending=1" + (isPhonePay() ? "&phone=1" : ""))); return; }
+      if (CONFIG.provider === "none" || isPhonePay()) { goTop(tyUrl("pending=1" + (isPhonePay() ? "&phone=1" : "") + (isPaidBefore() ? "&paid=1" : ""))); return; }
       if (amtChanged) {   // לפני המעבר לתשלום באשראי – רואים את הסכום הנכון
         topError.style.display = "block"; topError.classList.add("amt-note"); topError.textContent = "";
         var t = document.createElement("div"); t.textContent = "ההרשמה נקלטה בהצלחה. " + sm.amount_note;
