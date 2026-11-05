@@ -654,8 +654,9 @@ $("f-school").addEventListener("change", () => { schOther(); $("field-school").c
 const schVal = () => $("f-school").value === "אחר" ? ($("f-school-other").value.trim() || null) : ($("f-school").value || null);
 $("f-city").addEventListener("change", () => { schoolOpts($("f-city").value); renderTracks(); });
 if (P_CITY && CONFIG.citySchools[P_CITY]) { $("f-city").value = P_CITY; schoolOpts(P_CITY); $("f-city").disabled = true; }
-if (P_SCHOOL) { if (![...$("f-school").options].some(o => o.value === P_SCHOOL)) { const o = document.createElement("option"); o.value = o.textContent = P_SCHOOL; $("f-school").appendChild(o); } $("f-school").value = P_SCHOOL; $("f-school").disabled = true; }
+if (P_SCHOOL) { if (![...$("f-school").options].some(o => o.value === P_SCHOOL)) { const o = document.createElement("option"); o.value = o.textContent = P_SCHOOL; $("f-school").appendChild(o); } $("f-school").value = P_SCHOOL; }   /* נועה 5.11: בית הספר מסומן מהקישור, אבל אפשר לשנות (ילד נוסף / בית ספר אחר) – כמו בטופס ההרשמה */
 if (P_CITY) $("subtitleLocation").textContent = [P_SCHOOL, P_CITY].filter(Boolean).join(" · ");   // 5.19.91: בשורה השנייה בתוך התגית
+if (P_CITY && P_SCHOOL) $("f-school").addEventListener("change", () => { const v = $("f-school").value; $("subtitleLocation").textContent = [v && v !== "אחר" ? v : "", P_CITY].filter(Boolean).join(" · "); });   /* נועה 5.11: שינוי בית ספר – גם בכותרת */
 // התוכן לפי הקישור: המסלולים שנבחרו (ואם לא נבחרו - כל המסלולים כשיש עיר; בלי עיר - נוסח כללי)
 // 5.19.84: תיאור המרתון – אותו נוסח בדיוק כמו בטופס ההרשמה למרתון (marathon.html)
 function marDesc(){
