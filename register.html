@@ -309,6 +309,7 @@
   html.sig-only #field-payphone .pm-title, html.sig-only #pmOpts, html.sig-only .pm-lock{ display:none !important; }
   html.sg-prefill #trackPick > :not(.tp-on), html.sg-prefill #trackPick .tp-radio{ display:none !important; }   /* מהכרטיס – רק המסלול שנבחר */
   html.sig-only #payPhoneOnly{ display:block !important; background:#EEF6EF; border:1px solid #BFD9C4; color:#2F6B3D; border-radius:12px; padding:10px 14px; font-size:14.5px; }
+  html.sig-only #payPhoneOnly.unpaid{ background:#FFF6E0 !important; border-color:#E9CF8F !important; color:#6B4D12 !important; }
   .submit-wrap{ text-align:center; margin-top:30px; }
   button#submitBtn{
     font-family:'Heebo',sans-serif;
@@ -988,7 +989,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // נועה 3.11: קישור "נרשמו בטלפון" (register.html?city=…&phone=1) – ממלאים את כל הפרטים וחותמים; התשלום מטופל מולנו בטלפון (בלי אשראי בטופס)
   var PHONE_REG = PHONE_REG_;
   // נועה 3.11: בלי שום דבר על תשלום – רק הפרטים, התנאים והחתימה
-  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = RH("r.paid_note", "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום.", "במקום אופן התשלום – שילמו בטלפון"); } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.innerHTML = RH("r.first_paid", "תשלום ראשון – שולם בטלפון", "הסכום הראשון – שילמו בטלפון"); }
+  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = RH("r.paid_note", "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום.", "במקום אופן התשלום – שילמו בטלפון"); } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.id = "amtFirstLbl"; a1.innerHTML = RH("r.first_paid", "תשלום ראשון – שולם בטלפון", "הסכום הראשון – שילמו בטלפון"); }
     var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_paid", "זה טופס ההרשמה – תרגול שוטף תשפ\"ז.", "פתיחה – שילמו בטלפון") + "</div><div class=\"sg-sub\">" + RH("r.intro_paid_sub", "ממלאים את הפרטים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – שילמו בטלפון (שורה שנייה)") + "</div>";
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
     var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.innerHTML = RH("r.sig_hint_paid", "החתימה נשמרת יחד עם הטופס.", "הסבר מתחת לחתימה – שילמו בטלפון"); }
@@ -1831,12 +1832,15 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
     setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
     [cityEl, schoolEl, schoolOtherEl, subjectEl, subjectChoiceEl].forEach(function(el){ if (el) { el.disabled = true; el.classList.add("sg-lock"); } }); document.documentElement.classList.add("sg-prefill");
+    if (d.registered === false) {   /* נועה 5.11 (166): הקורס עוד לא "רשום" – לא "התשלום בוצע" */
+      var pu = document.getElementById("payPhoneOnly"); if (pu) { pu.classList.add("unpaid"); pu.innerHTML = RH("r.card_unpaid", "<b>📞 התשלום יוסדר בטלפון</b> – ניצור איתכם קשר. עכשיו רק לאשר ולחתום.", "הקישור מהכרטיס – עוד לא שולם"); }
+      var au = document.getElementById("amtFirstLbl"); if (au) au.innerHTML = RH("r.first_unpaid", "תשלום ראשון – ייגבה בטלפון", "הסכום הראשון – הקישור מהכרטיס, עוד לא שולם"); }
     var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_card", "שלום {שם ההורה}, זה טופס ההרשמה של <b>{שם התלמיד/ה}</b> – {קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": d.course || "" }) + "</div><div class=\"sg-sub\">" + RH("r.intro_card_sub", "הפרטים כבר ממולאים. בודקים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
   }
   function escHtml(t){ return String(t).replace(/[&<>"']/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function signBad(msg){ var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + escHtml(msg) + "</div>"; form.hidden = true; }
   // עורך הנוסחים במערכת: הקישור מהכרטיס עם נתוני דוגמה (c=sample, בלי שרת)
-  if (PHONE_REG && /[?&]c=sample(&|$)/.test(location.search)) setTimeout(function(){ signFill({ ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", grade: "ז'", class_num: "3", school: (CONFIG.citySchools[cityEl.value] || [""])[0], city: cityEl.value, course: "תרגול שוטף תשפ\"ז", track: "single", subject: "מתמטיקה", parent_first: "מיכל", parent_last: "לוי", parent_phone: "0500000001", parent_email: "parent@example.com" }); }, 300);
+  if (PHONE_REG && /[?&]c=sample(&|$)/.test(location.search)) setTimeout(function(){ signFill({ ok: true, registered: !/[?&]unpaid=1/.test(location.search), student_first: "נועה", student_last: "לוי", student_phone: "0500000000", grade: "ז'", class_num: "3", school: (CONFIG.citySchools[cityEl.value] || [""])[0], city: cityEl.value, course: "תרגול שוטף תשפ\"ז", track: "single", subject: "מתמטיקה", parent_first: "מיכל", parent_last: "לוי", parent_phone: "0500000001", parent_email: "parent@example.com" }); }, 300);
   if (SIGN_CODE) {
     var sgp = { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey };
     fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: sgp, body: JSON.stringify({ p_code: SIGN_CODE }) }).then(function(r){ return r.json(); }).then(function(d){

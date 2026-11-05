@@ -377,6 +377,11 @@
   .hero .subtitle{ color:#fff; font-family:'Heebo',sans-serif; font-weight:900; font-size:clamp(22px,6vw,30px); line-height:1.25; letter-spacing:0; margin:0; text-wrap:balance; }
 
   html.sig-only .reg-part-h{ display:none !important; }
+  /* נועה 5.11: הקישור האישי מכרטיס התלמיד – אותו טופס מרתון, ממולא */
+  .mk-cardinfo{ background:#F3E3C3; border-radius:18px; padding:14px 16px; margin:0 0 14px; font-size:15.5px; line-height:1.7; color:#3A2A1F; }
+  .mk-cardinfo .sg-sub{ margin-top:6px; font-size:.93em; }
+  html.mk-card #groupFieldset, html.mk-card #fsMode, html.mk-card #modeHint, html.mk-card .side-price, html.mk-card .amount-row, html.mk-card #amountBreakdown, html.mk-card #field-hakbatsa{ display:none !important; }
+  html.mk-card #payPhoneOnly.unpaid{ background:#FFF6E0 !important; border-color:#E9CF8F !important; color:#6B4D12 !important; }
   html.sig-only #termsBox{ max-height:none !important; overflow:visible !important; }
   /* נועה 4.11: "שילמו בטלפון" – הסכום כמו בטופס; במקום אופן התשלום – "✓ התשלום בוצע בטלפון" */
   html.sig-only #field-payphone .pm-title, html.sig-only #pmOpts, html.sig-only .pm-lock, html.sig-only #payMethodError, html.sig-only #fsFirstTime{ display:none !important; }
@@ -941,6 +946,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // מרתון לפי קוד: marathon.html?m=<קוד> (הקישור נוצר במערכת הניהול, במסך "קבוצות ונוכחות").
   // השם, העיר, בית הספר, המחירים והקבוצות נטענים מהמערכת. קבוצה מלאה - אי אפשר לבחור בה.
   var MARATHON = null, MARATHON_CODE = "";
+  var MSIGN = (location.search.match(/[?&]c=([0-9a-f]{32}|sample)(?:&|$)/) || [])[1] || "";   /* נועה 5.11: הקישור האישי מכרטיס התלמיד (marathon.html?m=…&c=…) */
   function lockSchool(school){
     var el = document.getElementById("f-school");
     el.value = school; el.readOnly = true; el.classList.add("locked");
@@ -1091,7 +1097,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function initMarathon(){
     var q; try { q = new URLSearchParams(location.search); } catch (err) { q = new URLSearchParams(""); }
     MARATHON_CODE = (q.get("m") || "").trim().slice(0, 20);
-    if (MARATHON_CODE) { (window.TELEM_HOLD || function(p){ return p; })(loadMarathon()); return; }   // נועה 24.10: הטופס מוצג רק אחרי שהנתונים הגיעו
+    if (MARATHON_CODE) { (window.TELEM_HOLD || function(p){ return p; })(loadMarathon().then(function(){ if (MSIGN) return mCardInit(); })); return; }   // נועה 24.10: הטופס מוצג רק אחרי שהנתונים הגיעו
     // קישור ישן (city/school) - אין בו קבוצות. בתצוגה מקדימה אפשר לראות את הטופס, אבל אי אפשר להירשם.
     var school = (q.get("school") || "").trim().slice(0, 60), city = (q.get("city") || "").trim().slice(0, 40);
     if (school) lockSchool(school);
@@ -1179,7 +1185,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const isPhonePay = () => payPhoneEl.checked || isPaidBefore();
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
   const isCardPay = () => document.getElementById("f-paycard").checked;
-  const SUBMIT_TXT = () => isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
+  const SUBMIT_TXT = () => MSIGN ? "אישור ושליחה" : isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
     const c = document.getElementById("consentText"); c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
@@ -1660,6 +1666,31 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   document.getElementById("leadBtn").addEventListener("click", submitLead);
   mkPaint();
 
+  /* נועה 5.11: הקישור האישי מכרטיס התלמיד – טופס המרתון עצמו, ממולא מהכרטיס; בלי בחירת קבוצה ובלי תשלום (התשלום – בטלפון) */
+  function mCardInit(){
+    if (!MARATHON) { location.replace(new URL("sign.html?c=" + MSIGN, location.href).href); return; }   /* המרתון סגור להרשמה – טופס החתימה הנפרד */
+    var H = function(k, d, l, v){ return (window.TX && TX.h) ? TX.h(k, d, l, "הקישור האישי מהכרטיס", v) : d; };
+    document.documentElement.classList.add("sig-only", "mk-card");
+    var rr = document.querySelector("input[name=mkmode][value=reg]"); if (rr) { rr.checked = true; mkPaint(); }
+    payPhoneEl.checked = true; firstTimeYesEl.checked = true;
+    var info = document.createElement("div"); info.className = "mk-cardinfo"; info.id = "mkCardInfo"; form.parentNode.insertBefore(info, form);
+    function bad(msg){ info.textContent = msg; form.hidden = true; }
+    var pr = MSIGN === "sample" ? Promise.resolve({ ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", parent_first: "דנה", parent_last: "לוי", parent_phone: "0500000001", parent_email: "dana@example.com", course: MARATHON.name || "מרתון", registered: !/[?&]unpaid=1/.test(location.search) })
+      : fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: MSIGN }) }).then(function(r){ return r.json(); });
+    return pr.then(function(d){
+      if (!d || !d.ok) { var why = d && d.reason; bad(why === "signed" ? "הטופס כבר נחתם. תודה!" : why === "expired" ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. אפשר לבקש קישור חדש: 052-9067101"); return; }
+      var setv = function(id, v){ var el = document.getElementById(id); if (el && v != null && v !== "") el.value = String(v); };
+      setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
+      setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
+      if (d.grade && !document.getElementById("f-grade").value) setv("f-grade", d.grade);
+      info.innerHTML = "<div>" + H("m.intro_card", "שלום {שם ההורה}, זה טופס ההרשמה של <b>{שם התלמיד/ה}</b> – {קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": MARATHON.name || d.course || "" })
+        + "</div><div class=\"sg-sub\">" + H("m.intro_card_sub", "הפרטים כבר ממולאים – בודקים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
+      var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.classList.toggle("unpaid", d.registered === false);
+        pp.innerHTML = d.registered === false ? H("m.card_unpaid", "<b>📞 התשלום יוסדר בטלפון</b> – ניצור איתכם קשר. עכשיו רק לאשר ולחתום.", "הקישור מהכרטיס – עוד לא שולם")
+                                              : H("m.card_paid", "<b>✓ התשלום בוצע</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום.", "הקישור מהכרטיס – שולם"); }
+      submitBtn.textContent = SUBMIT_TXT(); if (typeof updateSubmitAvailability === "function") updateSubmitAvailability();
+    }).catch(function(){ bad("לא הצלחנו לטעון את הטופס. נסו שוב מאוחר יותר, ואם זה חוזר – התקשרו: 052-9067101"); });
+  }
   form.addEventListener("submit", function(e){
     e.preventDefault();
     // נועה 28.10: קודם בוחרים "רק להשאיר פרטים" / "להירשם עכשיו"
@@ -1687,7 +1718,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
 
     const groupEl = form.querySelector("input[name=group]:checked");
     const sessionId = groupEl ? Number(groupEl.value) : null;
-    const needGroup = !!MARATHON_CODE;
+    const needGroup = !!MARATHON_CODE && !MSIGN;
     setInvalid("field-group", needGroup && !sessionId);
     if (needGroup && !sessionId) valid = false;
 
@@ -1700,7 +1731,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     setInvalid("field-grade", !grade);
     if (!grade) valid = false;
 
-    const hakEl = document.getElementById("f-hakbatsa"), needHak = !document.getElementById("field-hakbatsa").hidden;
+    const hakEl = document.getElementById("f-hakbatsa"), needHak = !MSIGN && !document.getElementById("field-hakbatsa").hidden;
     const hakbatsa = needHak ? hakEl.value : "";
     setInvalid("field-hakbatsa", needHak && !hakbatsa);
     if (needHak && !hakbatsa) valid = false;
@@ -1724,11 +1755,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     setInvalid("field-email", !emailOk);
     if (!emailOk) valid = false;
 
-    setInvalid("field-first-time", !firstTime);
-    if (!firstTime) valid = false;
+    setInvalid("field-first-time", !firstTime && !MSIGN);
+    if (!firstTime && !MSIGN) valid = false;
 
     // תלם 5.19.38: אופן התשלום - בחירה מפורשת (אשראי עכשיו / טלפוני)
-    const pmOk = isPhonePay() || isCardPay();
+    const pmOk = isPhonePay() || isCardPay() || !!MSIGN;
     document.getElementById("field-payphone").classList.toggle("invalid", !pmOk);
     if (!pmOk) valid = false;
 
@@ -1763,6 +1794,15 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       try { sessionStorage.setItem("reg_saved_at", String(Date.now())); sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", ("טופס הרשמה למרתון - " + String(studentFirst + " " + studentLast).replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim() + (isPreview ? " (תצוגה מקדימה)" : "")).trim() + ".pdf"); } catch (e) {}   // תלם 5.19.48: שם הקובץ בעברית
     }
     makeSignedPdf("טופס הרשמה למרתון", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
+    if (MSIGN && MSIGN !== "sample") {   /* נועה 5.11: מהכרטיס – הקורס הקיים מסומן "טופס חתום" (בלי הרשמה חדשה), כמו בטופס ההרשמה */
+      var vals = { student_first: studentFirst, student_last: studentLast, student_phone: studentPhone, grade: grade, parent_first: parentFirst, parent_last: parentLast, parent_phone: phone, parent_email: email };
+      callSupabase("submit_sign_link", { code: MSIGN, terms_accepted: true, values: vals, signature: signature, pdf: signedPdf, website: document.getElementById("f-website").value }).then(function(rs){
+        saveRegPdf(signedPdf, false);
+        try { sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(null))); } catch (err) {}
+        goTop(tyUrl("signed=1" + (rs && rs.registered === false ? "&unpaid=1" : "")));
+      }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: 052-9067101" : "לא הצלחנו לשמור את הטופס. נסו שוב בעוד רגע, ואם זה חוזר – התקשרו: 052-9067101"; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
+      return;
+    }
     if (isPreviewNow()) {
       saveRegPdf(signedPdf, true);   // תלם 5.19.40: לא מורידים אוטומטית - כפתור הורדה בדף התודה
       try { sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(getAmount()))); } catch (err) {}
