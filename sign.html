@@ -956,13 +956,13 @@ $("payForm").addEventListener("submit", function(e){
     if (PREVIEW) { if (pdf) { const a = document.createElement("a"); a.href = pdf; a.download = "טופס-חתימה-תצוגה-מקדימה.pdf"; document.body.appendChild(a); a.click(); }
       showDone("תצוגה מקדימה – הטופס לא נשמר."); return; }
     callSupabase("submit_sign_link", { code: CODE, terms_accepted: true, values: values, signature: signature, pdf: pdf, website: $("f-website").value })
-      .then(function(){   // נועה 4.11: אחרי החתימה – דף התודה של אישור ההרשמה (הקישור נשלח למי שכבר שילם), בלי שום דבר על תשלום
+      .then(function(rs){   // נועה 4.11: אחרי החתימה – דף התודה של אישור ההרשמה (הקישור נשלח למי שכבר שילם), בלי שום דבר על תשלום
         const mar = /^מרתון/.test(String(LINK.course || "")), nm = [values.student_first || LINK.student_first, values.student_last || LINK.student_last].filter(Boolean).join(" ");
         const trk = mar ? "" : (LINK.track === "double" ? TRK.double : String(TRK[LINK.track] || "").replace("מתמטיקה או אנגלית", LINK.subject || "מתמטיקה או אנגלית"));
         try { sessionStorage.setItem("reg_summary", JSON.stringify(mar ? { kind: "marathon", name: nm, event: String(LINK.course || "").replace(/^מרתון\s*·?\s*/, "מרתון ") } : { kind: "register", name: nm, city: LINK.city || "", school: LINK.school || "", track: trk }));
               sessionStorage.setItem("reg_saved_at", String(Date.now()));
               if (pdf) { sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", ("טופס הרשמה - " + nm).replace(/[\\/:*?"<>|]+/g, "") + ".pdf"); } } catch (e) {}
-        location.href = new URL("thank-you.html?signed=1", location.href).href; })
+        location.href = new URL("thank-you.html?signed=1" + (rs && rs.registered === false ? "&unpaid=1" : ""), location.href).href; })   /* נועה 5.11 (163) */
       .catch(function(err){
         const m = String(err && err.message || "");
         topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: " + PHONE : /signature/.test(m) ? "יש לחתום כדי להמשיך." : /invalid (phone|email|name|field)/.test(m) ? "יש לבדוק את הפרטים המסומנים." : "לא הצלחנו לשמור. נסו שוב, ואם זה חוזר – התקשרו: " + PHONE;

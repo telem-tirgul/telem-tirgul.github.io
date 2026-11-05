@@ -147,6 +147,7 @@
     ["ty.title_phone", "טופס ההרשמה התקבל", "כותרת – תשלום טלפוני (עוד לא שולם)", {}, []],
     ["ty.chip_wait", "⏳ ממתין לתשלום", "תגית – תשלום טלפוני", {}, []],
     ["ty.pending_phone", 'טופס ההרשמה התקבל אך ההרשמה טרם הושלמה.<br>אנא צרו איתנו קשר טלפוני לצורך השלמת הרישום:<br><a class="ph-big" href="tel:0529067101" dir="ltr">📞 052-9067101</a>', "התיבה הצהובה – תשלום טלפוני", {}, []],
+    ["ty.signed_unpaid", "הטופס נחתם ונשמר. נשאר רק להסדיר את התשלום – ניצור איתכם קשר בהקדם.", "התיבה הצהובה – נחתם מהקישור האישי, עוד לא שולם", {}, []],
     ["ty.pending_paidphone", "תודה! נוודא שהתשלום שביצעתם בטלפון התקבל, ונעדכן אתכם כשההרשמה תאושר.", "התיבה הצהובה – \"כבר שילמתי בטלפון\"", {}, []],
     ["ty.pending", "ניצור איתכם קשר בימים הקרובים להסדרת התשלום.", "התיבה הצהובה – ממתין לתשלום (לא טלפוני)", {}, []],
     ["ty.lead_register", "{שם} רשום/ה לתרגולים השוטפים{ · עיר}", "שורה מתחת לכותרת – תרגולים שוטפים", { "שם": "השם הפרטי של התלמיד/ה", " · עיר": "העיר עם נקודה לפניה (ריק אם אין עיר)" }, ["שם"]],
@@ -197,7 +198,9 @@
     var $ = function(id){ return document.getElementById(id); };
     var signed = /[?&]signed=1/.test(location.search);   // נועה 3.11: "חתימה על התנאים" – בלי שום דבר על תשלום
     var pending = /[?&]pending=1/.test(location.search), phone = /[?&]phone=1/.test(location.search), preview = /[?&]preview=1/.test(location.search), paidRef = /[?&]ref=/.test(location.search);
-    if (TY_EDIT) { preview = false; pending = phone = TYV === "phone" || TYV === "phpaid"; paidRef = TYV === "paid"; }
+    if (TY_EDIT) { preview = false; pending = phone = TYV === "phone" || TYV === "phpaid" || TYV === "sgunp"; paidRef = TYV === "paid"; signed = false; }
+    var unpaid = (signed && /[?&]unpaid=1/.test(location.search)) || (TY_EDIT && TYV === "sgunp");   /* נועה 5.11: נחתם מהקישור האישי, והקורס עוד לא "רשום" – לא "ההרשמה אושרה" */
+    if (unpaid) { signed = false; pending = phone = true; }
     var box = $("sum");
     function row(label, value, cls){ var d = document.createElement("div"); if (cls) d.className = cls; var a = document.createElement("span"); a.textContent = label; var b = document.createElement("b"); b.textContent = value; d.appendChild(a); d.appendChild(b); box.appendChild(d); }
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
@@ -231,7 +234,7 @@
       $("title").textContent = tyT("ty.title_phone");
       // 5.19.57: גם בתשלום טלפוני - הוי הירוק ליד הכותרת (הטופס התקבל); הסטטוס בתיבה הצהובה
       var ch0 = $("stChip"); ch0.className = "st-chip wait"; ch0.textContent = tyT("ty.chip_wait");
-      var pm0 = $("pendingMsg"); pm0.innerHTML = (/[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid")) ? '<span class="ic">🔍</span><span>' + tyH("ty.pending_paidphone") + '</span>' : '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
+      var pm0 = $("pendingMsg"); pm0.innerHTML = unpaid ? '<span class="ic">📞</span><span>' + tyH("ty.signed_unpaid") + '</span>' : (/[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid")) ? '<span class="ic">🔍</span><span>' + tyH("ty.pending_paidphone") + '</span>' : '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
     }
     var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
     if (regLike && !(phone && pending && !preview)) {
