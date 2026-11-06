@@ -1000,7 +1000,7 @@ $("payForm").addEventListener("submit", function(e){
       .then(function(){ submittedOnce = true; goToPayment(); })
       .catch(function(err){
         const m = String(err && err.message || "");
-        topError.textContent = /used link/.test(m) ? "הטופס כבר נשלח, או שהקישור בוטל. לפרטים: 052-9067101" : /missing field/.test(m) ? "חסרים פרטים בטופס." : /invalid (email|phone)/.test(m) ? "האימייל או הטלפון לא תקינים." : "לא ניתן היה לשלוח את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101";
+        topError.textContent = /used link/.test(m) ? "הטופס כבר נשלח, או שהקישור בוטל. לפרטים: 052-9067101" : /missing field/.test(m) ? "חסרים פרטים בטופס." : /invalid student phone/.test(m) ? "נייד התלמיד/ה לא תקין." : /link expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : /invalid (email|phone)/.test(m) ? "האימייל או הטלפון לא תקינים." : "לא ניתן היה לשלוח את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101";
         topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = "המשך לתשלום מאובטח";
       });
   });
