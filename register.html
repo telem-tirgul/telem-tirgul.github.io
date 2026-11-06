@@ -2068,11 +2068,21 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     });
   }
   if (TS.endpoint) tsLoad(function(){}, function(){});   // טעינה מראש, כדי שהשליחה לא תתעכב
+  // נועה 6.11 (מהירות): בדיקת הבוטים רצה ברקע כבר בזמן המילוי (טוקן תקף 5 דק'), והשרת "מתעורר" מראש – בשליחה לא מחכים להם
+  var TS_PRE = null;
+  function srvWarm(){ var u = CONFIG.supabase && CONFIG.supabase.url; if (!u || srvWarm.at && Date.now() - srvWarm.at < 120000) return; srvWarm.at = Date.now();
+    ["form-submit", "icredit-pay"].forEach(function(fn){ try { fetch(u + "/functions/v1/" + fn, { method: "OPTIONS" }).catch(function(){}); } catch (e) {} }); }
+  function tsPrefetch(){ srvWarm(); if (!TS.endpoint || (TS_PRE && Date.now() - TS_PRE.at < 200000)) return;
+    var x = { at: Date.now() }; x.p = tsToken(); TS_PRE = x; x.p.catch(function(){ if (TS_PRE === x) TS_PRE = null; }); }
+  function tsTake(){ var x = TS_PRE; TS_PRE = null; return x && Date.now() - x.at < 270000 ? x.p.catch(function(){ return tsToken(); }) : tsToken(); }
+  setTimeout(srvWarm, 1500);
+  ["change", "focusin"].forEach(function(ev){ document.addEventListener(ev, function(e){ if (e.target && e.target.closest && e.target.closest("form")) tsPrefetch(); }, true); });
+  sigCanvas.addEventListener("pointerdown", tsPrefetch);
   // שליחת ההרשמה: עם endpoint - דרך הבדיקה בשרת; בלי - ישירות לפונקציה כמו היום
   function submitPayload(fnName, kind, payload){
     if (!TS.endpoint) return callSupabase(fnName, payload);
     const s = CONFIG.supabase;
-    return tsToken().then(function(token){
+    return tsTake().then(function(token){
       return fetch(s.url + "/functions/v1/" + TS.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": s.anonKey, "Authorization": "Bearer " + s.anonKey },
