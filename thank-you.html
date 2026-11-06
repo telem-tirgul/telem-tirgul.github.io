@@ -156,7 +156,9 @@
     ["ty.pending", "ניצור עמכם קשר בימים הקרובים לצורך הסדרת התשלום.", "התיבה הצהובה – ממתין לתשלום (לא טלפוני)", {}, []],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
     ["ty.meet_note", "*נפגשים בכניסה למבנה בית הספר.", "מרתון – הערה מתחת למועדי המפגשים", {}, []],
-    ["ty.chip_paid", "✓ שולם", "תגית – אחרי תשלום באשראי", {}, []],
+    ["ty.al_title", "התלמיד/ה כבר רשום/ה למרתון", "מרתון – כבר רשום/ה: כותרת", {}, []],
+    ["ty.al_chip", "✓ רשום/ה", "מרתון – כבר רשום/ה: מתחת לכותרת", {}, []],
+    ["ty.al_lead", "הפרטים כבר שמורים אצלנו, ואין צורך לשלוח את הטופס פעם נוספת.<br>נתראה במרתון!", "מרתון – כבר רשום/ה: הטקסט", {}, []],
     ["ty.int_title", "תודה, פנייתכם התקבלה", "התעניינות – כותרת", {}, []],
     ["ty.int_msg", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם עם פרטים על התרגולים השוטפים.", "התעניינות – ההודעה בתיבה", {}, []],
     ["ty.lead_title", "תודה, פנייתכם התקבלה", "רק פרטים (מרתון) – כותרת", {}, []],
@@ -201,19 +203,19 @@
     var $ = function(id){ return document.getElementById(id); };
     var signed = /[?&]signed=1/.test(location.search);   // נועה 3.11: "חתימה על התנאים" – בלי שום דבר על תשלום
     var pending = /[?&]pending=1/.test(location.search), phone = /[?&]phone=1/.test(location.search), preview = /[?&]preview=1/.test(location.search), paidRef = /[?&]ref=/.test(location.search);
-    if (TY_EDIT) { preview = false; pending = phone = TYV === "phone" || TYV === "phpaid" || TYV === "sgunp"; paidRef = TYV === "paid"; signed = false; }
+    if (TY_EDIT) { preview = false; pending = phone = TYV === "phone" || TYV === "phpaid" || TYV === "sgunp"; paidRef = TYV === "paid" || TYV === "paylink"; signed = TYV === "signed"; }   // נועה 6.11: כל המקרים בעורך
     var unpaid = (signed && /[?&]unpaid=1/.test(location.search)) || (TY_EDIT && TYV === "sgunp");   /* נועה 5.11: נחתם מהקישור האישי, והקורס עוד לא "רשום" – לא "ההרשמה אושרה" */
     if (unpaid) { signed = false; pending = phone = true; }
     var box = $("sum");
     function row(label, value, cls){ var d = document.createElement("div"); if (cls) d.className = cls; var a = document.createElement("span"); a.textContent = label; var b = document.createElement("b"); b.textContent = value; d.appendChild(a); d.appendChild(b); box.appendChild(d); }
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
-    if (TY_EDIT) x = TY_SAMPLE;
+    if (TY_EDIT) x = TYV === "paylink" ? null : TY_SAMPLE;
     // נועה 25.10: נשלח טופס מרתון לתלמיד/ה שכבר רשום/ה ושילם/ה – כותבים בפירוש שאין צורך להירשם שוב, עם שם התלמיד/ה והמרתון
-    if (/[?&]already=1/.test(location.search) && !TY_EDIT) {
-      var al = null; try { al = JSON.parse(sessionStorage.getItem("reg_already") || "null"); } catch (e) {}
-      $("title").textContent = "התלמיד/ה כבר רשום/ה למרתון";
-      var chA = $("stChip"); chA.className = "st-chip ok"; chA.textContent = "✓ רשום/ה";
-      var ld = $("lead"); ld.textContent = "הפרטים כבר שמורים אצלנו, ואין צורך לשלוח את הטופס פעם נוספת.";   /* נועה 28.10 */ ld.appendChild(document.createElement("br")); ld.appendChild(document.createTextNode("נתראה במרתון!")); ld.hidden = false;
+    if ((/[?&]already=1/.test(location.search) && !TY_EDIT) || (TY_EDIT && TYV === "already")) {
+      var al = null; try { al = JSON.parse(sessionStorage.getItem("reg_already") || "null"); } catch (e) {} if (TY_EDIT) al = TY_SAMPLE;
+      $("title").textContent = tyT("ty.al_title");
+      var chA = $("stChip"); chA.className = "st-chip ok"; chA.textContent = tyT("ty.al_chip");
+      var ld = $("lead"); ld.innerHTML = tyH("ty.al_lead"); ld.hidden = false;   /* נועה 28.10 */
       if (al && (al.name || al.event)) { if (al.name) row(tyT("ty.row_name"), al.name); if (al.event) row(tyT("ty.row_mar"), al.event); $("sumT").textContent = tyT("ty.sum_t"); $("sumT").hidden = false; box.hidden = false; }
       document.title = "כבר רשומים - תלם"; return;
     }
@@ -287,7 +289,7 @@
   // תלם 5.19.42: תשלום אושר - למעלה בגדול "ההרשמה אושרה / חשבונית תישלח אליכם במייל"
   window.__tyPaid = function(){
     var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
-    if (TY_EDIT) x = TY_SAMPLE;
+    if (TY_EDIT) x = TYV === "paylink" ? null : TY_SAMPLE;
     var reg = x && (x.kind === "marathon" || x.kind === "register");
     // 5.19.93 (נועה): גם בלי פרטי הרשמה (דף תשלום / הפרטים פגו) – אותו עיצוב, בלי התיבה הירוקה
     document.getElementById("title").textContent = reg ? tyT("ty.paid_title_reg") : tyT("ty.paid_title");
@@ -325,7 +327,7 @@
 
   // חזרה מעמוד התשלום של איקרדיט (?ref=...): בודקים מול השרת שהתשלום באמת אושר (5.19.100: אחרי שהדף נבנה – __tyAfter)
   window.__tyAfter = function(){
-    if (TY_EDIT && TYV === "paid") { window.__tyPaid(); return; }
+    if (TY_EDIT && (TYV === "paid" || TYV === "paylink")) { window.__tyPaid(); return; }
     var m = /[?&]ref=([A-Za-z0-9]{32,64})/.exec(location.search);
     if (!m) return;
     var msg = document.getElementById("payMsg"); msg.hidden = false; msg.textContent = tyT("ty.pay_checking");
