@@ -851,7 +851,8 @@ const FIELDS = [
 ];
 // תלם 5.19.46: השדות בכרטיסים קטנים (2-4 שדות), כמו בטופס המרתון
 const FIELD_GROUPS = [["פרטי התלמיד/ה", ["student_first", "student_last"]], ["בית הספר", ["city", "school", "grade", "class_num"]], ["המסלול", ["track", "subject"]], ["פרטי ההורה", ["parent_name", "parent_phone", "parent_email"]]];
-const BASE_REQ = ["parent_name", "parent_phone", "student_first"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
+const BASE_REQ = ["parent_name", "parent_phone", "student_first"];
+const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first", "student_last", "school", "grade", "class_num"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
 const money = (n) => "₪" + Number(n).toLocaleString("he-IL", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const dateHe = (d) => { if (!d) return ""; const p = String(d).split("-"); return p.length === 3 ? (+p[2]) + "." + (+p[1]) + "." + p[0] : d; };
 var LINK = null;
@@ -871,15 +872,8 @@ function fill(d){
   $("payForm").hidden = false;
   $("v-desc").textContent = d.description || "תשלום לתלם";
   $("v-amount").textContent = money(d.one_time_amount);
-  if (d.trial) {   // נועה 6.11: חודש ניסיון (icredit-37/38) – היום חודש אחד; אם ממשיכים – חודש + דמי הרשמה (+ חומרים), ואז ב-1 בכל חודש
-    const t = d.trial; $("v-amount").previousElementSibling.textContent = "היום – חודש ניסיון";
-    $("v-desc-sub").textContent = "חודש הניסיון: מ-" + dm(t.start) + " עד " + dateHe(t.end) + ". התשלום מתבצע בעמוד תשלום מאובטח, וחשבונית תישלח אליכם במייל.";
-    if (t.second_amount) {
-      $("recurRow").hidden = false; $("v-recur").textContent = money(t.second_amount); $("v-recur-lbl").innerHTML = "";
-      $("v-recur-lbl").appendChild(document.createTextNode("אם ממשיכים – ב-" + dm(t.second_date)));
-      const sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = trialTxt(t); $("v-recur-lbl").appendChild(sm);
-    }
-    $("consentText").textContent = "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של חודש הניסיון בכרטיס האשראי בעמוד התשלום המאובטח. אם ההרשמה תימשך לאחר חודש הניסיון – אני מאשר/ת חיוב אוטומטי באותו כרטיס בסכומים ובמועדים המפורטים למעלה.";
+  if (d.trial) {   // נועה 6.11 (שני שלבים): חודש ניסיון = תשלום על חודש אחד, בלי הוראת קבע; ההמשך – בקישור הרשמה נפרד
+    const t = d.trial; $("v-amount").previousElementSibling.textContent = "חודש ניסיון: מ-" + dm(t.start) + " עד " + dm(t.end);
   } else
   if (d.monthly_amount) {
     $("recurRow").hidden = false;
@@ -897,15 +891,17 @@ function fill(d){
   function mk(k, label, type, val, req, gk){
     const wrap = document.createElement("div"); wrap.className = "field"; wrap.id = "field-" + k;
     const lab = document.createElement("label"); lab.htmlFor = "f-" + k; lab.textContent = label + " ";
-    if (req && !val) { const r = document.createElement("span"); r.className = "req"; r.textContent = "*"; lab.appendChild(r); }
+    if (req && (!val || EDITABLE.indexOf(gk || k) >= 0)) { const r = document.createElement("span"); r.className = "req"; r.textContent = "*"; lab.appendChild(r); }
     wrap.appendChild(lab);
     let el;
-    if (val) { el = document.createElement("input"); el.type = "text"; el.className = "ro-val"; el.readOnly = true; el.value = val; }
+    const ed = EDITABLE.indexOf(gk || k) >= 0;   // icredit-38: ההורה יכול/ה לתקן פרטים (לא עיר / מסלול / מקצוע)
+    if (val && !ed) { el = document.createElement("input"); el.type = "text"; el.className = "ro-val"; el.readOnly = true; el.value = val; }
     else if (Array.isArray(type)) {
       el = document.createElement("select"); el.innerHTML = '<option value="">בחירה</option>';
       type.forEach(function(o){ const op = document.createElement("option"); op.value = o; op.textContent = o; el.appendChild(op); });
     } else { el = document.createElement("input"); el.type = type; el.maxLength = 60; if (type === "tel") el.inputMode = "tel"; if (type === "email") el.autocomplete = "email"; }
-    el.id = "f-" + k; el.dataset.key = k; el.dataset.req = req && !val ? "1" : "";
+    if (val && ed) { if (el.tagName === "SELECT" && ![].some.call(el.options, function(o){ return o.value === val; })) { const op = document.createElement("option"); op.value = val; op.textContent = val; el.appendChild(op); } el.value = val; el.dataset.orig = val; }
+    el.id = "f-" + k; el.dataset.key = k; el.dataset.req = req || (val && ed) ? "1" : "";
     wrap.appendChild(el);
     const err = document.createElement("div"); err.className = "error-msg"; err.textContent = "שדה חובה"; wrap.appendChild(err);
     const gb = grpBox[gk || k] || box; gb.appendChild(wrap); gb.parentNode.hidden = false;
@@ -916,7 +912,7 @@ function fill(d){
     if (!val && !req) return;
     shown++;
     if (k === "parent_name") { const sp = val.indexOf(" "), fv = sp > 0 ? val.slice(0, sp) : val, lv = sp > 0 ? val.slice(sp + 1).trim() : "";
-      mk("parent_first", "שם פרטי הורה", "text", fv, req, k); mk("parent_last", "שם משפחה הורה", "text", val ? lv || "—" : "", req, k); return; }
+      mk("parent_first", "שם פרטי הורה", "text", fv, req, k); mk("parent_last", "שם משפחה הורה", "text", lv, req && !(val && !lv), k); return; }
     mk(k, def[1], def[2], val, req);
   });
   sigResize();
@@ -941,7 +937,7 @@ function showQuick(d, sent){
   const esc2 = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   box.innerHTML = (sent ? '<div class="q-sent">✓ הטופס התקבל, והפרטים נעולים לשינוי. נותר להשלים את התשלום.<small>לתיקון הפרטים ניתן לפנות אלינו: 052-9067101</small></div>' : "") + '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם"))
     + row("לתשלום עכשיו", esc2(money(d.one_time_amount)), "q-amt")
-    + (d.trial && d.trial.second_amount ? row("אם ממשיכים – ב-" + esc2(dm(d.trial.second_date)), esc2(money(d.trial.second_amount)) + '<small class="recur-sub">' + esc2(trialTxt(d.trial)) + '</small>') : "")
+    + (d.trial ? row("חודש ניסיון", "מ-" + esc2(dm(d.trial.start)) + " עד " + esc2(dm(d.trial.end))) : "")
     + (d.monthly_amount ? row("ואחר כך תשלום חודשי", esc2(money(d.monthly_amount)) + '<small class="recur-sub">' + esc2(recurTxt(d)) + '</small>') : "")
     + '</div><div class="q-err" id="qErr" hidden></div><button type="button" class="q-go" id="qGo">לתשלום מאובטח ←</button>'
     + '<div class="q-lock">🔒 פרטי האשראי מוזנים בעמוד המאובטח של חברת הסליקה ולא נשמרים אצלנו.</div>';
@@ -986,6 +982,9 @@ $("payForm").addEventListener("submit", function(e){
   });
   if (values.parent_first || values.parent_last) { values.parent_name = [values.parent_first, values.parent_last].filter(Boolean).join(" "); }
   delete values.parent_first; delete values.parent_last;
+  // שולחים רק מה שההורה מילא / שינה (ערך שלא השתנה – לא נשלח)
+  const orig = {}; ((LINK && LINK.fields) ? Object.keys(LINK.fields) : []).forEach(function(k){ orig[k] = ((LINK.fields[k] || {}).value || "").trim(); });
+  Object.keys(values).forEach(function(k){ if (orig[k] && orig[k] === values[k]) delete values[k]; });
   $("termsError").textContent = $("f-terms").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-terms").checked) ok = false;
   $("consentError").textContent = $("f-consent").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-consent").checked) ok = false;
   const signature = signatureImage(); if (!signature) { $("sigError").textContent = "יש לחתום כדי להמשיך."; ok = false; }
