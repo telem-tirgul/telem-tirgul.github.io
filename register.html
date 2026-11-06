@@ -1715,14 +1715,14 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var n1 = "", n2 = "";
     if (tbl) { var fz = [{ amount: tbl.registrationFee, label: "דמי שיבוץ והרשמה" }].concat(tbl.materialsFee ? [{ amount: tbl.materialsFee, label: "חומרי תרגול" }] : []);
       n1 = TELEM_TK({ key: "single", feesOnly: true, fees: fz }); var lj = lateJoinRule(city); n2 = lj && lj.apply === "first" && lateOn(lj, ilTodayISO())
-        ? RH("r.trk_late", "הרשמה עד ה-{עד יום} לחודש – שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו). הרשמה מה-{מיום} לחודש ואילך – {אחוז}% מהתשלום החודשי.", "מתחת למסלולים – הרשמה אחרי ה-20", { "עד יום": lj.from_day - 1, "מיום": lj.from_day, "אחוז": lj.percent }) : ""; }
-    var sA = n1 ? "*" : "", sB = n2 ? (n1 ? "**" : "*") : "";
+        ? RH("r.trk_late", "הרשמה עד ה-{עד יום} לחודש – שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו). הרשמה מ-{מיום} לחודש ואילך – {אחוז}% מהתשלום החודשי.", "מתחת למסלולים – הרשמה אחרי ה-20", { "עד יום": lj.from_day - 1, "מיום": lj.from_day, "אחוז": lj.percent }) : ""; }
+    var sA = n1 ? "*" : "", sB = n2 ? "*" : "";   // נועה 6.11: כוכבית אחת – ליד המחיר ובכל אחת מהשורות
     keys.forEach(function(k){
       var info = CONFIG.trackInfo[k]; if (!info) return; var pr = tbl && tbl[k];
       var fees = tbl ? [{ amount: tbl.registrationFee, label: "דמי שיבוץ והרשמה", offset: !!jo.registration }].concat(tbl.materialsFee ? [{ amount: tbl.materialsFee, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: !!jo.materials }] : []) : [];
       var extra = []; if (k === cur && tbl) { var ri = getRecurInfo(); if (ri) { var fm = String(firstMonthText(city) || "").replace(/<\/?li>/g, ""); if (fm) extra.push(fm); } if ((ri || {}).juneFree) extra.push("הקיזוז גבוה מהתשלום החודשי, ולכן לא ייגבה תשלום עבור חודש יוני."); }
       var w = document.createElement("div");
-      w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true, noOnce: true, star: [sA, sB].filter(Boolean).join(" ") });
+      w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true, noOnce: true, star: sA || sB });
       var c = w.firstChild, h = c.querySelector(".tk-head") || c;
       h.insertAdjacentHTML("afterbegin", '<label class="tp-radio" title="בחירת המסלול"><input type="radio" name="trkpick" value="' + k + '"' + (k === cur ? " checked" : "") + ' aria-label="בחירת המסלול: ' + String(info.title).replace(/"/g, "") + '"></label>');
       c.classList.toggle("tp-on", k === cur); if (k === cur && c.tagName === "DETAILS") c.open = true;
