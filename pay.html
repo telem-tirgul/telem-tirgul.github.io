@@ -893,25 +893,31 @@ function fill(d){
   const box = $("fieldsBox"), f = d.fields || {}; let shown = 0;
   const grpBox = {};
   FIELD_GROUPS.forEach(function(g){ const fs = document.createElement("fieldset"); fs.hidden = true; const lg = document.createElement("legend"); lg.textContent = g[0]; fs.appendChild(lg); const r = document.createElement("div"); r.className = "row"; fs.appendChild(r); box.appendChild(fs); g[1].forEach(function(k){ grpBox[k] = r; }); });
+  // נועה 6.11: שם ההורה – שני שדות (פרטי + משפחה), כמו במרתון ובשאר הטפסים; נשלח לשרת כ-parent_name
+  function mk(k, label, type, val, req, gk){
+    const wrap = document.createElement("div"); wrap.className = "field"; wrap.id = "field-" + k;
+    const lab = document.createElement("label"); lab.htmlFor = "f-" + k; lab.textContent = label + " ";
+    if (req && !val) { const r = document.createElement("span"); r.className = "req"; r.textContent = "*"; lab.appendChild(r); }
+    wrap.appendChild(lab);
+    let el;
+    if (val) { el = document.createElement("input"); el.type = "text"; el.className = "ro-val"; el.readOnly = true; el.value = val; }
+    else if (Array.isArray(type)) {
+      el = document.createElement("select"); el.innerHTML = '<option value="">בחירה</option>';
+      type.forEach(function(o){ const op = document.createElement("option"); op.value = o; op.textContent = o; el.appendChild(op); });
+    } else { el = document.createElement("input"); el.type = type; el.maxLength = 60; if (type === "tel") el.inputMode = "tel"; if (type === "email") el.autocomplete = "email"; }
+    el.id = "f-" + k; el.dataset.key = k; el.dataset.req = req && !val ? "1" : "";
+    wrap.appendChild(el);
+    const err = document.createElement("div"); err.className = "error-msg"; err.textContent = "שדה חובה"; wrap.appendChild(err);
+    const gb = grpBox[gk || k] || box; gb.appendChild(wrap); gb.parentNode.hidden = false;
+  }
   FIELDS.forEach(function(def){
     const k = def[0], cfg = f[k] || {}, val = (cfg.value || "").trim();
     const req = !!cfg.required || (d.needs_student && BASE_REQ.indexOf(k) >= 0);
     if (!val && !req) return;
     shown++;
-    const wrap = document.createElement("div"); wrap.className = "field"; wrap.id = "field-" + k;
-    const lab = document.createElement("label"); lab.htmlFor = "f-" + k; lab.textContent = def[1] + " ";
-    if (req && !val) { const r = document.createElement("span"); r.className = "req"; r.textContent = "*"; lab.appendChild(r); }
-    wrap.appendChild(lab);
-    let el;
-    if (val) { el = document.createElement("input"); el.type = "text"; el.className = "ro-val"; el.readOnly = true; el.value = val; }
-    else if (Array.isArray(def[2])) {
-      el = document.createElement("select"); el.innerHTML = '<option value="">בחירה</option>';
-      def[2].forEach(function(o){ const op = document.createElement("option"); op.value = o; op.textContent = o; el.appendChild(op); });
-    } else { el = document.createElement("input"); el.type = def[2]; el.maxLength = 120; if (def[2] === "tel") el.inputMode = "tel"; if (def[2] === "email") el.autocomplete = "email"; }
-    el.id = "f-" + k; el.dataset.key = k; el.dataset.req = req && !val ? "1" : "";
-    wrap.appendChild(el);
-    const err = document.createElement("div"); err.className = "error-msg"; err.textContent = "שדה חובה"; wrap.appendChild(err);
-    const gb = grpBox[k] || box; gb.appendChild(wrap); gb.parentNode.hidden = false;
+    if (k === "parent_name") { const sp = val.indexOf(" "), fv = sp > 0 ? val.slice(0, sp) : val, lv = sp > 0 ? val.slice(sp + 1).trim() : "";
+      mk("parent_first", "שם פרטי הורה", "text", fv, req, k); mk("parent_last", "שם משפחה הורה", "text", val ? lv || "—" : "", req, k); return; }
+    mk(k, def[1], def[2], val, req);
   });
   sigResize();
 }
@@ -919,7 +925,7 @@ const SAMPLE = { status: "opened", description: "הרשמה לתרגולים + �
   needs_student: true, fields: { parent_name: { value: "מיכל לוי", required: true }, parent_email: { value: "", required: true }, subject: { value: "מתמטיקה" } } };
 if (PREVIEW && !CODE) fill(SAMPLE);
 else if (CODE.length < 32) showBad("הקישור לא תקין. לפרטים: 052-9067101");
-else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("pay_link_public", { p_code: CODE })).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא הצלחנו לטעון את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101"));
+else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("pay_link_public", { p_code: CODE })).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא ניתן היה לטעון את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101"));
 
 function dm(d){ const p = String(d || "").split("-"); return p.length === 3 ? (+p[2]) + "." + (+p[1]) : d; }
 function trialTxt(t){
@@ -948,7 +954,7 @@ function showQuick(d, sent){
     fetch(s.url + "/functions/v1/icredit-pay", { method: "POST", headers: { "Content-Type": "application/json", "apikey": s.anonKey }, body: JSON.stringify(p) })
       .then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
       .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); location.href = u; })
-      .catch(function(){ $("qErr").hidden = false; $("qErr").textContent = "לא הצלחנו לפתוח את עמוד התשלום. נסו שוב, ואם זה חוזר - התקשרו: 052-9067101"; btn.disabled = false; btn.textContent = "לנסות שוב ←"; });
+      .catch(function(){ $("qErr").hidden = false; $("qErr").textContent = "לא ניתן היה לפתוח את עמוד התשלום. יש לנסות שוב, ואם הבעיה חוזרת – להתקשר: 052-9067101"; btn.disabled = false; btn.textContent = "לנסות שוב ←"; });
   };
 }
 function goToPayment(){
@@ -961,7 +967,7 @@ function goToPayment(){
     .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); location.href = u; })
     .catch(function(err){
       console.error("icredit-pay failed:", err);
-      topError.textContent = "הפרטים נשמרו, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - התקשרו: 052-9067101";
+      topError.textContent = "הפרטים נשמרו, אבל לא ניתן היה לפתוח את עמוד התשלום. יש ללחוץ שוב על הכפתור, ואם הבעיה חוזרת – להתקשר: 052-9067101";
       topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = "לנסות שוב לעבור לתשלום";
     });
 }
@@ -978,13 +984,15 @@ $("payForm").addEventListener("submit", function(e){
     $("field-" + k).classList.toggle("invalid", bad); if (bad) ok = false;
     if (v && !el.readOnly) values[k] = v;
   });
+  if (values.parent_first || values.parent_last) { values.parent_name = [values.parent_first, values.parent_last].filter(Boolean).join(" "); }
+  delete values.parent_first; delete values.parent_last;
   $("termsError").textContent = $("f-terms").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-terms").checked) ok = false;
   $("consentError").textContent = $("f-consent").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-consent").checked) ok = false;
   const signature = signatureImage(); if (!signature) { $("sigError").textContent = "יש לחתום כדי להמשיך."; ok = false; }
   if (!ok) { topError.textContent = "יש להשלים את השדות המסומנים."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); else topError.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
   if (window.TELEM_OK) TELEM_OK();
   topError.style.display = "none"; submitBtn.disabled = true; submitBtn.textContent = "ממשיכים לתשלום…";
-  const signer = (($("f-parent_name") || {}).value || "").trim();
+  const signer = [($("f-parent_first") || {}).value, ($("f-parent_last") || {}).value].filter(function(x){ return x && x !== "—"; }).join(" ").trim();
   makeSignedPdf("טופס תשלום" + (LINK.description ? " - " + LINK.description : ""), signer).then(function(pdf){
     if (PREVIEW) { if (pdf) { const a = document.createElement("a"); a.href = pdf; a.download = "טופס-תשלום-תצוגה-מקדימה.pdf"; document.body.appendChild(a); a.click(); }
       showDone("תצוגה מקדימה - הטופס לא נשמר ולא עבר לתשלום."); return; }
@@ -992,7 +1000,7 @@ $("payForm").addEventListener("submit", function(e){
       .then(function(){ submittedOnce = true; goToPayment(); })
       .catch(function(err){
         const m = String(err && err.message || "");
-        topError.textContent = /used link/.test(m) ? "הטופס כבר נשלח, או שהקישור בוטל. לפרטים: 052-9067101" : /missing field/.test(m) ? "חסרים פרטים בטופס." : /invalid (email|phone)/.test(m) ? "האימייל או הטלפון לא תקינים." : "לא הצלחנו לשלוח את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101";
+        topError.textContent = /used link/.test(m) ? "הטופס כבר נשלח, או שהקישור בוטל. לפרטים: 052-9067101" : /missing field/.test(m) ? "חסרים פרטים בטופס." : /invalid (email|phone)/.test(m) ? "האימייל או הטלפון לא תקינים." : "לא ניתן היה לשלוח את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101";
         topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = "המשך לתשלום מאובטח";
       });
   });
