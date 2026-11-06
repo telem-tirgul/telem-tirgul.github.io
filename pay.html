@@ -411,7 +411,8 @@
   #recurRow{ align-items:flex-start; gap:12px; } #recurRow strong{ white-space:nowrap; } .q-row b{ text-align:left; }
   .q-sent{ background:#EEF7EA; border:1px solid #CFE6C6; color:#2F5D23; border-radius:12px; padding:12px 14px; margin-bottom:12px; font-weight:600; line-height:1.5; }
   .q-sent small{ display:block; font-weight:400; color:#4F6B45; margin-top:2px; }
-  .p-incl{ background:#F3E3C3; border-radius:14px; padding:10px 14px; margin:10px 0 0; font-size:15px; line-height:1.65; color:#3A2A1F; white-space:pre-line; }   /* נועה 6.11: פירוט – מה כלול בתשלום */
+  .p-incl{ background:#F3E3C3; border-radius:18px; padding:14px 16px; margin:0 0 14px; font-size:15.5px; line-height:1.7; color:#3A2A1F; white-space:pre-line; }   /* כמו תיבת הפירוט במרתון */
+  #payForm .ti-box{ display:none; }   /* נועה 6.11: התיאור – בכותרת, בלי "התשלום מתבצע…" */   /* נועה 6.11: פירוט – מה כלול בתשלום */
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -862,6 +863,9 @@ function showDone(msg){ $("loadBox").hidden = true; $("payForm").hidden = true; 
 function fill(d){
   LINK = d;
   $("loadBox").hidden = true;
+  // נועה 6.11: כמו במרתון – התיאור בכותרת (במקום "טופס תשלום"), והפירוט במסגרת בז' מתחת
+  if (d.description && !["cancelled", "expired"].includes(d.status)) { const st = document.querySelector(".subtitle"); if (st) st.textContent = d.description; document.title = d.description + " - תלם"; }
+  if (d.note && !["paid", "cancelled", "expired"].includes(d.status)) { const n = document.createElement("div"); n.className = "p-incl"; n.id = "pIncl"; n.textContent = String(d.note).trim(); $("loadBox").parentNode.insertBefore(n, $("loadBox").nextSibling); }
   if (d.status === "paid") { showDone("התשלום כבר התקבל. תודה!"); return; }
   if (d.status === "cancelled") { showBad("הקישור בוטל. לפרטים: 052-9067101"); return; }
   if (d.status === "expired") { showBad("תוקף הקישור פג. לקבלת קישור חדש: 052-9067101"); return; }   // נועה 6.11: קישור חודש ניסיון – 7 ימים
@@ -869,7 +873,6 @@ function fill(d){
   if (d.quick) { showQuick(d); return; }   // 5.19.58: קישור להרשמה שכבר נחתמה (icredit-18) - בלי שדות, חתימה ותקנון
   $("payForm").hidden = false;
   $("v-desc").textContent = d.description || "תשלום לתלם";
-  if (d.note) { const n = document.createElement("div"); n.className = "p-incl"; n.textContent = String(d.note).trim(); $("v-desc").parentNode.appendChild(n); }   // נועה 6.11: פירוט מה כלול (לא בחשבונית)
   $("v-amount").textContent = money(d.one_time_amount);
   if (d.trial) {   // נועה 6.11: חודש ניסיון (icredit-37/38) – היום חודש אחד; אם ממשיכים – חודש + דמי הרשמה (+ חומרים), ואז ב-1 בכל חודש
     const t = d.trial; $("v-amount").previousElementSibling.textContent = "היום – חודש ניסיון";
@@ -933,7 +936,7 @@ function showQuick(d, sent){
   const box = document.createElement("div"); box.className = "quick-box"; box.id = "quickBox";
   const row = (l, v, cls) => '<div class="q-row' + (cls ? " " + cls : "") + '"><span>' + l + '</span><b>' + v + '</b></div>';
   const esc2 = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  box.innerHTML = (sent ? '<div class="q-sent">✓ הטופס התקבל, והפרטים נעולים לשינוי. נותר להשלים את התשלום.<small>לתיקון הפרטים ניתן לפנות אלינו: 052-9067101</small></div>' : "") + '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם")) + (d.note ? '<div class="p-incl">' + esc2(String(d.note).trim()) + '</div>' : "")
+  box.innerHTML = (sent ? '<div class="q-sent">✓ הטופס התקבל, והפרטים נעולים לשינוי. נותר להשלים את התשלום.<small>לתיקון הפרטים ניתן לפנות אלינו: 052-9067101</small></div>' : "") + '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם"))
     + row("לתשלום עכשיו", esc2(money(d.one_time_amount)), "q-amt")
     + (d.trial && d.trial.second_amount ? row("אם ממשיכים – ב-" + esc2(dm(d.trial.second_date)), esc2(money(d.trial.second_amount)) + '<small class="recur-sub">' + esc2(trialTxt(d.trial)) + '</small>') : "")
     + (d.monthly_amount ? row("ואחר כך תשלום חודשי", esc2(money(d.monthly_amount)) + '<small class="recur-sub">' + esc2(recurTxt(d)) + '</small>') : "")
