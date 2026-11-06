@@ -1196,7 +1196,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const SUBMIT_TXT = () => MSIGN ? "אישור ושליחה" : isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
-    const c = document.getElementById("consentText"); c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
+    const c = document.getElementById("consentText"); c.textContent = MSIGN || isPaidBefore() ? (c.dataset.paid || "אני מאשר/ת שהפרטים נכונים.") : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום · נועה 6.11: קישור אישי / "כבר שילמתי" – רק "הפרטים נכונים"
     if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור ושליחה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
     document.getElementById("field-payphone").classList.remove("invalid");
   }
