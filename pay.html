@@ -863,7 +863,7 @@ function fill(d){
   $("loadBox").hidden = true;
   if (d.status === "paid") { showDone("התשלום כבר התקבל. תודה!"); return; }
   if (d.status === "cancelled") { showBad("הקישור בוטל. לפרטים: 052-9067101"); return; }
-  if (d.status === "expired") { showBad("תוקף הקישור פג. לקישור חדש ניתן לפנות אלינו: 052-9067101"); return; }   // נועה 6.11: קישור חודש ניסיון – 7 ימים
+  if (d.status === "expired") { showBad("תוקף הקישור פג. לקבלת קישור חדש: 052-9067101"); return; }   // נועה 6.11: קישור חודש ניסיון – 7 ימים
   if (d.status === "submitted") { showQuick(d, true); return; }   // נועה 6.11: לאחר שליחת הטופס – הפרטים נעולים; נותר רק לשלם
   if (d.quick) { showQuick(d); return; }   // 5.19.58: קישור להרשמה שכבר נחתמה (icredit-18) - בלי שדות, חתימה ותקנון
   $("payForm").hidden = false;
