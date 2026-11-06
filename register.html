@@ -509,7 +509,6 @@
   .amount-row.amount-row-recur > span{ font-weight:800 !important; color:var(--accent) !important; font-size:15.5px; }
   .amount-row.amount-row-recur > strong{ font-size:20px !important; font-weight:900 !important; color:var(--accent) !important; }
   .amount-row.amount-row-recur .recur-sub{ color:#6B5F55 !important; font-weight:500 !important; }
-  html.reg-trial .pay-grp-h, html.reg-trial .pay-once, html.reg-trial .amount-row-recur{ display:none !important; }   /* נועה 6.11: המשך לאחר חודש ניסיון */
 </style>
 <link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
@@ -1833,15 +1832,6 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
     setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
     [cityEl, schoolEl, schoolOtherEl, subjectEl, subjectChoiceEl].forEach(function(el){ if (el) { el.disabled = true; el.classList.add("sg-lock"); } }); document.documentElement.classList.add("sg-prefill");
-    var tr = d.trial;
-    if (tr && !tr.ended) {   /* נועה 6.11 (icredit-38): המשך לאחר חודש ניסיון – בלי תשלום עכשיו; הוראת קבע מהכרטיס של הניסיון */
-      document.documentElement.classList.add("reg-trial");   /* הסכומים של הטופס (חישוב רגיל) לא רלוונטיים – רק נוסח הניסיון */
-      var dm = function(x){ var q = String(x || "").split("-"); return q.length === 3 ? (+q[2]) + "." + (+q[1]) : x; }, nis = function(n){ return "₪" + Number(n || 0).toLocaleString("he-IL"); };
-      var inc = ["חודש"].concat(Number(tr.registration_fee) > 0 ? ["דמי הרשמה"] : [], Number(tr.materials_fee) > 0 ? ["חומרי תרגול"] : []), inc2 = inc.length > 1 ? inc.slice(0, -1).join(", ") + " ו" + inc[inc.length - 1] : inc[0];
-      var pt = document.getElementById("payPhoneOnly"); if (pt) { pt.classList.remove("unpaid"); pt.innerHTML = RH("r.card_trial", "<b>חודש הניסיון עד {סוף}.</b> אם ממשיכים – ב-{תאריך} ייגבו {סכום} ({כולל}){כרטיס}{אחר כך}. בשלב זה אין חיוב – נותר רק לאשר את התנאים ולחתום.", "המשך לאחר חודש ניסיון – במקום אופן התשלום",
-        { "סוף": dm(tr.end), "תאריך": dm(tr.second_date), "סכום": nis(tr.second_amount), "כולל": inc2, "כרטיס": tr.card_last4 ? " בכרטיס שמסתיים ב-" + tr.card_last4 : "", "אחר כך": Number(tr.charges_after) > 0 ? ", ולאחר מכן " + nis(tr.monthly) + " ב-1 בכל חודש עד " + tr.last_month : "" }); }
-      var at = document.getElementById("amtFirstLbl"); if (at) at.innerHTML = RH("r.first_trial", "תשלום ראשון – ב-{תאריך}", "הסכום הראשון – המשך לאחר חודש ניסיון", { "תאריך": dm(tr.second_date) });
-    } else
     if (d.registered === false) {   /* נועה 5.11 (166): הקורס עוד לא "רשום" – לא "התשלום בוצע" */
       var pu = document.getElementById("payPhoneOnly"); if (pu) { pu.classList.add("unpaid"); pu.innerHTML = RH("r.card_unpaid", "<b>📞 התשלום יוסדר טלפונית</b> ונציגנו ייצרו עמכם קשר. בשלב זה נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – עוד לא שולם"); }
       var au = document.getElementById("amtFirstLbl"); if (au) au.innerHTML = RH("r.first_unpaid", "תשלום ראשון – ייגבה טלפונית", "הסכום הראשון – הקישור מהכרטיס, עוד לא שולם"); }
@@ -1984,8 +1974,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       callSupabase("submit_sign_link", { code: SIGN_CODE, terms_accepted: true, values: vals, signature: signature, pdf: signedPdf, website: document.getElementById("f-website").value }).then(function(rs){
         saveRegPdf(signedPdf, false);
         try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: city, school: school, name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (track !== "double" && subjectChoice) ? subjectChoice : "מתמטיקה או אנגלית") })); } catch (err) {}
-        location.href = new URL("thank-you.html?signed=1" + (rs && rs.trial && rs.trial.result === "plan" ? "&trial=" + encodeURIComponent(rs.trial.first_date || "") : rs && rs.registered === false ? "&unpaid=1" : ""), location.href).href;   /* נועה 5.11 (163): "אושרה" רק כשהקורס "רשום" */
-      }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "לא ניתן היה לשמור את הטופס. יש לנסות שוב בעוד רגע."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
+        location.href = new URL("thank-you.html?signed=1" + (rs && rs.registered === false ? "&unpaid=1" : ""), location.href).href;   /* נועה 5.11 (163): "אושרה" רק כשהקורס "רשום" */
+      }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "לא הצלחנו לשמור את הטופס. נסו שוב בעוד רגע."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
       return;
     }
     submitPayload("submit_registration_v2", "registration", payload).then(function(res){
