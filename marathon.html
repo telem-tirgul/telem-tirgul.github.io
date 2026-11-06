@@ -573,7 +573,6 @@
   #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
   #field-first-time.invalid .price-options{ border-color:#C9554F; }
   .top-error.amt-note{ background:#FFF7E0 !important; border-color:#E0B84F !important; color:#5A4300 !important; }
-  .p-note{ background:#FFF8EC; border:1.5px solid #E7C98F; border-radius:18px; padding:12px 16px; margin:0 0 14px; font-size:15.5px; line-height:1.7; color:#3A2A1F; white-space:pre-line; }   /* נועה 6.11: הודעה אישית מהצוות (קישור אישי) */
 </style>
 <link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script>
 <script>
@@ -827,8 +826,6 @@
 
 <script src="texts.js?v=2"></script><!-- תלם 5.19.100: נוסחי הטפסים מהמערכת -->
 <script>
-function pNote(after, t){ t = String(t || "").trim(); if (!t || !after || document.getElementById("pNote")) return; var n = document.createElement("div"); n.className = "p-note"; n.id = "pNote"; n.textContent = t; after.parentNode.insertBefore(n, after.nextSibling); }
-
 function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:" ? x.href : null; } catch(e) { return null; } }   // אבטחה 5.19.52: מעבר לתשלום רק לכתובת https
 
 
@@ -1700,7 +1697,6 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       if (d.grade && !document.getElementById("f-grade").value) setv("f-grade", d.grade);
       info.innerHTML = "<div>" + H("m.intro_card", "שלום {שם ההורה}, להלן טופס ההרשמה של <b>{שם התלמיד/ה}</b> ל{קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": MARATHON.name || d.course || "" })
         + "</div><div class=\"sg-sub\">" + H("m.intro_card_sub", "הפרטים כבר ממולאים. יש לוודא שהם נכונים, לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
-      pNote(info, d.note);   // נועה 6.11: הודעה אישית מהכרטיס (167)
       var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.classList.toggle("unpaid", d.registered === false);
         pp.innerHTML = d.registered === false ? H("m.card_unpaid", "<b>📞 התשלום יוסדר טלפונית</b> ונציגנו ייצרו עמכם קשר. בשלב זה נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – עוד לא שולם")
                                               : H("m.card_paid", "<b>✓ התשלום בוצע</b> ואין צורך לשלם שוב. נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – שולם"); }
