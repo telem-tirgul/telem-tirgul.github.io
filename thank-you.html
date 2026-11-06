@@ -152,7 +152,6 @@
     ["ty.title_phone", "טופס ההרשמה התקבל", "כותרת – תשלום טלפוני (עוד לא שולם)", {}, []],
     ["ty.chip_wait", "⏳ ממתין לתשלום", "תגית – תשלום טלפוני", {}, []],
     ["ty.pending_phone", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם להשלמת התשלום.", "התיבה הצהובה – תשלום טלפוני", {}, []],
-    ["ty.signed_unpaid", "הטופס נחתם ונשמר. נותר להסדיר את התשלום, ונציגנו ייצרו עמכם קשר בהקדם.", "התיבה הצהובה – נחתם מהקישור האישי, עוד לא שולם", {}, []],
     ["ty.pending_paidphone", "תודה. נוודא שהתשלום שביצעתם טלפונית התקבל.", "התיבה הצהובה – \"כבר שילמתי בטלפון\"", {}, []],
     ["ty.pending", "ניצור עמכם קשר בימים הקרובים לצורך הסדרת התשלום.", "התיבה הצהובה – ממתין לתשלום (לא טלפוני)", {}, []],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
@@ -243,9 +242,9 @@
     if (phone && pending && !preview) {
       $("title").textContent = tyT("ty.title_phone");
       // 5.19.57: גם בתשלום טלפוני - הוי הירוק ליד הכותרת (הטופס התקבל); הסטטוס בתיבה הצהובה
-      var paidPh = !unpaid && (/[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid"));   // נועה 6.11: "כבר שילמתי בטלפון" – בלי "ממתין לתשלום"
+      var paidPh = unpaid || /[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid");   // נועה 6.11: נחתם מהקישור האישי = כמו "כבר שילמתי"   // נועה 6.11: "כבר שילמתי בטלפון" – בלי "ממתין לתשלום"
       var ch0 = $("stChip"); ch0.className = "st-chip wait"; ch0.textContent = tyT("ty.chip_wait"); if (paidPh) ch0.hidden = true;
-      var pm0 = $("pendingMsg"); pm0.innerHTML = unpaid ? '<span class="ic">📞</span><span>' + tyH("ty.signed_unpaid") + '</span>' : (/[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid")) ? '<span class="ic">🔍</span><span>' + tyH("ty.pending_paidphone") + '</span>' : '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
+      var pm0 = $("pendingMsg"); pm0.innerHTML = paidPh ? '<span class="ic">🔍</span><span>' + tyH("ty.pending_paidphone") + '</span>' : '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
     }
     var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
     if (regLike && !(phone && pending && !preview)) {
@@ -262,8 +261,8 @@
     if (x.name) row(tyT("ty.row_name"), x.name);
     if (x.event || x.track) row(x.event ? tyT("ty.row_mar") : tyT("ty.row_track"), x.event || x.track);
     if (signed && x) x.amount = null;
-    if (x.amount != null && !isNaN(x.amount)) row((pending || preview) && !(/[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid")) ? tyT("ty.row_due") : tyT("ty.row_paid"), Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
-    if (x.amount != null && !isNaN(x.amount) && pending && !preview && !(/[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid"))) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = tyT("ty.unpaid"); ab.appendChild(nt); } }   // 5.19.93 (נועה)
+    if (x.amount != null && !isNaN(x.amount)) row((pending || preview) && !(unpaid || /[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid")) ? tyT("ty.row_due") : tyT("ty.row_paid"), Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
+    if (x.amount != null && !isNaN(x.amount) && pending && !preview && !(unpaid || /[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid"))) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = tyT("ty.unpaid"); ab.appendChild(nt); } }   // 5.19.93 (נועה)
     if (x.amount_note) row("", x.amount_note);   // אבטחה (כל-16): הסכום נקבע בשרת – אם שונה ממה שסומן בטופס
     $("sumT").textContent = tyT("ty.sum_t"); $("meetT").textContent = tyT("ty.meet_t");
     $("sumT").hidden = false; box.hidden = false;
