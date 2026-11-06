@@ -8,6 +8,11 @@
   var SB = "https://oulivucqbpmbavbavfvy.supabase.co", KEY = "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz";
   var FORM = (document.documentElement.getAttribute("data-form") || location.pathname.split("/").pop().replace(/\.html?$/, "") || "index");
   var LS = "telem_tx_" + FORM, MAP = {}, EDIT = /[?&]txedit=1(&|$)/.test(location.search);
+  // נועה 6.11: "הסרה מהטופס" – נוסח = HIDE → הטקסט לא מוצג (בעורך – מוצג מחוק ודהוי, כדי שאפשר יהיה להחזיר)
+  var HIDE = "__hidden__";
+  (function(){ try { var st = document.createElement("style"); st.textContent = EDIT
+      ? "[data-txh]{opacity:.35 !important; text-decoration:line-through !important; outline:1px dashed #b33 !important;}"
+      : "[data-txh]{display:none !important;} :is(li,p,div,label):has(> [data-txh]:only-child){display:none !important;}"; (document.head || document.documentElement).appendChild(st); } catch(e) {} })();
   // צבעי תלם לטקסט (העורך שומר class, לא צבע חופשי)
   var COLORS = { "tx-c1": "#5A1216", "tx-c2": "#B07A0C", "tx-c3": "#6B6B6B", "tx-c4": "#2E7D32" };
   try { var st = document.createElement("style"); st.textContent = Object.keys(COLORS).map(function(c){ return "." + c + "{color:" + COLORS[c] + "}"; }).join("") + ".tx-u{text-decoration:underline}";
@@ -51,15 +56,15 @@
 
   // ---------- תבניות (טקסט שנבנה בקוד) ----------
   var reg = {};   // key → { def, label, vars: {שם: הסבר}, req: [משבצות חובה], group }
-  function TX(key, def, label){ if (!reg[key]) reg[key] = { def: def, label: label || "", vars: {} }; var v = MAP[key]; return v != null && v !== "" ? v : def; }
+  function TX(key, def, label){ if (!reg[key]) reg[key] = { def: def, label: label || "", vars: {} }; var v = MAP[key]; return v === HIDE ? "" : v != null && v !== "" ? v : def; }
   TX.def = function(key, def, label, vars, opt){ opt = opt || {}; if (!reg[key]) reg[key] = { def: def, label: label || key, vars: vars || {}, req: opt.req || [], group: opt.group || "", plain: !!opt.plain }; };
   TX.defs = function(group, list){ list.forEach(function(d){ TX.def(d[0], d[1], d[2], d[3], { req: d[4], group: group, plain: d[5] }); }); };
   // ממלא תבנית: {שם} → הערך (כטקסט). מחזיר HTML עטוף ב-span data-tx (להכנסה עם innerHTML); raw – בלי העטיפה
   TX.t = function(key, vals, raw){
-    var r = reg[key], tpl = MAP[key] != null && MAP[key] !== "" ? MAP[key] : (r ? r.def : key);
+    var r = reg[key], hid = MAP[key] === HIDE, tpl = !hid && MAP[key] != null && MAP[key] !== "" ? MAP[key] : (r ? r.def : key);
     var h = fmt(tpl).replace(/\{([^{}<>]{1,40})\}/g, function(m, n){ n = n.trim(); return vals && vals[n] != null ? esc(vals[n]) : ""; });
-    if (raw) { seen[toPlain(h)] = key; return h; }
-    return '<span data-tx="' + esc(key) + '"' + (vals ? ' data-txv="' + esc(JSON.stringify(vals)) + '"' : "") + ">" + h + "</span>";
+    if (raw) { seen[toPlain(h)] = key; return hid && !EDIT ? "" : h; }
+    return '<span data-tx="' + esc(key) + '"' + (hid ? ' data-txh="1"' : "") + (vals ? ' data-txv="' + esc(JSON.stringify(vals)) + '"' : "") + ">" + (hid && !EDIT ? "" : h) + "</span>";
   };
   // 4.11 (נועה: "כל טקסט עריך, עריכה על הטופס"): טקסט שנבנה בקוד – מגדירים ומציגים בפעם אחת.
   //   TX.h – HTML עטוף ב-span data-tx (מתעדכן לבד כשהנוסח משתנה, גם בעורך); TX.s – טקסט פשוט (ל-textContent / תכונות)
@@ -115,23 +120,25 @@
       if (ta) {   // טקסטים בתכונות (data-card / data-phone) – הטופס עצמו מציג אותם (אחרי האירוע telem-texts)
         ta.split(",").forEach(function(a){ a = a.trim(); var an = "data-" + a, kk = k + "." + a;
           if (!el.__txA) el.__txA = {}; if (el.__txA[a] == null) el.__txA[a] = el.getAttribute(an) || "";
-          var vv = MAP[kk]; el.setAttribute(an, vv != null && vv !== "" ? toPlain(fmt(vv)) : el.__txA[a]); });
+          var vv = MAP[kk]; el.setAttribute(an, vv === HIDE ? "" : vv != null && vv !== "" ? toPlain(fmt(vv)) : el.__txA[a]); });
         continue; }
       if (el.__txDef == null) el.__txDef = el.innerHTML;
       if (el.innerHTML !== (el.__txSet ? el.__txLast : el.__txDef)) { el.__txAuto = 1; continue; }   // הטופס עצמו שינה בקוד – לא נוגעים
       var v = MAP[k];
-      if (v != null && v !== "") { el.innerHTML = el.tagName === "OPTION" ? esc(toPlain(fmt(v))) : fmt(v); el.__txLast = el.innerHTML; el.__txSet = 1; }
+      if (v === HIDE) el.setAttribute("data-txh", "1"); else if (el.hasAttribute("data-txh")) el.removeAttribute("data-txh");
+      if (v === HIDE) { if (el.__txSet) { el.innerHTML = el.__txDef; el.__txSet = 0; } }
+      else if (v != null && v !== "") { el.innerHTML = el.tagName === "OPTION" ? esc(toPlain(fmt(v))) : fmt(v); el.__txLast = el.innerHTML; el.__txSet = 1; }
       else if (el.__txSet) { el.innerHTML = el.__txDef; el.__txSet = 0; }
     }
     applyObjs();
     // טקסט שנבנה בקוד (span data-tx) – מתעדכן לבד לנוסח החדש, עם אותם ערכים
     var tx = document.querySelectorAll("[data-tx]");
-    for (var j = 0; j < tx.length; j++) { var t = tx[j], k2 = t.getAttribute("data-tx"); if (!reg[k2] || t.isContentEditable) continue; var vv2 = null; try { vv2 = JSON.parse(t.getAttribute("data-txv") || "null"); } catch(e) {} var nh = TX.t(k2, vv2, true); if (t.innerHTML !== nh) t.innerHTML = nh; }
+    for (var j = 0; j < tx.length; j++) { var t = tx[j], k2 = t.getAttribute("data-tx"); if (!reg[k2] || t.isContentEditable) continue; var vv2 = null; try { vv2 = JSON.parse(t.getAttribute("data-txv") || "null"); } catch(e) {} var hid2 = MAP[k2] === HIDE; if (hid2) t.setAttribute("data-txh", "1"); else t.removeAttribute("data-txh"); var nh = hid2 && EDIT ? TX.t(k2, vv2, true) || "" : TX.t(k2, vv2, true); if (t.innerHTML !== nh) t.innerHTML = nh; }
     try { document.dispatchEvent(new CustomEvent("telem-texts")); } catch(e) {}
   }
   function set(m, save){ MAP = m || {}; if (save) { try { localStorage.setItem(LS, JSON.stringify(MAP)); } catch(e) {} } apply(); }
   (function(){ var els = document.querySelectorAll("[data-t]"); for (var i = 0; i < els.length; i++) if (els[i].__txDef == null) els[i].__txDef = els[i].innerHTML; })();
-  TX.form = FORM; TX.reg = reg; TX.fmt = fmt; TX.clean = clean; TX.toPlain = toPlain; TX.esc = esc; TX.COLORS = COLORS; TX.edit = EDIT;
+  TX.HIDE = HIDE; TX.form = FORM; TX.reg = reg; TX.fmt = fmt; TX.clean = clean; TX.toPlain = toPlain; TX.esc = esc; TX.COLORS = COLORS; TX.edit = EDIT;
   TX.preview = function(m){ set(m, false); };   // עורך הנוסחים: תצוגה חיה בלי לשמור
   TX.map = function(){ return MAP; };
   window.TX = TX;
