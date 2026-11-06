@@ -446,6 +446,10 @@
   .tk-subj .tks-l{ font-weight:700; font-size:15px; color:#5a1a1a; } .tk-subj .req{ color:#b3261e; }
   .tk-subj label{ display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border:1.5px solid #DCCFC2; border-radius:999px; cursor:pointer; font-size:15px; background:#FBF7F2; margin:0; }
   .tk-subj label.on{ border-color:currentColor; background:#fff; font-weight:700; } .c-red .tk-subj label.on{ color:#9b1c1c; } .c-green .tk-subj label.on{ color:#3f6b1f; }
+  .tk-subj:not(.invalid){ flex-wrap:nowrap !important; } .tk-subj label{ flex:0 0 auto; } .tk-subj input[type=radio]{ width:16px; height:16px; margin:0; flex:0 0 auto; }
+  .c-red .tk-subj input{ accent-color:#9b1c1c; } .c-green .tk-subj input{ accent-color:#3f6b1f; }
+  .c-red .tk-subj label{ border-color:rgba(155,28,28,.3); } .c-green .tk-subj label{ border-color:rgba(63,107,31,.3); }
+  @media (max-width:560px){ .tk-subj{ gap:6px; padding:8px 10px; } .tk-subj .tks-l{ font-size:14.5px; } .tk-subj label{ padding:6px 11px; font-size:14.5px; gap:5px; } .tk-subj .tks-opt{ display:block; font-size:12px; } }
   .tk-subj .tks-err{ display:none; flex-basis:100%; font-size:13.5px; font-weight:700; color:#B8463F; } .tk-subj.invalid{ border-color:#C9554F; } .tk-subj.invalid .tks-err{ display:block; }
   .consent .error-msg:not(:empty), #sigError:not(:empty), #termsConsentError:not(:empty), #consentError:not(:empty){ display:block !important; }   /* 28.10: ההודעות "יש לחתום" / "יש לאשר" לא הוצגו בכלל */
 
