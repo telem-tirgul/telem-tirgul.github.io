@@ -98,6 +98,9 @@
   .card{ max-width:640px !important; border-radius:16px !important; }
   .meet-note{ font-size:14px; color:#6b5a4c; margin:6px 2px 0; }   /* נועה 6.11 */
   #paidLine{ display:block !important; text-align:center; } #paidLine .pl-big{ display:block; font-size:clamp(18px, 4.8vw, 22px); font-weight:800; color:#2E7D32; } #paidLine small{ font-size:14px !important; margin-top:3px !important; }   /* נועה 6.11 */
+  /* נועה 6.11: בכל דפי התודה – הסטטוס כשורה גדולה מתחת לכותרת (לא תגית ליד) */
+  .st-chip{ display:block !important; background:none !important; border-radius:0 !important; padding:0 !important; margin:2px auto 8px !important; font-size:clamp(18px, 4.8vw, 22px) !important; font-weight:800 !important; text-align:center; }
+  .st-chip.ok{ color:#2E7D32 !important; } .st-chip.wait{ color:#A0650E !important; } .st-chip[hidden]{ display:none !important; }
 </style>
 <link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
@@ -171,14 +174,12 @@
     ["ty.meet_t", "מועדי המפגשים", "כותרת – מועדי המפגשים (מרתון)", {}, []],
     ["ty.next_one", "השלב הבא", "כותרת – שלב אחד", {}, []],
     ["ty.next_many", "השלבים הבאים", "כותרת – כמה שלבים", {}, []],
-    ["ty.step_invoice", "חשבונית על התשלום תישלח אליכם במייל.", "שלב – חשבונית (שולם באשראי)", {}, []],
     ["ty.step_mar1", "מומלץ לשמור את מועדי המפגשים ביומן.", "שלב – מרתון 1", {}, []],
     ["ty.step_mar2", "יש להביא למפגש: ספר ומחברת הלימוד, כלי כתיבה ומחשבון (לתלמידי כיתות ח' ומעלה).", "שלב – מרתון 2", {}, []],
     ["ty.step_mar3", "יש להגיע עם טלפון טעון.", "שלב – מרתון 3", {}, []],
     ["ty.paid_title_reg", "טופס ההרשמה התקבל", "כותרת – אחרי תשלום באשראי (הרשמה)", {}, []],
     ["ty.paid_title", "התשלום התקבל", "כותרת – אחרי תשלום באשראי (בלי פרטי הרשמה)", {}, []],
     ["ty.paid_line", "התשלום התקבל בהצלחה", "שורה ירוקה – אחרי תשלום", {}, []],
-    ["ty.paid_small", "חשבונית תישלח אליכם במייל", "שורה קטנה – אחרי תשלום", {}, []],
     ["ty.pay_checking", "⏳ אישור התשלום נבדק…", "בדיקת התשלום – מחכים", {}, []],
     ["ty.pay_ok", "✔ התשלום התקבל בהצלחה.", "בדיקת התשלום – אושר", {}, []],
     ["ty.pay_late", "אישור התשלום טרם התקבל. אם חויבתם, אין צורך בפעולה נוספת – האישור יתעדכן בדקות הקרובות.", "בדיקת התשלום – עוד לא הגיע", {}, []],
@@ -268,7 +269,7 @@
     if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false;
       if (x.kind === "marathon" && !$("meetNote")) { var mn = document.createElement("div"); mn.id = "meetNote"; mn.className = "meet-note"; mn.innerHTML = tyH("ty.meet_note"); ul.after(mn); } }   // נועה 6.11
     var steps = [];
-    if (paidRef) steps.push("\u0001" + tyT("ty.step_invoice"));   // \u0001 = שלב החשבונית (יורד אחרי תשלום)
+    // נועה 6.11: בלי "חשבונית תישלח במייל"   // \u0001 = שלב החשבונית (יורד אחרי תשלום)
     // 5.19.93 (נועה): בתשלום טלפוני – "צרו קשר" כבר כתוב בתיבה הצהובה; לא חוזרים על זה ב"השלב הבא"
     if (x.kind === "marathon") {
       steps.push(tyT("ty.step_mar1"));
@@ -296,7 +297,7 @@
     var ld = document.getElementById("lead"), pm = document.getElementById("payMsg");
     if (pm) pm.hidden = true;
     var pl = document.getElementById("paidLine"); if (!pl) { pl = document.createElement("p"); pl.id = "paidLine"; pl.className = "paid-line"; ld.parentNode.insertBefore(pl, ld.nextSibling); }
-    pl.innerHTML = '<span class="pl-big">✓ ' + tyH("ty.paid_line") + '</span>' + "<small>" + tyH("ty.paid_small") + "</small>";
+    pl.innerHTML = '<span class="pl-big">✓ ' + tyH("ty.paid_line") + '</span>';   // נועה 6.11: בלי שורת החשבונית
     if (!reg) return;
     var nl = document.getElementById("next");
     [].slice.call(nl.children).forEach(function(li){ if (li.getAttribute("data-inv")) li.remove(); });
