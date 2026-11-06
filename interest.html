@@ -467,6 +467,10 @@
   .amount-row-recur{ border-radius:14px !important; padding:12px 16px !important; }
   .consents-box{ background:#FAF8F5 !important; border:1px solid #E6E0D8 !important; border-radius:14px !important; padding:12px 14px !important; margin:10px 0 4px !important; display:grid !important; gap:10px; }
   .consents-box .consent, .consent{ margin:0 !important; font-size:14px !important; color:var(--ink) !important; line-height:1.55; cursor:pointer; gap:8px; }
+  .tk-subj{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border-radius:12px; background:#fff; border:1px solid #EADFD3; }
+  .tk-subj .tks-l{ font-weight:700; font-size:15px; color:#5a1a1a; } .tk-subj .tks-opt{ font-weight:400; color:#888; font-size:13px; }
+  .tk-subj label{ display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border:1.5px solid #DCCFC2; border-radius:999px; cursor:pointer; font-size:15px; background:#FBF7F2; margin:0; }
+  .tk-subj label.on{ border-color:currentColor; background:#fff; font-weight:700; } .c-red .tk-subj label.on{ color:#9b1c1c; } .c-green .tk-subj label.on{ color:#3f6b1f; }
   .consents-box .consent input, .consent input[type=checkbox]{ width:20px; height:20px; flex:0 0 auto; margin-top:1px !important; accent-color:#8B1E23; }
   .consents-box .error-msg:empty{ display:none; }
   .terms-box{ background:#FAF8F5 !important; border:1px solid #E6E0D8 !important; border-radius:12px !important; padding:14px 16px !important; margin:16px 0 10px !important;
@@ -704,6 +708,7 @@ function foldTrack(d){
 }
 // את-25 (נועה 23.10): בחירת מסלול ברשימה – המסלולים של העיר (בלי סגורים); מהקישור (tracks=) – בחור מראש ואפשר להחליף. בקישור למרתון – בלי בחירה.
 const IS_MAR = P_TRACKS.includes("marathon"), P_REG = P_TRACKS.filter(t => t !== "marathon");
+const SUBJ = {};   // נועה 6.11: המקצוע שנבחר בתוך המסלול (מקצוע אחד / ללא הגבלה)
 const TRK_SEL = new Set(P_REG);   // נועה 3.11: המסלולים שסומנו "מעניין אותי" (מהקישור – מסומנים מראש)
 // נועה 3.11: הסימון בתוך הכרטיס (בשורת הכותרת), וכשמסומן – כל המסגרת של הכרטיס מסומנת
 // נועה 3.11: רק תיבת סימון (בלי טקסט), בתחילת שורת הכותרת – כמו ברשימת סימון; מסומן – כל המסגרת
@@ -762,7 +767,11 @@ function renderTracks(){
       const one = tracks.length === 1, w = document.createElement("div");
       w.innerHTML = TELEM_TK({ key: t, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: earlyOn, cut: cut,
         fees: fees, extra: monthLi ? [monthLi] : [], fold: !one });
-      box.appendChild(trkPut(w.firstChild, t)); return;
+      const cd = trkPut(w.firstChild, t);
+      // נועה 6.11: שדה "מקצוע" בתוך המסלול (מקצוע אחד / ללא הגבלה) – לא חובה
+      if (t === "single" || t === "unlimited-single") { const bd = cd.querySelector(".tk-body"); if (bd) bd.insertAdjacentHTML("afterbegin", '<div class="tk-subj" role="radiogroup" aria-label="מקצוע"><span class="tks-l"><span data-tx="tk.subj">מקצוע</span> <span class="tks-opt">(לא חובה)</span></span>'
+        + ["מתמטיקה", "אנגלית"].map(x => '<label class="' + (SUBJ[t] === x ? "on" : "") + '"><input type="radio" name="tksubj-' + t + '" data-subjt="' + t + '" value="' + x + '"' + (SUBJ[t] === x ? " checked" : "") + '> ' + x + '</label>').join("") + '</div>'); }
+      box.appendChild(cd); return;
     }
     d.className = "track-info " + (info.color || "");
     d.innerHTML = '<div class="track-info-title"></div><div class="track-info-body"></div>' + (pr ? '<div class="track-info-label">תשלום חודשי:</div><ul class="track-info-list">'
@@ -778,6 +787,9 @@ renderTracks();
 // הלחיצה על "מעניין אותי" לא פותחת / סוגרת את הכרטיס (הוא בתוך שורת הכותרת)
 $("tracksBox").addEventListener("click", (e) => { const l = e.target.closest && e.target.closest(".ti-pick"); if (!l) return; e.preventDefault(); e.stopPropagation();
   const c = l.querySelector("[data-trk]"), on = !c.checked; c.checked = on; on ? TRK_SEL.add(c.dataset.trk) : TRK_SEL.delete(c.dataset.trk); const k = l.closest(".ti-card"); if (k) k.classList.toggle("ti-on", on); }, true);
+// בחירת מקצוע בתוך המסלול – מסמנת גם את המסלול כ"מעניין אותי"
+$("tracksBox").addEventListener("change", (e) => { const r = e.target; if (!r || !r.dataset || !r.dataset.subjt) return; const t = r.dataset.subjt; SUBJ[t] = r.value;
+  const k = r.closest(".ti-card"); if (k) { k.querySelectorAll(".tk-subj label").forEach(l => l.classList.toggle("on", l.contains(r))); const c = k.querySelector("[data-trk]"); if (c && !c.checked) { c.checked = true; TRK_SEL.add(t); k.classList.add("ti-on"); } } });
 if (P_MAR) (window.TELEM_HOLD || function(p){ return p; })(callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){}));
 // 5.19.58: כמו בטופס ההרשמה - שכר הלימוד של חודש ההרשמה לפי חוק "הצטרפות מאוחרת" ממסך חוקי החיוב (billing_rules_public)
 var LATE_RULES = [], JUNE = { on: true, cities: {} };
@@ -871,7 +883,7 @@ $("intForm").addEventListener("submit", function(e){
   bad("field-pphone", !/^0\d{8,9}$/.test(ph)); bad("field-sphone", !!sph && !/^0\d{8,9}$/.test(sph)); bad("field-email", !!em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em));
   $("topError").style.display = ok ? "none" : "block"; if (!ok) { if (window.TELEM_BAD) TELEM_BAD($("submitBtn")); return; } if (window.TELEM_OK) TELEM_OK();
   const picked = IS_MAR ? P_TRACKS.filter(t => t === "marathon" || TRK_SEL.has(t)) : Object.keys(CONFIG.trackInfo).filter(t => TRK_SEL.has(t));   // נועה 3.11: מה שסומן (בלי סימון – כל המסלולים)
-  const courses = picked.map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title);
+  const courses = picked.map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title + (SUBJ[t] && TRK_SEL.has(t) ? " – " + SUBJ[t] : ""));
   const payload = { website: $("f-website").value, city: city === "אחר" ? "" : city, school: schVal(), courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: schVal() },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };

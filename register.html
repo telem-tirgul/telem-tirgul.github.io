@@ -440,6 +440,12 @@
   .field.invalid input, .field.invalid select, .field.invalid textarea{ border:1.5px solid #C9554F !important; }   /* הלקוחה: פחות אדום - רק מסגרת */
   .field.invalid .error-msg, .consent .error-msg:not(:empty), #sigError:not(:empty){ font-size:13.5px !important; font-weight:700 !important; color:#B8463F !important; margin-top:4px; }
   .field.invalid .error-msg::before{ content:"⚠ "; }
+  #field-subject-choice{ display:none !important; }   /* נועה 6.11: המקצוע בתוך כרטיס המסלול */
+  .tk-subj{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border-radius:12px; background:#fff; border:1px solid #EADFD3; }
+  .tk-subj .tks-l{ font-weight:700; font-size:15px; color:#5a1a1a; } .tk-subj .req{ color:#b3261e; }
+  .tk-subj label{ display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border:1.5px solid #DCCFC2; border-radius:999px; cursor:pointer; font-size:15px; background:#FBF7F2; margin:0; }
+  .tk-subj label.on{ border-color:currentColor; background:#fff; font-weight:700; } .c-red .tk-subj label.on{ color:#9b1c1c; } .c-green .tk-subj label.on{ color:#3f6b1f; }
+  .tk-subj .tks-err{ display:none; flex-basis:100%; font-size:13.5px; font-weight:700; color:#B8463F; } .tk-subj.invalid{ border-color:#C9554F; } .tk-subj.invalid .tks-err{ display:block; }
   .consent .error-msg:not(:empty), #sigError:not(:empty), #termsConsentError:not(:empty), #consentError:not(:empty){ display:block !important; }   /* 28.10: ההודעות "יש לחתום" / "יש לאשר" לא הוצגו בכלל */
 
   /* ===== 5.19.83 (נועה): שדות לבנים כמו במערכת הניהול – לא שמנת. פינות 8, גובה 44 בכל הטפסים ===== */
@@ -1393,6 +1399,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
 
   function setInvalid(fieldId, invalid){
     document.getElementById(fieldId).classList.toggle("invalid", invalid);
+    if (fieldId === "field-subject-choice") { var ts = document.querySelector("#trackPick .tk-subj"); if (ts) ts.classList.toggle("invalid", invalid); }   // נועה 6.11: המקצוע בתוך המסלול
   }
 
   function isValidEmail(v){
@@ -1708,7 +1715,12 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true });
       var c = w.firstChild, h = c.querySelector(".tk-head") || c;
       h.insertAdjacentHTML("afterbegin", '<label class="tp-radio" title="בחירת המסלול"><input type="radio" name="trkpick" value="' + k + '"' + (k === cur ? " checked" : "") + ' aria-label="בחירת המסלול: ' + String(info.title).replace(/"/g, "") + '"></label>');
-      c.classList.toggle("tp-on", k === cur); if (k === cur && c.tagName === "DETAILS") c.open = true; box.appendChild(c);
+      c.classList.toggle("tp-on", k === cur); if (k === cur && c.tagName === "DETAILS") c.open = true;
+      // נועה 6.11: שדה "מקצוע" בתוך המסלול שנבחר (מקצוע אחד / ללא הגבלה) – במקום השדה הנפרד מתחת למסלולים
+      if (k === cur && (k === "single" || k === "unlimited-single")) { var bd = c.querySelector(".tk-body"), sv = subjectChoiceEl.value, dis = subjectChoiceEl.disabled ? " disabled" : "";
+        if (bd) bd.insertAdjacentHTML("afterbegin", '<div class="tk-subj' + (document.getElementById("field-subject-choice").classList.contains("invalid") ? " invalid" : "") + '" role="radiogroup" aria-label="מקצוע"><span class="tks-l"><span data-tx="tk.subj">מקצוע</span> <span class="req">*</span></span>'
+          + ["מתמטיקה", "אנגלית"].map(function(x){ return '<label class="' + (sv === x ? "on" : "") + '"><input type="radio" name="tksubj" value="' + x + '"' + (sv === x ? " checked" : "") + dis + '> ' + x + '</label>'; }).join("") + '<div class="tks-err">⚠ יש לבחור מקצוע</div></div>'); }
+      box.appendChild(c);
     });
     if (!tbl) box.insertAdjacentHTML("beforeend", '<div class="tp-note">המחירים יופיעו אחרי בחירת העיר (בחלק "בית הספר").</div>');
   }
@@ -1734,6 +1746,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     updateLevelFieldsVisibility();
   });
 
+  document.getElementById("trackPick").addEventListener("change", function(e){ var r = e.target; if (!r || r.name !== "tksubj") return;
+    subjectChoiceEl.value = r.value; [].forEach.call(document.querySelectorAll("#trackPick .tk-subj label"), function(l){ l.classList.toggle("on", l.contains(r)); });
+    subjectChoiceEl.dispatchEvent(new Event("change", { bubbles: true })); });
   subjectChoiceEl.addEventListener("change", function(){
     setInvalid("field-subject-choice", false);
     updateLevelFieldsVisibility();
