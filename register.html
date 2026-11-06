@@ -440,7 +440,8 @@
   .field.invalid input, .field.invalid select, .field.invalid textarea{ border:1.5px solid #C9554F !important; }   /* הלקוחה: פחות אדום - רק מסגרת */
   .field.invalid .error-msg, .consent .error-msg:not(:empty), #sigError:not(:empty){ font-size:13.5px !important; font-weight:700 !important; color:#B8463F !important; margin-top:4px; }
   .field.invalid .error-msg::before{ content:"⚠ "; }
-  #field-subject-choice{ display:none !important; }   /* נועה 6.11: המקצוע בתוך כרטיס המסלול */
+  #field-subject-choice{ display:none !important; }
+  .tp-stars{ margin:10px 4px 0; line-height:1.6; } .tk-star{ font-size:.85em; margin-inline-start:3px; color:#8B1E23; font-weight:700; } .tp-stars p{ margin:4px 0; display:flex; gap:6px; } .tp-stars .fn{ flex:0 0 1.4em; font-weight:700; } .tk-star + .tk-star{ margin-inline-start:4px; }   /* נועה 6.11: המקצוע בתוך כרטיס המסלול */
   .tk-subj{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border-radius:12px; background:#fff; border:1px solid #EADFD3; }
   .tk-subj .tks-l{ font-weight:700; font-size:15px; color:#5a1a1a; } .tk-subj .req{ color:#b3261e; }
   .tk-subj label{ display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border:1.5px solid #DCCFC2; border-radius:999px; cursor:pointer; font-size:15px; background:#FBF7F2; margin:0; }
@@ -1459,7 +1460,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         d.appendChild(a); d.appendChild(b); amountBreakdown.appendChild(d);
       });
       // נועה 6.11: רק למי שמשלם/ת חלק מהחודש – הסבר קטן מתחת ל"שכר לימוד חודש נוכחי"
-      if (recurInfo.firstMonthHalf && recurInfo.lateFrom) { var nt = document.createElement("div"); nt.className = "bd-note";
+      if (false && recurInfo.firstMonthHalf && recurInfo.lateFrom) {   // נועה 6.11: ההסבר עבר למתחת למסלולים var nt = document.createElement("div"); nt.className = "bd-note";
         nt.innerHTML = RH("r.bd_month_note", "הרשמה עד ה-{עד יום} לחודש - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו). הרשמה מה-{מיום} לחודש ואילך - {אחוז}% מהתשלום החודשי.", "פירוט התשלום – הסבר על חלק מהחודש",
           { "עד יום": recurInfo.lateFrom - 1, "מיום": recurInfo.lateFrom, "אחוז": recurInfo.firstMonthPct });
         amountBreakdown.appendChild(nt); }
@@ -1519,6 +1520,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (c && typeof c === "object") { m = !!c.materials && mat > 0; r = !!c.registration; } else { m = mat > 0; r = !m; }
     return { materials: m, registration: r, sum: (m ? mat : 0) + (r ? reg : 0) };
   }
+  // נועה 6.11: החוק חל רק מתאריך בשנת הלימודים (start = "MM-DD", ברירת מחדל 15.11); ינואר–אוגוסט – תמיד
+  function lateOn(r, iso){ var st = /^\d{2}-\d{2}$/.test(r.start || "") ? r.start : "11-15", md = String(iso).slice(5, 10), m = Number(md.slice(0, 2)), sm = Number(st.slice(0, 2));
+    if (sm >= 9) return m < 9 || md >= st; return m < 9 && md >= st; }
   function lateJoinRule(city){
     var m = null;
     LATE_RULES.forEach(function(r){ if (r.city === city) m = r; });
@@ -1592,7 +1596,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var effectiveStartDate = getEffectiveStartDate(cityTable.activityStartDate);
     // 5.19.57: החוק מגיע ממסך "חוקי חיוב" (billing_rules_public) - לא קבוע בקוד. רק כשההנחה יורדת מהתשלום בהרשמה (apply=first).
     var lj = lateJoinRule(city), dayIL = Number(ilTodayISO().slice(8, 10));
-    var firstMonthHalf = !!(lj && lj.apply === "first" && effectiveStartDate === ilTodayISO() && dayIL >= lj.from_day);
+    var firstMonthHalf = !!(lj && lj.apply === "first" && effectiveStartDate === ilTodayISO() && dayIL >= lj.from_day && lateOn(lj, ilTodayISO()));
     var firstMonthAmount = firstMonthHalf ? Math.round(monthlySum * lj.percent) / 100 : monthlySum;
 
     // הוראת הקבע עצמה רצה על החודשים המלאים הנותרים, מה-1 לחודש
@@ -1707,12 +1711,18 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var city = cityEl.value, tbl = CONFIG.trackPricing[city], cur = subjectEl.value, jo = city ? juneOffset(city) : {};
     var keys = [].slice.call(subjectEl.options).filter(function(o){ return o.value && !o.disabled && o.style.display !== "none" && !o.hidden; }).map(function(o){ return o.value; });
     box.innerHTML = "";
+    // נועה 6.11: מתחת למסלולים, באותה מסגרת – * התשלום בעת ההרשמה, ** הרשמה עד ה-19 (רק מאמצע השנה – לפי החוק); ליד המחיר בכל מסלול – * / **
+    var n1 = "", n2 = "";
+    if (tbl) { var fz = [{ amount: tbl.registrationFee, label: "דמי שיבוץ והרשמה" }].concat(tbl.materialsFee ? [{ amount: tbl.materialsFee, label: "חומרי תרגול" }] : []);
+      n1 = TELEM_TK({ key: "single", feesOnly: true, fees: fz }); var lj = lateJoinRule(city); n2 = lj && lj.apply === "first" && lateOn(lj, ilTodayISO())
+        ? RH("r.trk_late", "הרשמה עד ה-{עד יום} לחודש – שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו). הרשמה מה-{מיום} לחודש ואילך – {אחוז}% מהתשלום החודשי.", "מתחת למסלולים – הרשמה אחרי ה-20", { "עד יום": lj.from_day - 1, "מיום": lj.from_day, "אחוז": lj.percent }) : ""; }
+    var sA = n1 ? "*" : "", sB = n2 ? (n1 ? "**" : "*") : "";
     keys.forEach(function(k){
       var info = CONFIG.trackInfo[k]; if (!info) return; var pr = tbl && tbl[k];
       var fees = tbl ? [{ amount: tbl.registrationFee, label: "דמי שיבוץ והרשמה", offset: !!jo.registration }].concat(tbl.materialsFee ? [{ amount: tbl.materialsFee, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: !!jo.materials }] : []) : [];
       var extra = []; if (k === cur && tbl) { var ri = getRecurInfo(); if (ri) { var fm = String(firstMonthText(city) || "").replace(/<\/?li>/g, ""); if (fm) extra.push(fm); } if ((ri || {}).juneFree) extra.push("הקיזוז גבוה מהתשלום החודשי, ולכן לא ייגבה תשלום עבור חודש יוני."); }
       var w = document.createElement("div");
-      w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true });
+      w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true, noOnce: true, star: [sA, sB].filter(Boolean).join(" ") });
       var c = w.firstChild, h = c.querySelector(".tk-head") || c;
       h.insertAdjacentHTML("afterbegin", '<label class="tp-radio" title="בחירת המסלול"><input type="radio" name="trkpick" value="' + k + '"' + (k === cur ? " checked" : "") + ' aria-label="בחירת המסלול: ' + String(info.title).replace(/"/g, "") + '"></label>');
       c.classList.toggle("tp-on", k === cur); if (k === cur && c.tagName === "DETAILS") c.open = true;
@@ -1723,6 +1733,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       box.appendChild(c);
     });
     if (!tbl) box.insertAdjacentHTML("beforeend", '<div class="tp-note">המחירים יופיעו אחרי בחירת העיר (בחלק "בית הספר").</div>');
+    // נועה 6.11: מתחת למסלולים, באותה מסגרת – שתי שורות עם כוכבית: התשלום בעת ההרשמה + הרשמה עד ה-19 (רק מאמצע השנה – לפי החוק)
+    if (n1 || n2) box.insertAdjacentHTML("beforeend", '<div class="tp-stars">' + (n1 ? '<p><span class="fn">' + sA + '</span><span>' + n1 + '</span></p>' : "") + (n2 ? '<p><span class="fn">' + sB + '</span><span>' + n2 + '</span></p>' : "") + '</div>');
   }
   document.getElementById("trackPick").addEventListener("click", function(e){ var l = e.target.closest && e.target.closest(".tp-radio"); if (!l) return; e.preventDefault(); e.stopPropagation();
     var v = l.querySelector("input").value; if (subjectEl.value === v || subjectEl.disabled) return;   /* נועה 4.11: מהכרטיס – המסלול נעול */ subjectEl.value = v; subjectEl.dispatchEvent(new Event("change", { bubbles: true })); setInvalid("field-subject", false); }, true);
@@ -1781,7 +1793,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   (window.TELEM_HOLD || function(p){ return p; })(callSupabase("billing_rules_public", null)).then(function(x){
     var list = x && Array.isArray(x.late_join) ? x.late_join : [];
     JUNE = { on: !(x && x.june_offset === false), cities: (x && x.city_offsets && typeof x.city_offsets === "object") ? x.city_offsets : {}, known: !!(x && "june_offset" in x) };
-    LATE_RULES = list.map(function(r){ return { city: typeof r.city === "string" ? r.city : "", from_day: Math.round(Number(r.from_day)), percent: Number(r.percent), apply: r.apply === "first" ? "first" : "last" }; })
+    LATE_RULES = list.map(function(r){ return { city: typeof r.city === "string" ? r.city : "", from_day: Math.round(Number(r.from_day)), percent: Number(r.percent), apply: r.apply === "first" ? "first" : "last", start: typeof r.start === "string" ? r.start : "" }; })
       .filter(function(r){ return r.from_day >= 2 && r.from_day <= 31 && isFinite(r.percent) && r.percent >= 0 && r.percent <= 100; });
     updateAmountDisplay(); updateRecurDisplay(); updateTrackInfo();
   }).catch(function(){});

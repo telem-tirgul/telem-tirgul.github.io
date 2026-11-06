@@ -109,15 +109,17 @@ window.TELEM_TK = function(o){
   var G = "כרטיסי המסלולים", T = function(k, d, l, v){ return window.TELEM_TXH(k, d, l, G, v); };
   var head = '<div class="tk-head"><div><h3>' + (SHORT[o.key] ? T("tk." + o.key + ".name", SHORT[o.key], "שם המסלול – " + SHORT[o.key]) : e(o.title)) + '</h3>' + (SUB[o.key] ? '<span class="tk-sub">' + T("tk." + o.key + ".sub", SUB[o.key], "שורה מתחת לשם – " + SHORT[o.key]) + '</span>' : "") + '</div>' + (o.fold ? '<span class="tk-car" aria-hidden="true"></span>' : "") + '</div>';
   var price = o.regular == null ? "" : (o.earlyOn && o.early != null
-    ? '<div class="tk-price"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><div class="tk-row"><b>' + e(o.early) + ' ₪</b><span>' + T("tk.early", "להרשמה מוקדמת<br><small>עד {תאריך}</small>", "מחיר להרשמה מוקדמת", { "תאריך": o.cut }) + '</span></div><div class="tk-row"><b>' + e(o.regular) + ' ₪</b><span>' + T("tk.regular", "להרשמה רגילה<br><small>מ-{תאריך} ואילך</small>", "מחיר להרשמה רגילה", { "תאריך": o.cut }) + '</span></div></div>'
-    : '<div class="tk-price tk-one"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><b>' + e(o.regular) + ' ₪</b></div>');
+    ? '<div class="tk-price"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><div class="tk-row"><b>' + e(o.early) + ' ₪' + (o.star ? String(o.star).split(' ').map(function(x){ return '<sup class="tk-star">' + x + '</sup>'; }).join('') : '') + '</b><span>' + T("tk.early", "להרשמה מוקדמת<br><small>עד {תאריך}</small>", "מחיר להרשמה מוקדמת", { "תאריך": o.cut }) + '</span></div><div class="tk-row"><b>' + e(o.regular) + ' ₪' + (o.star ? String(o.star).split(' ').map(function(x){ return '<sup class="tk-star">' + x + '</sup>'; }).join('') : '') + '</b><span>' + T("tk.regular", "להרשמה רגילה<br><small>מ-{תאריך} ואילך</small>", "מחיר להרשמה רגילה", { "תאריך": o.cut }) + '</span></div></div>'
+    : '<div class="tk-price tk-one"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><b>' + e(o.regular) + ' ₪' + (o.star ? String(o.star).split(' ').map(function(x){ return '<sup class="tk-star">' + x + '</sup>'; }).join('') : '') + '</b></div>');
   // נועה 6.11: משפט אחד, עריך כולו ("נוסחי הטפסים" → כרטיסי המסלולים); עם חומרי תרגול / בלי
   var fReg = (o.fees || []).filter(function(f){ return f && f.amount && f.label === "דמי שיבוץ והרשמה"; })[0], fMat = (o.fees || []).filter(function(f){ return f && f.amount && f.label !== "דמי שיבוץ והרשמה"; })[0];
   var fv = { "דמי הרשמה": fReg ? fReg.amount : "", "חומרי תרגול": fMat ? fMat.amount : "", "חודש": o.offMonth || "יוני" };
   var FM = ["tk.fees_mat", "שירות עבור חומרי תרגול דיגיטליים בסך {חומרי תרגול} ₪ ודמי שיבוץ והרשמה בסך {דמי הרשמה} ₪ ייגבו בעת ההרשמה ויקוזזו מעלות חודש {חודש} בהתאם לתנאי ההתקשרות.", "תשלום בעת ההרשמה – עיר עם חומרי תרגול"],
       FR = ["tk.fees_reg", "דמי שיבוץ והרשמה בסך {דמי הרשמה} ₪ ייגבו בעת ההרשמה ויקוזזו מעלות חודש {חודש} בהתאם לתנאי ההתקשרות.", "תשלום בעת ההרשמה – עיר בלי חומרי תרגול"];
   if (window.TX && TX.def) [FM, FR].forEach(function(d){ TX.def(d[0], d[1], d[2], { "דמי הרשמה": "", "חומרי תרגול": "", "חודש": "" }, { group: G }); });   // שני הנוסחים מופיעים בעורך תמיד
-  var once = !fReg && !fMat ? "" : '<p class="tk-once">' + (fMat ? T(FM[0], FM[1], FM[2], fv) : T(FR[0], FR[1], FR[2], fv)) + '</p>';
+  var onceTxt = !fReg && !fMat ? "" : (fMat ? T(FM[0], FM[1], FM[2], fv) : T(FR[0], FR[1], FR[2], fv));
+  if (o.feesOnly) return onceTxt;   // נועה 6.11: המשפט לבד – מתחת לכל המסלולים (לא בכל כרטיס)
+  var once = !onceTxt || o.noOnce ? "" : '<p class="tk-once">' + onceTxt + '</p>';
   var extra = (o.extra || []).filter(Boolean).map(function(x){ return '<p class="tk-once tk-more">' + x + '</p>'; }).join("");
   var body = '<div class="tk-body">' + (o.body ? '<p class="tk-desc">' + e(o.body) + '</p>' : "") + price + once + extra + '</div>';
   var cls = 'tk c-' + e(o.color || "red");
