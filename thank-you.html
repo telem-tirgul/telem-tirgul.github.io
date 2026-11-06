@@ -121,7 +121,7 @@
       <ul class="meet" id="meet" hidden></ul>
       <div class="sec-t" id="nextT" hidden>השלבים הבאים</div>
       <ul class="next" id="next" hidden></ul>
-      <button type="button" class="dl-btn" id="dlPdf" hidden>⬇ הורדת פרטי ההרשמה (PDF)</button>
+      <button type="button" class="dl-btn" id="dlPdf" hidden>⬇ הורדת טופס ההרשמה החתום (PDF)</button>
       <div class="dl-note" id="dlNote" hidden data-t="t004">מומלץ לשמור את הקובץ, שכן הוא זמין להורדה מדף זה בלבד.</div>
       <div class="wa-join" id="waJoin" hidden><div class="t">💬 הצטרפו לקבוצת העדכונים השקטה של <span id="waSch"></span> בווטסאפ</div><a class="wa-btn" id="waBtn" href="#" target="_blank" rel="noopener">להצטרפות לקבוצה</a></div>
       <div class="contact"><span data-t="t005">לשאלות:</span> <a href="tel:0529067101">052-9067101</a> · <a href="mailto:telem.tr@gmail.com">telem.tr@gmail.com</a></div>
@@ -168,6 +168,7 @@
     ["ty.row_name", "שם התלמיד/ה", "פרטים – שם", {}, []],
     ["ty.row_mar", "מרתון", "פרטים – מרתון", {}, []],
     ["ty.row_track", "מסלול", "פרטים – מסלול", {}, []],
+    ["ty.row_subj", "מקצוע", "פרטים – מקצוע", {}, []],
     ["ty.row_due", "סכום לתשלום", "פרטים – סכום (לא שולם)", {}, []],
     ["ty.row_paid", "סכום ששולם", "פרטים – סכום (שולם)", {}, []],
     ["ty.unpaid", "לא שולם", "תגית ליד הסכום – תשלום טלפוני", {}, []],
@@ -212,7 +213,7 @@
     // נועה 25.10: נשלח טופס מרתון לתלמיד/ה שכבר רשום/ה ושילם/ה – כותבים בפירוש שאין צורך להירשם שוב, עם שם התלמיד/ה והמרתון
     if ((/[?&]already=1/.test(location.search) && !TY_EDIT) || (TY_EDIT && TYV === "already")) {
       var al = null; try { al = JSON.parse(sessionStorage.getItem("reg_already") || "null"); } catch (e) {} if (TY_EDIT) al = TY_SAMPLE;
-      $("title").textContent = tyT("ty.al_title");
+      $("title").textContent = tyT("ty.al_title"); $("title").classList.add("ty-ok");
       var ld = $("lead"); ld.innerHTML = tyH("ty.al_lead"); ld.hidden = false;   /* נועה 28.10 */
       if (al && (al.name || al.event)) { if (al.name) row(tyT("ty.row_name"), al.name); if (al.event) row(tyT("ty.row_mar"), al.event); $("sumT").textContent = tyT("ty.sum_t"); $("sumT").hidden = false; box.hidden = false; }
       document.title = "הפרטים כבר אצלנו - תלם"; return;
@@ -257,9 +258,13 @@
     // 5.19.91 (נועה): בלי תגית "✓ התקבל" באמצע – הכותרת עצמה בירוק עם וי ("✓ ההרשמה התקבלה")
     // נועה 6.11: כל דפי התודה בעיצוב של התשלום הטלפוני – בלי הווי הירוק למעלה (התגית נשארת)
     $("title").textContent = $("title").textContent.replace(/!$/, "");
+    // נועה 6.11: וי ירוק מעל הכותרת בכל דפי התודה – חוץ מתשלום טלפוני שעוד לא שולם
+    var waitPay = phone && pending && !preview && !(unpaid || /[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid"));
+    if (!waitPay && !preview) $("title").classList.add("ty-ok");
     if (!x) return;
     if (x.name) row(tyT("ty.row_name"), x.name);
     if (x.event || x.track) row(x.event ? tyT("ty.row_mar") : tyT("ty.row_track"), x.event || x.track);
+    if (x.subject && String(x.track || "").indexOf(x.subject) < 0) row(tyT("ty.row_subj"), x.subject);   // נועה 6.11: המקצוע (אם יש)
     if (signed && x) x.amount = null;
     if (x.amount != null && !isNaN(x.amount)) row((pending || preview) && !(unpaid || /[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid")) ? tyT("ty.row_due") : tyT("ty.row_paid"), Number(x.amount).toLocaleString("he-IL", { maximumFractionDigits: 2 }) + " ₪", "amt");
     if (x.amount != null && !isNaN(x.amount) && pending && !preview && !(unpaid || /[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid"))) { var ab = box.lastChild && box.lastChild.querySelector("b"); if (ab) { var nt = document.createElement("span"); nt.className = "unpaid"; nt.textContent = tyT("ty.unpaid"); ab.appendChild(nt); } }   // 5.19.93 (נועה)
@@ -290,14 +295,14 @@
     if (TY_EDIT) x = TYV === "paylink" ? null : TY_SAMPLE;
     var reg = x && (x.kind === "marathon" || x.kind === "register");
     // 5.19.93 (נועה): גם בלי פרטי הרשמה (דף תשלום / הפרטים פגו) – אותו עיצוב, בלי התיבה הירוקה
-    document.getElementById("title").textContent = reg ? tyT("ty.paid_title_reg") : tyT("ty.paid_title");
+    document.getElementById("title").textContent = reg ? tyT("ty.paid_title_reg") : tyT("ty.paid_title"); document.getElementById("title").classList.add("ty-ok");
     // 5.19.62: אחרי תשלום - בלי תגית "שולם" למעלה (התיבה הירוקה "התשלום התקבל בהצלחה" מספיקה)
     document.getElementById("stChip").hidden = true;   // נועה 6.11: בלי תגית ליד – "✓ התשלום התקבל בהצלחה" כשורה גדולה מתחת לכותרת
     // 5.19.91 (נועה): במקום התיבה הירוקה הגדולה – שורה ירוקה קטנה מתחת לשם: "✓ התשלום התקבל בהצלחה · חשבונית תישלח אליכם במייל"
     var ld = document.getElementById("lead"), pm = document.getElementById("payMsg");
     if (pm) pm.hidden = true;
     var pl = document.getElementById("paidLine"); if (!pl) { pl = document.createElement("p"); pl.id = "paidLine"; pl.className = "paid-line"; ld.parentNode.insertBefore(pl, ld.nextSibling); }
-    pl.innerHTML = reg ? '<span class="pl-big">✓ ' + tyH("ty.paid_line") + '</span>' : "";   // נועה 6.11: בלי שורת החשבונית; בתשלום בלי הרשמה – הכותרת "התשלום התקבל" מספיקה
+    pl.innerHTML = reg ? '<span class="pl-big">' + tyH("ty.paid_line") + '</span>' : "";   // נועה 6.11: הווי – רק מעל הכותרת   // נועה 6.11: בלי שורת החשבונית; בתשלום בלי הרשמה – הכותרת "התשלום התקבל" מספיקה
     if (!reg) return;
     var nl = document.getElementById("next");
     [].slice.call(nl.children).forEach(function(li){ if (li.getAttribute("data-inv")) li.remove(); });

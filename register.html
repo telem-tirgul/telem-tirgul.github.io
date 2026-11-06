@@ -1987,7 +1987,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     makeSignedPdf("טופס הרשמה לתרגולים", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
     if (isPreviewNow()) {
       saveRegPdf(signedPdf, true);   // תלם 5.19.42: לא מורידים אוטומטית - כפתור הורדה בדף התודה (כמו במרתון)
-      try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
+      try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", subject: (track === "double" ? "מתמטיקה ואנגלית" : subjectChoice) || "", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
       setTimeout(function(){ location.href = new URL("thank-you.html?preview=1", location.href).href; }, 600); return;
     }
     const payload = {
@@ -2013,7 +2013,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       var vals = { student_first: studentFirst, student_last: studentLast, student_phone: studentPhoneEl.value.trim(), grade: grade, class_num: classNum, parent_first: parentFirst, parent_last: parentLast, parent_phone: phone, parent_email: email };
       callSupabase("submit_sign_link", { code: SIGN_CODE, terms_accepted: true, values: vals, signature: signature, pdf: signedPdf, website: document.getElementById("f-website").value }).then(function(rs){
         saveRegPdf(signedPdf, false);
-        try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: city, school: school, name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (track !== "double" && subjectChoice) ? subjectChoice : "מתמטיקה או אנגלית") })); } catch (err) {}
+        try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", subject: (track === "double" ? "מתמטיקה ואנגלית" : subjectChoice) || "", city: city, school: school, name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (track !== "double" && subjectChoice) ? subjectChoice : "מתמטיקה או אנגלית") })); } catch (err) {}
         location.href = new URL("thank-you.html?signed=1" + (rs && rs.registered === false ? "&unpaid=1" : ""), location.href).href;   /* נועה 5.11 (163): "אושרה" רק כשהקורס "רשום" */
       }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "לא הצלחנו לשמור את הטופס. נסו שוב בעוד רגע."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
       return;
@@ -2023,7 +2023,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       saveRegPdf(signedPdf, false);
       try {
         sessionStorage.setItem("reg_studentFullName", studentFirst + " " + studentLast);
-        sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
+        sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", subject: (track === "double" ? "מתמטיקה ואנגלית" : subjectChoice) || "", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: Number(res.first_charge_amount) }));
         sessionStorage.setItem("reg_form_url", location.href);
       } catch (err) {}
       if (PHONE_REG) { location.href = new URL("thank-you.html?signed=1", location.href).href; return; }   // נועה 3.11: חתימה על התנאים – בלי הודעות תשלום
