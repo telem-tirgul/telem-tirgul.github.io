@@ -557,7 +557,7 @@ function rpc(fn, body){ const h = { "Content-Type": "application/json", apikey: 
 const bad = (msg) => { const b = $("badBox"); b.innerHTML = msg + '<br>לפרטים: <a href="tel:0529067101">052-9067101</a>'; b.hidden = false; $("clsForm").hidden = true; };
 let L = null;
 function show(l){ L = l; $("f-school").value = l.school || ""; $("f-grade").value = l.grade || "";
-  $("subtitleLocation").textContent = [l.school, l.grade ? "שכבה " + l.grade : "", l.city].filter(Boolean).join(" · "); $("clsForm").hidden = false; }
+  $("subtitleLocation").textContent = [l.school, l.grade ? "שכבת " + l.grade : "", l.city].filter(Boolean).join(" · "); $("clsForm").hidden = false; }
 if (PREVIEW) show({ school: Q.get("school") || "בארי", grade: Q.get("grade") || "ח'", city: Q.get("city") || "ראש העין" });
 else if (!/^[0-9a-f]{6,40}$/i.test(CODE)) bad("<b>הקישור לא תקין.</b>");
 else rpc("class_link_get", { p_code: CODE }).then(r => r && r.ok ? show(r) : bad("<b>הטופס כבר לא פעיל.</b>")).catch(() => bad("<b>לא הצלחנו לטעון את הטופס.</b> נסו שוב בעוד רגע."));

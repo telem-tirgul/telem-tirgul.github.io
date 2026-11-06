@@ -1078,7 +1078,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         // תלם 5.19.38: הכותרת = שם המרתון בלבד (בית הספר והשכבה כבר בשם)
         // 5.19.91 (נועה): "הרשמה ותשלום ל<מרתון>" ובשורה השנייה בתוך התגית – השכבה ובית הספר
         { var baseN = String(MARATHON.name || "").replace(/\s*·.*$/, "").replace(/\s*שכבת\s*\S+/, "").trim() || "מרתון מתמטיקה";
-          var gr0 = MARATHON.grade ? "שכבה " + String(MARATHON.grade).replace(/['"׳]/g, "") + "'" : "";
+          var gr0 = MARATHON.grade ? "שכבת " + String(MARATHON.grade).replace(/['"׳]/g, "") + "'" : "";
           document.querySelector(".subtitle").firstChild.innerHTML = tt("mar.sub", { "שם המרתון": baseN.replace(/^ל/, "") });
           var sl2 = document.getElementById("subtitleLocation"); sl2.textContent = [gr0, MARATHON.school].filter(Boolean).join(" · "); sl2.className = "sub-l2"; }
         document.title = (MARATHON.name || "מרתון מתמטיקה") + " - תלם";
