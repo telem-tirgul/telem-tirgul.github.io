@@ -412,7 +412,7 @@
   .q-sent{ background:#EEF7EA; border:1px solid #CFE6C6; color:#2F5D23; border-radius:12px; padding:12px 14px; margin-bottom:12px; font-weight:600; line-height:1.5; }
   .q-sent small{ display:block; font-weight:400; color:#4F6B45; margin-top:2px; }
   .p-incl{ background:#F3E3C3; border-radius:18px; padding:14px 16px; margin:0 0 14px; font-size:15.5px; line-height:1.7; color:#3A2A1F; white-space:pre-line; }   /* כמו תיבת הפירוט במרתון */
-  #payForm .ti-box{ display:none; }   /* נועה 6.11: התיאור – בכותרת, בלי "התשלום מתבצע…" */   /* נועה 6.11: פירוט – מה כלול בתשלום */
+  #payForm .ti-box, #ackCard .ti-box{ display:none; } #ackCard .amount-row{ margin:0 0 12px; }   /* נועה 6.11: התיאור – בכותרת, בלי "התשלום מתבצע…" */   /* נועה 6.11: פירוט – מה כלול בתשלום */
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -502,14 +502,11 @@
   <div id="loadBox" class="intro"><div data-t="t003">טוען את הטופס...</div></div>
   <form id="payForm" novalidate hidden>
     <div class="top-error form-error" id="topError" style="display:none;"></div>
-    <fieldset>
-      <legend data-t="t004">פרטי התשלום</legend>
+    <div id="fieldsBox"></div>
+    <section class="sec-card" id="ackCard"><div class="sec-h" data-t="t007">תשלום ואישור</div><!-- נועה 6.11: כמו במרתון – הפירוט, הפרטים, ובסוף התשלום והאישור -->
       <div class="ti-box"><h3 id="v-desc"></h3><p id="v-desc-sub" data-t="t005">התשלום מתבצע בעמוד תשלום מאובטח. חשבונית תישלח אליכם במייל.</p></div>
       <div class="amount-row"><span data-t="t006">סכום לתשלום מיידי</span><strong id="v-amount"></strong></div>
       <div class="amount-row amount-row-recur" id="recurRow" hidden><span id="v-recur-lbl">תשלום חודשי</span><strong id="v-recur"></strong></div>
-    </fieldset>
-    <div id="fieldsBox"></div>
-    <section class="sec-card" id="ackCard"><div class="sec-h" data-t="t007">אישור וחתימה</div>
       <div class="terms-box" id="termsBox" hidden></div>
       <div class="consents-box">
       <label class="consent" id="field-terms">
