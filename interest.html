@@ -475,7 +475,9 @@
   .tk-subj:not(.invalid){ flex-wrap:nowrap !important; } .tk-subj label{ flex:0 0 auto; } .tk-subj input[type=radio]{ width:16px; height:16px; margin:0; flex:0 0 auto; }
   .c-red .tk-subj input{ accent-color:#9b1c1c; } .c-green .tk-subj input{ accent-color:#3f6b1f; }
   .c-red .tk-subj label{ border-color:rgba(155,28,28,.3); } .c-green .tk-subj label{ border-color:rgba(63,107,31,.3); }
-  @media (max-width:560px){ .tk-subj{ gap:6px; padding:8px 10px; } .tk-subj .tks-l{ font-size:14.5px; } .tk-subj label{ padding:6px 11px; font-size:14.5px; gap:5px; } .tk-subj .tks-opt{ display:block; font-size:12px; } }
+  /* נועה 6.11: בטלפון – "מקצוע" בשורה משלו, ושני המקצועות זה לצד זה (חצי-חצי) – בכל גודל גופן */
+  @media (max-width:560px){ .tk-subj, .tk-subj:not(.invalid){ flex-wrap:wrap !important; gap:8px; padding:10px; } .tk-subj .tks-l{ flex:0 0 100%; font-size:15px; } .tk-subj .tks-opt{ display:inline; font-size:12.5px; }
+    .tk-subj label{ flex:1 1 0; min-width:0; justify-content:center; padding:8px 6px; font-size:15px; gap:6px; } }
   .consents-box .consent input, .consent input[type=checkbox]{ width:20px; height:20px; flex:0 0 auto; margin-top:1px !important; accent-color:#8B1E23; }
   .consents-box .error-msg:empty{ display:none; }
   .terms-box{ background:#FAF8F5 !important; border:1px solid #E6E0D8 !important; border-radius:12px !important; padding:14px 16px !important; margin:16px 0 10px !important;
@@ -523,7 +525,7 @@
     window.addEventListener("load", function(){ send(); if (window.ResizeObserver) new ResizeObserver(send).observe(document.body); setInterval(send, 1000); });
   })();
 </script>
-<link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=9"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=10"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 <div class="wrap">
