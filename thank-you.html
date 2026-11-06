@@ -297,7 +297,7 @@
     var ld = document.getElementById("lead"), pm = document.getElementById("payMsg");
     if (pm) pm.hidden = true;
     var pl = document.getElementById("paidLine"); if (!pl) { pl = document.createElement("p"); pl.id = "paidLine"; pl.className = "paid-line"; ld.parentNode.insertBefore(pl, ld.nextSibling); }
-    pl.innerHTML = '<span class="pl-big">✓ ' + tyH("ty.paid_line") + '</span>';   // נועה 6.11: בלי שורת החשבונית
+    pl.innerHTML = reg ? '<span class="pl-big">✓ ' + tyH("ty.paid_line") + '</span>' : "";   // נועה 6.11: בלי שורת החשבונית; בתשלום בלי הרשמה – הכותרת "התשלום התקבל" מספיקה
     if (!reg) return;
     var nl = document.getElementById("next");
     [].slice.call(nl.children).forEach(function(li){ if (li.getAttribute("data-inv")) li.remove(); });
