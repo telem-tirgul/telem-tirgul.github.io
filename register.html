@@ -1442,7 +1442,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var recurInfo = getRecurInfo();
     if (cityTable && recurInfo){
       var parts = [ [RH("r.bd_reg", "דמי שיבוץ והרשמה", "פירוט התשלום – דמי שיבוץ"), cityTable.registrationFee] ];
-      if (cityTable.materialsFee) parts.push([RH("r.bd_mat", "חומרי לימוד", "פירוט התשלום – חומרי לימוד"), cityTable.materialsFee]);
+      if (cityTable.materialsFee) parts.push([RH("r.bd_mat", "שירות עבור חומרי תרגול דיגיטליים", "פירוט התשלום – חומרי תרגול"), cityTable.materialsFee]);
       parts.push([recurInfo.firstMonthHalf ? RH("r.bd_month_pct", "שכר לימוד חודש נוכחי ({אחוז}%)", "פירוט התשלום – חלק מהחודש", { "אחוז": recurInfo.firstMonthPct }) : RH("r.bd_month", "שכר לימוד חודש נוכחי", "פירוט התשלום – חודש נוכחי"), recurInfo.firstMonthAmount]);
       amountBreakdown.textContent = "";
       parts.forEach(function(p){
