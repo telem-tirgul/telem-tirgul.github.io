@@ -409,6 +409,8 @@
   .q-go:disabled{ opacity:.7; cursor:default; } .q-err{ color:#A33A35; margin-top:10px; font-weight:600; } .q-lock{ color:#6B5F55; font-size:13px; text-align:center; }
   .recur-sub{ display:block; font-size:12.5px; color:#6B5F55; font-weight:400; margin-top:3px; line-height:1.45; }
   #recurRow{ align-items:flex-start; gap:12px; } #recurRow strong{ white-space:nowrap; } .q-row b{ text-align:left; }
+  .q-sent{ background:#EEF7EA; border:1px solid #CFE6C6; color:#2F5D23; border-radius:12px; padding:12px 14px; margin-bottom:12px; font-weight:600; line-height:1.5; }
+  .q-sent small{ display:block; font-weight:400; color:#4F6B45; margin-top:2px; }
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -861,6 +863,7 @@ function fill(d){
   $("loadBox").hidden = true;
   if (d.status === "paid") { showDone("התשלום כבר התקבל. תודה!"); return; }
   if (d.status === "cancelled") { showBad("הקישור בוטל. לפרטים: 052-9067101"); return; }
+  if (d.status === "submitted") { showQuick(d, true); return; }   // נועה 6.11: לאחר שליחת הטופס – הפרטים נעולים; נותר רק לשלם
   if (d.quick) { showQuick(d); return; }   // 5.19.58: קישור להרשמה שכבר נחתמה (icredit-18) - בלי שדות, חתימה ותקנון
   $("payForm").hidden = false;
   $("v-desc").textContent = d.description || "תשלום לתלם";
@@ -907,11 +910,11 @@ else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("pay_link_public", {
 
 function recurTxt(d){ return d.monthly_count + " תשלומים חודשיים" + (d.first_monthly_date ? ", החל מ-" + dateHe(d.first_monthly_date) : "") + " ועד חודש יוני כולל"; }
 // 5.19.58: קישור "מהיר" - רק סיכום + כפתור לתשלום (ישר ל-icredit-pay; השרת מסמן את הקישור בעצמו)
-function showQuick(d){
+function showQuick(d, sent){
   const box = document.createElement("div"); box.className = "quick-box"; box.id = "quickBox";
   const row = (l, v, cls) => '<div class="q-row' + (cls ? " " + cls : "") + '"><span>' + l + '</span><b>' + v + '</b></div>';
   const esc2 = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  box.innerHTML = '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם"))
+  box.innerHTML = (sent ? '<div class="q-sent">✓ הטופס התקבל, והפרטים נעולים לשינוי. נותר להשלים את התשלום.<small>לתיקון הפרטים ניתן לפנות אלינו: 052-9067101</small></div>' : "") + '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם"))
     + row("לתשלום עכשיו", esc2(money(d.one_time_amount)), "q-amt")
     + (d.monthly_amount ? row("ואחר כך תשלום חודשי", esc2(money(d.monthly_amount)) + '<small class="recur-sub">' + esc2(recurTxt(d)) + '</small>') : "")
     + '</div><div class="q-err" id="qErr" hidden></div><button type="button" class="q-go" id="qGo">לתשלום מאובטח ←</button>'
@@ -969,7 +972,7 @@ $("payForm").addEventListener("submit", function(e){
       .then(function(){ submittedOnce = true; goToPayment(); })
       .catch(function(err){
         const m = String(err && err.message || "");
-        topError.textContent = /used link/.test(m) ? "הטופס כבר שולם או שהקישור בוטל." : /missing field/.test(m) ? "חסרים פרטים בטופס." : /invalid (email|phone)/.test(m) ? "האימייל או הטלפון לא תקינים." : "לא הצלחנו לשלוח את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101";
+        topError.textContent = /used link/.test(m) ? "הטופס כבר נשלח, או שהקישור בוטל. לפרטים: 052-9067101" : /missing field/.test(m) ? "חסרים פרטים בטופס." : /invalid (email|phone)/.test(m) ? "האימייל או הטלפון לא תקינים." : "לא הצלחנו לשלוח את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101";
         topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = "המשך לתשלום מאובטח";
       });
   });
