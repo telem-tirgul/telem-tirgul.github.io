@@ -509,6 +509,7 @@
   .amount-row.amount-row-recur > span{ font-weight:800 !important; color:var(--accent) !important; font-size:15.5px; }
   .amount-row.amount-row-recur > strong{ font-size:20px !important; font-weight:900 !important; color:var(--accent) !important; }
   .amount-row.amount-row-recur .recur-sub{ color:#6B5F55 !important; font-weight:500 !important; }
+  .bd-note{ font-size:12.5px; line-height:1.5; color:#7a6a5c; margin:-4px 0 8px; padding:0 14px; }   /* נועה 6.11 */
 </style>
 <link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
@@ -1450,6 +1451,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         var b = document.createElement("b"); b.textContent = "₪" + Number(p[1]).toFixed(2);
         d.appendChild(a); d.appendChild(b); amountBreakdown.appendChild(d);
       });
+      // נועה 6.11: רק למי שמשלם/ת חלק מהחודש – הסבר קטן מתחת ל"שכר לימוד חודש נוכחי"
+      if (recurInfo.firstMonthHalf && recurInfo.lateFrom) { var nt = document.createElement("div"); nt.className = "bd-note";
+        nt.innerHTML = RH("r.bd_month_note", "הרשמה עד ה-{עד יום} לחודש - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו). הרשמה מה-{מיום} לחודש ואילך - {אחוז}% מהתשלום החודשי.", "פירוט התשלום – הסבר על חלק מהחודש",
+          { "עד יום": recurInfo.lateFrom - 1, "מיום": recurInfo.lateFrom, "אחוז": recurInfo.firstMonthPct });
+        amountBreakdown.appendChild(nt); }
     } else {
       amountBreakdown.textContent = "";
     }
@@ -1597,7 +1603,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       firstMonthName: hebrewMonthName(effectiveStartDate),
       firstMonthAmount: firstMonthAmount,
       firstMonthHalf: firstMonthHalf,
-      firstMonthPct: lj ? lj.percent : 100,
+      firstMonthPct: lj ? lj.percent : 100, lateFrom: lj ? lj.from_day : null,
       recurStartDate: recurStartDate,
       recurStartDateHe: formatDateHe(recurStartDate),
       payments: payments,
