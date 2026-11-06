@@ -150,12 +150,10 @@
     ["ty.signed_unpaid", "הטופס נחתם ונשמר. נותר להסדיר את התשלום, ונציגנו ייצרו עמכם קשר בהקדם.", "התיבה הצהובה – נחתם מהקישור האישי, עוד לא שולם", {}, []],
     ["ty.pending_paidphone", "תודה. נוודא שהתשלום שביצעתם טלפונית התקבל, ונעדכן אתכם עם אישור ההרשמה.", "התיבה הצהובה – \"כבר שילמתי בטלפון\"", {}, []],
     ["ty.pending", "ניצור עמכם קשר בימים הקרובים לצורך הסדרת התשלום.", "התיבה הצהובה – ממתין לתשלום (לא טלפוני)", {}, []],
-    ["ty.lead_register", "{שם} רשום/ה לתרגולים השוטפים{ · עיר}", "שורה מתחת לכותרת – תרגולים שוטפים", { "שם": "השם הפרטי של התלמיד/ה", " · עיר": "העיר עם נקודה לפניה (ריק אם אין עיר)" }, ["שם"]],
-    ["ty.lead_event", "{שם} רשום/ה ל{מרתון / מסלול}", "שורה מתחת לכותרת – מרתון / מסלול", { "שם": "השם הפרטי של התלמיד/ה", "מרתון / מסלול": "שם המרתון או המסלול" }, ["שם"]],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
     ["ty.chip_paid", "✓ שולם", "תגית – אחרי תשלום באשראי", {}, []],
-    ["ty.int_title", "טופס ההתעניינות התקבל", "התעניינות – כותרת", {}, []],
-    ["ty.int_msg", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם, עם מידע מלא על התרגולים ועל אופן ההרשמה.", "התעניינות – ההודעה בתיבה", {}, []],
+    ["ty.int_title", "פרטיכם התקבלו", "התעניינות – כותרת", {}, []],
+    ["ty.int_msg", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם עם פרטים.", "התעניינות – ההודעה בתיבה", {}, []],
     ["ty.lead_title", "תודה, פנייתכם התקבלה", "רק פרטים (מרתון) – כותרת", {}, []],
     ["ty.lead_lead", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם, עם מידע מלא על המרתון ועל אופן ההרשמה.", "רק פרטים (מרתון) – שורה מתחת לכותרת", {}, []],
     ["ty.lead_cta_t", "מעוניינים להירשם כבר עכשיו?", "רק פרטים (מרתון) – כותרת התיבה", {}, []],
@@ -235,7 +233,7 @@
     if ((/[?&]interest=1/.test(location.search) && !TY_EDIT) || (TY_EDIT && TYV === "interest")) {
       $("title").textContent = tyT("ty.int_title"); $("stChip").hidden = true;
       var pmI = $("pendingMsg"); pmI.innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.int_msg") + '</span>'; pmI.hidden = false;
-      document.title = "טופס ההתעניינות התקבל - תלם"; return;
+      document.title = "פרטיכם התקבלו - תלם"; return;
     }
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
     if (phone && pending && !preview) {
@@ -248,8 +246,7 @@
     if (regLike && !(phone && pending && !preview)) {
       $("title").textContent = preview ? "כך ייראה האישור" : signed ? tyT("ty.paid_title_reg") : tyT("ty.title_reg");   // נועה 4.11: אישור תנאים (שולם בטלפון לפני החתימה) – "ההרשמה אושרה"
       var first = String(x.name || "").trim().split(/\s+/)[0];
-      if (x.kind === "register" && x.name) { $("lead").innerHTML = tyH("ty.lead_register", { "שם": first, " · עיר": x.city ? " · " + x.city : "" }); $("lead").hidden = false; }   // 5.19.91 (נועה)
-      else if (x.name && (x.event || x.track)) { $("lead").innerHTML = tyH("ty.lead_event", { "שם": first, "מרתון / מסלול": (x.event || x.track).replace(/^ל/, "") }); $("lead").hidden = false; }
+      // נועה 6.11: בלי "{שם} רשום/ה ל…" – אין כאן אישור הרשמה
     }
     if (preview) { var chp = $("stChip"); chp.className = "st-chip info"; chp.textContent = "👁 תצוגה מקדימה"; var pm = $("pendingMsg"); pm.className = "status info"; pm.innerHTML = '<span class="ic">👁</span><span>תצוגה מקדימה - ההרשמה לא נשמרה ולא בוצע תשלום.</span>'; pm.hidden = false; }
     else if (pending) { if (!phone) $("pendingMsg").innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.pending") + '</span>'; $("pendingMsg").hidden = false; }
