@@ -96,6 +96,7 @@
   .pg-head .brand-logo{ width:100%; max-width:230px; height:auto; display:block; margin:0 auto; mix-blend-mode:multiply; }
   .pg-head .org{ font-family:'Heebo','Segoe UI',sans-serif; font-weight:900; font-size:clamp(22px,4.5vw,30px); color:#2E1C19; margin:4px 0 0; }
   .card{ max-width:640px !important; border-radius:16px !important; }
+  .meet-note{ font-size:14px; color:#6b5a4c; margin:6px 2px 0; }   /* נועה 6.11 */
 </style>
 <link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
@@ -151,6 +152,7 @@
     ["ty.pending_paidphone", "תודה. נוודא שהתשלום שביצעתם טלפונית התקבל, ונעדכן אתכם עם אישור ההרשמה.", "התיבה הצהובה – \"כבר שילמתי בטלפון\"", {}, []],
     ["ty.pending", "ניצור עמכם קשר בימים הקרובים לצורך הסדרת התשלום.", "התיבה הצהובה – ממתין לתשלום (לא טלפוני)", {}, []],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
+    ["ty.meet_note", "*נפגשים בכניסה למבנה בית הספר.", "מרתון – הערה מתחת למועדי המפגשים", {}, []],
     ["ty.chip_paid", "✓ שולם", "תגית – אחרי תשלום באשראי", {}, []],
     ["ty.int_title", "תודה, פנייתכם התקבלה", "התעניינות – כותרת", {}, []],
     ["ty.int_msg", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם עם פרטים על התרגולים השוטפים.", "התעניינות – ההודעה בתיבה", {}, []],
@@ -262,7 +264,8 @@
     if (x.amount_note) row("", x.amount_note);   // אבטחה (כל-16): הסכום נקבע בשרת – אם שונה ממה שסומן בטופס
     $("sumT").textContent = tyT("ty.sum_t"); $("meetT").textContent = tyT("ty.meet_t");
     $("sumT").hidden = false; box.hidden = false;
-    if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false; }
+    if (x.meetings && x.meetings.length) { var ul = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul.appendChild(li); }); ul.hidden = false; $("meetT").hidden = false;
+      if (x.kind === "marathon" && !$("meetNote")) { var mn = document.createElement("div"); mn.id = "meetNote"; mn.className = "meet-note"; mn.innerHTML = tyH("ty.meet_note"); ul.after(mn); } }   // נועה 6.11
     var steps = [];
     if (paidRef) steps.push("\u0001" + tyT("ty.step_invoice"));   // \u0001 = שלב החשבונית (יורד אחרי תשלום)
     // 5.19.93 (נועה): בתשלום טלפוני – "צרו קשר" כבר כתוב בתיבה הצהובה; לא חוזרים על זה ב"השלב הבא"
