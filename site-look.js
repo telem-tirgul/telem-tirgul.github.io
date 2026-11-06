@@ -72,7 +72,7 @@
     if (c && c.parentNode) c.parentNode.insertBefore(a, c); else document.body.appendChild(a);
   });
 })();
-// נועה 23.10: פרטי הקשר בתחתית כל טופס ובדף התודה / התשלום לא הושלם – "שאלות? כתבו לנו בוואטסאפ: 052-9067101" (לחיץ, פותח וואטסאפ
+// נועה 23.10: פרטי הקשר בתחתית כל טופס ובדף התודה / התשלום לא הושלם – "לשאלות ניתן לפנות אלינו בוואטסאפ: 052-9067101" (לחיץ, פותח וואטסאפ
 // עם הודעה לפי הטופס), ומתחתיו האימייל (לחיץ). מחליף את שורת "טלפון · אימייל". בתוך האתר התחתית מוסתרת – לאתר יש משלו.
 (function(){
   var MSG = { register: "לגבי ההרשמה לתרגולים השוטפים", marathon: "לגבי ההרשמה למרתון", interest: "לגבי התרגולים בתלם", shibutz: "לגבי טופס השיבוץ",
@@ -89,7 +89,7 @@
     var FT = function(k, d, l){ var sp = document.createElement("span"); sp.innerHTML = window.TELEM_TXH(k, d, l, "תחתית העמוד"); return sp; };   // נועה 4.11: עריך
     a.appendChild(FT("foot.wa", "💬 וואטסאפ:", "תחתית – וואטסאפ")); a.appendChild(document.createTextNode(" ")); var n = document.createElement("bdi"); n.textContent = PHONE; a.appendChild(n);
     var m = document.createElement("a"); m.className = "wa-link wa-mail"; m.target = "_blank"; m.rel = "noopener"; m.href = "mailto:" + MAIL; m.appendChild(FT("foot.mail", "✉️ אימייל:", "תחתית – אימייל")); m.appendChild(document.createTextNode(" ")); var mb = document.createElement("bdi"); mb.textContent = MAIL; m.appendChild(mb);   // באותה בועה, כמו הוואטסאפ
-    var h = document.createElement("div"); h.className = "wa-h"; h.appendChild(FT("foot.h", "שאלות? כתבו לנו", "תחתית – כותרת"));   // נועה: הכול במסגרת אחת – כותרת, ומתחתיה וואטסאפ ואימייל
+    var h = document.createElement("div"); h.className = "wa-h"; h.appendChild(FT("foot.h", "לשאלות ניתן לפנות אלינו", "תחתית – כותרת"));   // נועה: הכול במסגרת אחת – כותרת, ומתחתיה וואטסאפ ואימייל
     box.appendChild(h); box.appendChild(a); box.appendChild(m);
     var pv = document.createElement("a"); pv.className = "wa-privacy"; pv.target = "_blank"; pv.rel = "noopener"; pv.appendChild(FT("foot.privacy", "מדיניות פרטיות", "תחתית – מדיניות פרטיות"));   // את-46: עד שהאתר החדש באוויר – העמוד באתר הישן
     pv.href = "https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA"; box.appendChild(pv);

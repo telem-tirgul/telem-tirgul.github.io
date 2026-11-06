@@ -516,7 +516,7 @@
   <form id="payForm" novalidate hidden>
     <div class="top-error form-error" id="topError" style="display:none;"></div>
     <div id="fieldsBox"></div>
-    <div class="sg-note">אפשר לעדכן או להשלים את הפרטים. שינוי בקורס, במסלול או בבית הספר – כתבו לנו בוואטסאפ: <a href="https://wa.me/972529067101">052-9067101</a></div>
+    <div class="sg-note">ניתן לעדכן או להשלים את הפרטים. לשינוי בקורס, במסלול או בבית הספר נא לפנות אלינו בוואטסאפ: <a href="https://wa.me/972529067101">052-9067101</a></div>
     <section class="sec-card"><div class="sec-h">תנאי ההתקשרות</div>
       <div class="terms-box" id="termsBox"><p>טוען את התנאים...</p></div>
     </section>
@@ -535,7 +535,7 @@
       </div>
       <div class="sig-wrap" id="field-signature">
         <span class="sig-lbl"><span>חתימת ההורה</span> <span class="req">*</span></span>
-        <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph">חתמו כאן באצבע או בעכבר</div></div>
+        <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph">נא לחתום כאן באמצעות האצבע או העכבר</div></div>
         <div class="sig-tools"><span id="sigHint">החתימה נשמרת יחד עם הטופס.</span><button type="button" id="sigClear">ניקוי</button></div>
         <div class="error-msg" id="sigError"></div>
       </div>
@@ -873,7 +873,7 @@ function loadTerms(city, mar){
       if (note) note.style.display = (x && Number(x.materialsFee) > 0) ? "block" : "none";
     }).catch(function(){});
     return Promise.all([texts, mats]);
-  }).catch(function(){ box.innerHTML = ""; const p = document.createElement("p"); p.textContent = "לא הצלחנו לטעון את התנאים. נסו לרענן את הדף, ואם זה חוזר – התקשרו: " + PHONE; box.appendChild(p); throw new Error("terms"); });
+  }).catch(function(){ box.innerHTML = ""; const p = document.createElement("p"); p.textContent = "לא ניתן היה לטעון את התנאים. נא לרענן את הדף; אם התקלה חוזרת, נא לפנות אלינו בטלפון: " + PHONE; box.appendChild(p); throw new Error("terms"); });
 }
 // הפרטים – כמו בטופס ההרשמה (אותם מקטעים ושדות, שניים בשורה), לקריאה בלבד
 const TRK = { single: "מקצוע אחד - מתמטיקה או אנגלית, פעמיים בשבוע", "unlimited-single": "מקצוע אחד - מתמטיקה או אנגלית, ללא הגבלה בכמות המפגשים", double: "שני מקצועות - מתמטיקה ואנגלית", summer: "קיץ", "summer-ext": "קיץ מורחב" };
@@ -920,7 +920,7 @@ function fill(d){
     document.title = mar ? "טופס הרשמה למרתון מתמטיקה - תלם" : "טופס הרשמה לתרגולים - תלם"; }
   const ib = $("introBox"); ib.hidden = false; ib.innerHTML = "";
   const t1 = document.createElement("div"); t1.textContent = "שלום" + (d.parent_first ? " " + d.parent_first : "") + ", זה טופס ההרשמה עבור "; const st = document.createElement("strong"); st.textContent = d.student_first || "התלמיד/ה"; t1.appendChild(st); t1.appendChild(document.createTextNode(d.course ? " – " + d.course + "." : "."));
-  const t2 = document.createElement("div"); t2.className = "sg-sub"; t2.textContent = "קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.";
+  const t2 = document.createElement("div"); t2.className = "sg-sub"; t2.textContent = "יש לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.";
   ib.appendChild(t1); ib.appendChild(t2);
   loadTerms(d.city, /^מרתון/.test(String(d.course || ""))).then(function(){ TERMS_OK = true; updateSubmitAvailability(); }).catch(function(){});
   $("loadBox").hidden = true; $("payForm").hidden = false; sigResize();
@@ -931,10 +931,10 @@ else if (!/^[0-9a-f]{32}$/.test(CODE)) showBad("הקישור לא תקין. לפ
 else rpcRaw("sign_link_get", { p_code: CODE }).then(function(d){
   if (d && d.ok) { fill(d); return; }
   const r = d && d.reason;
-  if (r === "signed") showDone("הטופס כבר נחתם. תודה!");
-  else if (r === "expired") showBad("תוקף הקישור עבר. אפשר לבקש קישור חדש: " + PHONE);
+  if (r === "signed") showDone("הטופס כבר נחתם. תודה.");
+  else if (r === "expired") showBad("תוקף הקישור פג. לקבלת קישור חדש: " + PHONE);
   else showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: " + PHONE);
-}).catch(function(){ showBad("לא הצלחנו לטעון את הטופס. נסו שוב מאוחר יותר, ואם זה חוזר – התקשרו: " + PHONE); });
+}).catch(function(){ showBad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון " + PHONE); });
 
 $("payForm").addEventListener("submit", function(e){
   e.preventDefault();
@@ -965,7 +965,7 @@ $("payForm").addEventListener("submit", function(e){
         location.href = new URL("thank-you.html?signed=1" + (rs && rs.registered === false ? "&unpaid=1" : ""), location.href).href; })   /* נועה 5.11 (163) */
       .catch(function(err){
         const m = String(err && err.message || "");
-        topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: " + PHONE : /signature/.test(m) ? "יש לחתום כדי להמשיך." : /invalid (phone|email|name|field)/.test(m) ? "יש לבדוק את הפרטים המסומנים." : "לא הצלחנו לשמור. נסו שוב, ואם זה חוזר – התקשרו: " + PHONE;
+        topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: " + PHONE : /signature/.test(m) ? "יש לחתום כדי להמשיך." : /invalid (phone|email|name|field)/.test(m) ? "יש לבדוק את הפרטים המסומנים." : "לא הצלחנו לשמור. נסו שוב, ואם זה חוזר – התקשרו: " + PHONE;
         topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = "אישור ושליחה";
       });
   });

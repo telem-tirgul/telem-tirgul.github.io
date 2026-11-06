@@ -524,7 +524,7 @@
   <div class="subtitle"><span data-t="t003">טופס הרשמה לתרגולים השוטפים</span><span id="subtitleLocation" hidden></span><span class="sub-loc" id="subLoc" hidden></span></div>
 
   <!-- תלם 5.19.46: ההסבר על התשלום והאבטחה עבר למטה, ל"אופן התשלום" (כמו בטופס המרתון) -->
-  <div class="reg-info" id="regInfo"><span data-t="ri1">בוחרים מסלול, ממלאים את הפרטים וחותמים על טופס ההרשמה – ובסיום עוברים לתשלום מאובטח.</span></div><!-- נועה 3.11: כמו התיבה של המרתון -->
+  <div class="reg-info" id="regInfo"><span data-t="ri1">יש לבחור מסלול, למלא את הפרטים ולחתום על טופס ההרשמה. בסיום תועברו לעמוד תשלום מאובטח.</span></div><!-- נועה 3.11: כמו התיבה של המרתון -->
 
   <div class="top-error form-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
 
@@ -537,7 +537,7 @@
       <div class="field" id="field-subject">
         <label for="f-subject"><span data-t="t025">מסלול</span> <span class="req">*</span></label>
         <select id="f-subject" name="subject" required>
-          <option value="" disabled selected data-t="t026">בחרו מסלול</option>
+          <option value="" disabled selected data-t="t026">בחירת מסלול</option>
           <option value="single" data-t="t027">מקצוע אחד - מתמטיקה או אנגלית, פעמיים בשבוע</option>
           <option value="unlimited-single" data-t="t028">מקצוע אחד - מתמטיקה או אנגלית, ללא הגבלה בכמות המפגשים</option>
           <option value="double" data-t="t029">שני מקצועות - מתמטיקה ואנגלית</option>
@@ -548,7 +548,7 @@
       <div class="field" id="field-subject-choice" style="display:none;">
         <label for="f-subject-choice"><span data-t="t031">מקצוע</span> <span class="req">*</span></label>
         <select id="f-subject-choice" name="subjectChoice">
-          <option value="" disabled selected data-t="t032">בחרו מקצוע</option>
+          <option value="" disabled selected data-t="t032">בחירת מקצוע</option>
           <option value="מתמטיקה">מתמטיקה</option>
           <option value="אנגלית">אנגלית</option>
         </select>
@@ -582,7 +582,7 @@
         <div class="field" id="field-student-phone">
           <label for="f-student-phone"><span data-t="t009">נייד תלמיד/ה</span> <span class="req">*</span></label>
           <input type="tel" id="f-student-phone" name="studentPhone" inputmode="numeric" maxlength="10" placeholder="05XXXXXXXX" autocomplete="tel" required>
-          <div class="error-msg" data-t="t010">מספר טלפון לא תקין (10 ספרות)</div>
+          <div class="error-msg" data-t="t010">מספר הטלפון אינו תקין (10 ספרות)</div>
         </div>
     </fieldset>
 
@@ -593,7 +593,7 @@
       <div class="field" id="field-city">
         <label for="f-city"><span data-t="t012">עיר</span> <span class="req">*</span></label>
         <select id="f-city" name="city" required>
-          <option value="" disabled selected data-t="t013">בחרו עיר</option>
+          <option value="" disabled selected data-t="t013">בחירת עיר</option>
           <option value="הוד השרון">הוד השרון</option>
           <option value="כפר סבא">כפר סבא</option>
           <option value="ראש העין">ראש העין</option>
@@ -616,7 +616,7 @@
         <div class="field" id="field-grade">
           <label for="f-grade"><span data-t="t018">שכבת לימוד</span> <span class="req">*</span></label>
           <select id="f-grade" name="grade" required>
-            <option value="" disabled selected data-t="t019">בחרו שכבה</option>
+            <option value="" disabled selected data-t="t019">בחירת שכבה</option>
             <option value="ה'">ה'</option>
             <option value="ו'">ו'</option>
             <option value="ז'">ז'</option>
@@ -631,7 +631,7 @@
         <div class="field" id="field-class">
           <label for="f-class"><span data-t="t021">מספר כיתה</span> <span class="req">*</span></label>
           <select id="f-class" name="classNum" required>
-            <option value="" disabled selected data-t="t022">בחרו כיתה</option>
+            <option value="" disabled selected data-t="t022">בחירת כיתה</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -703,7 +703,7 @@
       <div class="field" id="field-email">
         <label for="f-email"><span data-t="t053">אימייל</span> <span class="req">*</span></label>
         <input type="email" id="f-email" maxlength="100" name="email" autocomplete="email" required>
-        <div class="error-msg" data-t="t054">כתובת אימייל לא תקינה</div>
+        <div class="error-msg" data-t="t054">כתובת האימייל אינה תקינה</div>
       </div>
       </div>
     </fieldset>
@@ -723,14 +723,14 @@
     </div>
 
     <div class="pay-method" id="field-payphone">
-      <div class="pm-title" data-t="t057">איך תרצו לשלם?</div>
+      <div class="pm-title" data-t="t057">באיזה אופן תרצו לשלם?</div>
       <div class="pm-opts" id="pmOpts">
-        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b data-t="t058">💳 תשלום באשראי עכשיו</b><small data-t="t059">אחרי השליחה עוברים לעמוד תשלום מאובטח של חברת הסליקה</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b data-t="t060">📞 תשלום טלפוני</b><small data-t="t061">שולחים את טופס ההרשמה, וניצור איתכם קשר לתשלום בכרטיס אשראי</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="r.pm_paid">✅ כבר שילמתי בטלפון</b><small data-t="r.pm_paid_sub">נוודא שהתשלום התקבל ונאשר את ההרשמה</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b data-t="t058">💳 תשלום באשראי עכשיו</b><small data-t="t059">לאחר השליחה תועברו לעמוד תשלום מאובטח של חברת הסליקה.</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b data-t="t060">📞 תשלום טלפוני</b><small data-t="t061">לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="r.pm_paid">✅ כבר שילמתי בטלפון</b><small data-t="r.pm_paid_sub">לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה.</small></span></label>
       </div>
-      <div class="lock-line pm-lock" data-t="t062">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
-      <div class="pm-only" id="payPhoneOnly" hidden data-t="t063"><b>📞 התשלום טלפוני</b> - אחרי שליחת ההרשמה ניצור איתכם קשר לתשלום בכרטיס אשראי.</div>
+      <div class="lock-line pm-lock" data-t="t062">🔒 פרטי כרטיס האשראי אינם נשמרים ואינם מועברים דרך אתר זה. הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
+      <div class="pm-only" id="payPhoneOnly" hidden data-t="t063"><b>📞 תשלום טלפוני</b> – לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</div>
     </div>
     <!-- 5.19.62: כמו במרתון - קודם הסכום ואופן התשלום, אחר כך התנאים ושתי תיבות האישור יחד -->
     <div class="terms-box" id="termsBox">
@@ -769,7 +769,7 @@
 
     <div class="sig-wrap" id="field-signature">
       <span class="sig-lbl"><span data-t="t078">חתימת ההורה</span> <span class="req">*</span></span>
-      <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph" data-t="t079">חתמו כאן באצבע או בעכבר</div></div>
+      <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph" data-t="t079">נא לחתום כאן באמצעות האצבע או העכבר</div></div>
       <div class="sig-tools"><span id="sigHint" data-t="t080">החתימה נשמרת יחד עם טופס ההרשמה.</span><button type="button" id="sigClear" data-t="t081">ניקוי</button></div>
       <div class="error-msg" id="sigError"></div>
     </div>
@@ -989,8 +989,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // נועה 3.11: קישור "נרשמו בטלפון" (register.html?city=…&phone=1) – ממלאים את כל הפרטים וחותמים; התשלום מטופל מולנו בטלפון (בלי אשראי בטופס)
   var PHONE_REG = PHONE_REG_;
   // נועה 3.11: בלי שום דבר על תשלום – רק הפרטים, התנאים והחתימה
-  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = RH("r.paid_note", "<b>✓ התשלום בוצע בטלפון</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום.", "במקום אופן התשלום – שילמו בטלפון"); } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.id = "amtFirstLbl"; a1.innerHTML = RH("r.first_paid", "תשלום ראשון – שולם בטלפון", "הסכום הראשון – שילמו בטלפון"); }
-    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_paid", "זה טופס ההרשמה – תרגול שוטף תשפ\"ז.", "פתיחה – שילמו בטלפון") + "</div><div class=\"sg-sub\">" + RH("r.intro_paid_sub", "ממלאים את הפרטים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – שילמו בטלפון (שורה שנייה)") + "</div>";
+  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = RH("r.paid_note", "<b>✓ התשלום בוצע</b> ואין צורך לשלם שוב. נותר רק לאשר את התנאים ולחתום.", "במקום אופן התשלום – שילמו בטלפון"); } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.id = "amtFirstLbl"; a1.innerHTML = RH("r.first_paid", "תשלום ראשון – שולם טלפונית", "הסכום הראשון – שילמו בטלפון"); }
+    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_paid", "להלן טופס ההרשמה לתרגול השוטף תשפ\"ז.", "פתיחה – שילמו בטלפון") + "</div><div class=\"sg-sub\">" + RH("r.intro_paid_sub", "יש למלא את הפרטים, לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "פתיחה – שילמו בטלפון (שורה שנייה)") + "</div>";
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
     var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.innerHTML = RH("r.sig_hint_paid", "החתימה נשמרת יחד עם הטופס.", "הסבר מתחת לחתימה – שילמו בטלפון"); }
     /* נועה 4.11: הכותרת וכותרת המשנה – בדיוק כמו בטופס ההרשמה */
@@ -1362,7 +1362,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     placeholder.value = "";
     placeholder.disabled = true;
     placeholder.selected = true;
-    placeholder.textContent = city ? "בחרו בית ספר" : "בחרו עיר תחילה";
+    placeholder.textContent = city ? "בחירת בית ספר" : "בחרו עיר תחילה";
     schoolEl.appendChild(placeholder);
 
     list.concat(["אחר"]).forEach(function(name){
@@ -1515,8 +1515,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function firstMonthText(city){
     var r = lateJoinRule(city);
     // 5.19.58: השרת מחשב רק apply="first" (icredit-18) - חוק "last" לא מוצג
-    if (!r || r.apply !== "first") return "<li>" + RH("r.first_month", "שכר הלימוד עבור חודש ההרשמה - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו).", "כרטיס המסלול – חודש ההרשמה") + "</li>";
-    return "<li>" + RH("r.first_month_late", "שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-{יום אחרון} לחודש - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום איתנו). הרשמה מה-{מיום} לחודש ואילך - {אחוז}% מהתשלום החודשי.", "כרטיס המסלול – חודש ההרשמה (כשיש הנחה להצטרפות מאוחרת)", { "יום אחרון": r.from_day - 1, "מיום": r.from_day, "אחוז": r.percent }) + "</li>";
+    if (!r || r.apply !== "first") return "<li>" + RH("r.first_month", "שכר הלימוד עבור חודש ההרשמה - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו).", "כרטיס המסלול – חודש ההרשמה") + "</li>";
+    return "<li>" + RH("r.first_month_late", "שכר הלימוד עבור חודש ההרשמה - הרשמה עד ה-{יום אחרון} לחודש - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו). הרשמה מה-{מיום} לחודש ואילך - {אחוז}% מהתשלום החודשי.", "כרטיס המסלול – חודש ההרשמה (כשיש הנחה להצטרפות מאוחרת)", { "יום אחרון": r.from_day - 1, "מיום": r.from_day, "אחוז": r.percent }) + "</li>";
   }
   function firstOfNextMonth(dateStr){
     var d = new Date(dateStr + "T00:00:00");
@@ -1672,14 +1672,14 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     }
     trackInfoNote.innerHTML =
       "<div class=\"track-info-label\">בעת ההרשמה יגבו תשלומים חד-פעמיים:</div>" +
-      "<ul class=\"track-info-list\">" + oneTimeItems.join("") + ((getRecurInfo() || {}).juneFree ? "<li>הקיזוז גדול מהתשלום החודשי - לכן אין תשלום על חודש יוני.</li>" : "") + "</ul>";
+      "<ul class=\"track-info-list\">" + oneTimeItems.join("") + ((getRecurInfo() || {}).juneFree ? "<li>הקיזוז גבוה מהתשלום החודשי, ולכן לא ייגבה תשלום עבור חודש יוני.</li>" : "") + "</ul>";
     trackInfoBox.style.display = "block";
     // את-37 (נועה 23.10): כרטיס המסלול כמו באתר (TELEM_TK ב-site-look.js); התיבה הישנה מוסתרת
     if (window.TELEM_TK) {
       var fees = [{ amount: cityTable.registrationFee, label: "דמי שיבוץ והרשמה", offset: !!jo.registration }];
       if (cityTable.materialsFee) fees.push({ amount: cityTable.materialsFee, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: !!jo.materials });
       var extra = []; if (recurInfo) { var fm = String(firstMonthText(city) || "").replace(/<\/?li>/g, ""); if (fm) extra.push(fm); }
-      if ((getRecurInfo() || {}).juneFree) extra.push("הקיזוז גדול מהתשלום החודשי - לכן אין תשלום על חודש יוני.");
+      if ((getRecurInfo() || {}).juneFree) extra.push("הקיזוז גבוה מהתשלום החודשי, ולכן לא ייגבה תשלום עבור חודש יוני.");
       var tc = document.getElementById("trackCard");
       tc.innerHTML = TELEM_TK({ key: trackKey, color: info.color, title: info.title, body: info.body, early: prices.early, regular: prices.regular,
         earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra });
@@ -1696,7 +1696,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     keys.forEach(function(k){
       var info = CONFIG.trackInfo[k]; if (!info) return; var pr = tbl && tbl[k];
       var fees = tbl ? [{ amount: tbl.registrationFee, label: "דמי שיבוץ והרשמה", offset: !!jo.registration }].concat(tbl.materialsFee ? [{ amount: tbl.materialsFee, label: "חומרי תרגול ועזרי לימוד דיגיטליים", offset: !!jo.materials }] : []) : [];
-      var extra = []; if (k === cur && tbl) { var ri = getRecurInfo(); if (ri) { var fm = String(firstMonthText(city) || "").replace(/<\/?li>/g, ""); if (fm) extra.push(fm); } if ((ri || {}).juneFree) extra.push("הקיזוז גדול מהתשלום החודשי - לכן אין תשלום על חודש יוני."); }
+      var extra = []; if (k === cur && tbl) { var ri = getRecurInfo(); if (ri) { var fm = String(firstMonthText(city) || "").replace(/<\/?li>/g, ""); if (fm) extra.push(fm); } if ((ri || {}).juneFree) extra.push("הקיזוז גבוה מהתשלום החודשי, ולכן לא ייגבה תשלום עבור חודש יוני."); }
       var w = document.createElement("div");
       w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true });
       var c = w.firstChild, h = c.querySelector(".tk-head") || c;
@@ -1808,7 +1808,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (!pick(cityEl, q.get("city"))) return;
     // העיר נקבעת לפי הקישור ואי אפשר לשנות אותה
     cityEl.disabled = true; cityEl.classList.add("locked");
-    var lockNote = document.createElement("div"); lockNote.className = "lock-note"; lockNote.innerHTML = RH("r.city_lock", "העיר נקבעה לפי הקישור שקיבלתם", "הסבר מתחת לעיר");
+    var lockNote = document.createElement("div"); lockNote.className = "lock-note"; lockNote.innerHTML = RH("r.city_lock", "העיר נקבעה בהתאם לקישור שקיבלתם", "הסבר מתחת לעיר");
     cityEl.parentNode.appendChild(lockNote);
     var sl = document.getElementById("subtitleLocation"); if (sl && !sl.textContent) { sl.textContent = cityEl.value; subLocSet(cityEl.value); }
     // תלם 5.19.45: כשהמסלול נקבע בקישור (שורת מסלול במערכת) - לא מציגים את בחירת המסלול; כרטיס המסלול נשאר
@@ -1833,9 +1833,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
     [cityEl, schoolEl, schoolOtherEl, subjectEl, subjectChoiceEl].forEach(function(el){ if (el) { el.disabled = true; el.classList.add("sg-lock"); } }); document.documentElement.classList.add("sg-prefill");
     if (d.registered === false) {   /* נועה 5.11 (166): הקורס עוד לא "רשום" – לא "התשלום בוצע" */
-      var pu = document.getElementById("payPhoneOnly"); if (pu) { pu.classList.add("unpaid"); pu.innerHTML = RH("r.card_unpaid", "<b>📞 התשלום יוסדר בטלפון</b> – ניצור איתכם קשר. עכשיו רק לאשר ולחתום.", "הקישור מהכרטיס – עוד לא שולם"); }
-      var au = document.getElementById("amtFirstLbl"); if (au) au.innerHTML = RH("r.first_unpaid", "תשלום ראשון – ייגבה בטלפון", "הסכום הראשון – הקישור מהכרטיס, עוד לא שולם"); }
-    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_card", "שלום {שם ההורה}, זה טופס ההרשמה של <b>{שם התלמיד/ה}</b> – {קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": d.course || "" }) + "</div><div class=\"sg-sub\">" + RH("r.intro_card_sub", "הפרטים כבר ממולאים. בודקים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
+      var pu = document.getElementById("payPhoneOnly"); if (pu) { pu.classList.add("unpaid"); pu.innerHTML = RH("r.card_unpaid", "<b>📞 התשלום יוסדר טלפונית</b> ונציגנו ייצרו עמכם קשר. בשלב זה נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – עוד לא שולם"); }
+      var au = document.getElementById("amtFirstLbl"); if (au) au.innerHTML = RH("r.first_unpaid", "תשלום ראשון – ייגבה טלפונית", "הסכום הראשון – הקישור מהכרטיס, עוד לא שולם"); }
+    var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_card", "שלום {שם ההורה}, להלן טופס ההרשמה של <b>{שם התלמיד/ה}</b> ל{קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": d.course || "" }) + "</div><div class=\"sg-sub\">" + RH("r.intro_card_sub", "הפרטים כבר ממולאים. יש לוודא שהם נכונים, לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
   }
   function escHtml(t){ return String(t).replace(/[&<>"']/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function signBad(msg){ var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + escHtml(msg) + "</div>"; form.hidden = true; }
@@ -1845,8 +1845,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var sgp = { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey };
     fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: sgp, body: JSON.stringify({ p_code: SIGN_CODE }) }).then(function(r){ return r.json(); }).then(function(d){
       if (d && d.ok) { signFill(d); return; }
-      var why = d && d.reason; signBad(why === "signed" ? "הטופס כבר נחתם. תודה!" : why === "expired" ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101");
-    }).catch(function(){ signBad("לא הצלחנו לטעון את הטופס. נסו שוב מאוחר יותר, ואם זה חוזר – התקשרו: 052-9067101"); });
+      var why = d && d.reason; signBad(why === "signed" ? "הטופס כבר נחתם. תודה." : why === "expired" ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101");
+    }).catch(function(){ signBad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."); });
   }
   form.addEventListener("submit", function(e){
     e.preventDefault();
@@ -1928,7 +1928,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
 
     if (pendingPay) { goToPayment(pendingPay.kind, pendingPay.id, pendingPay.secret); return; }
     submitBtn.disabled = true;
-    submitBtn.textContent = isPhonePay() ? "שולח…" : "מעביר לתשלום…";
+    submitBtn.textContent = isPhonePay() ? "שולח…" : "מעבר לתשלום…";
 
     topError.textContent = "נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.";
 
@@ -1937,7 +1937,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // שנגבה תמיד תואם למה שנרשם.
     const signature = signatureImage();
     if (!signature) { document.getElementById("sigError").textContent = "יש לחתום כדי להמשיך."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); return; }
-    submitBtn.textContent = "שולחים את ההרשמה…";
+    submitBtn.textContent = "ההרשמה נשלחת…";
     // תלם 5.19.42: הטופס החתום נשמר בדפדפן (בלשונית הזו בלבד) - בדף התודה כפתור "הורדת הטופס החתום"
     function saveRegPdf(pdf, isPreview){
       try { sessionStorage.removeItem("reg_pdf"); sessionStorage.removeItem("reg_pdf_name"); } catch (e) {}
@@ -1975,7 +1975,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         saveRegPdf(signedPdf, false);
         try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", city: city, school: school, name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (track !== "double" && subjectChoice) ? subjectChoice : "מתמטיקה או אנגלית") })); } catch (err) {}
         location.href = new URL("thank-you.html?signed=1" + (rs && rs.registered === false ? "&unpaid=1" : ""), location.href).href;   /* נועה 5.11 (163): "אושרה" רק כשהקורס "רשום" */
-      }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: 052-9067101" : "לא הצלחנו לשמור את הטופס. נסו שוב בעוד רגע."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
+      }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "לא הצלחנו לשמור את הטופס. נסו שוב בעוד רגע."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
       return;
     }
     submitPayload("submit_registration_v2", "registration", payload).then(function(res){
@@ -2073,19 +2073,19 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
 
   function showSubmitError(err){
-    topError.textContent = "לא הצלחנו לשמור את ההרשמה. אפשר לנסות שוב בעוד רגע, ואם זה חוזר - ליצור איתנו קשר.";
+    topError.textContent = "לא ניתן היה לשמור את ההרשמה. נא לנסות שוב בעוד מספר רגעים; אם התקלה חוזרת, נא לפנות אלינו.";
     // 5.19.53: הודעות מהבדיקה בשרת (form-submit)
     var m = String((err && err.message) || "");
-    if (/bot_check/.test(m)) topError.textContent = "לא הצלחנו לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה. אם זה חוזר – אפשר להתקשר אלינו: 052-9067101";
-    else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
-    else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
+    if (/bot_check/.test(m)) topError.textContent = "לא ניתן היה לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה; אם התקלה חוזרת, ניתן לפנות אלינו בטלפון 052-9067101.";
+    else if (/too many attempts/.test(m)) topError.textContent = "נרשמו ניסיונות שליחה רבים מדי. נא לנסות שוב בעוד מספר דקות.";
+    else if (/form too large/.test(m)) topError.textContent = "לא ניתן לשלוח את הטופס, ככל הנראה בשל גודל החתימה. נא למחוק את החתימה, לחתום מחדש ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
     else if (/registration closed|unknown or closed track/.test(m)) { var schEl = document.getElementById("f-school"), sch = schEl && schEl.value ? schEl.value : ((document.getElementById("f-city") || {}).value || "");
       topError.textContent = "ההרשמה לתרגול השוטף" + (sch ? " ב" + sch : "") + " סגורה כרגע.\nלפרטים ניתן להתקשר אלינו: 052-9067101"; topError.style.whiteSpace = "pre-line"; }   // אבטחה (2.11): השרת חוסם הרשמה סגורה
     else if (/needs review/.test(m)) {   // אבטחה (כל-21, 3.11): אותו שם בלי טלפון מוכר וכבר רשום – לא שומרים, לא מגלים; נחזור אליהם
       topError.style.display = "none"; var rn = document.getElementById("reviewNote");
       if (!rn) { rn = document.createElement("div"); rn.id = "reviewNote"; rn.setAttribute("role", "status"); rn.style.cssText = "background:#EAF6EC;border:1.5px solid #8CC79A;color:#1E5B2C;border-radius:12px;padding:14px 16px;margin:12px 0;font-size:16px;line-height:1.6;white-space:pre-line;font-weight:600;"; topError.parentNode.insertBefore(rn, topError.nextSibling); }
-      rn.textContent = "קיבלנו את הפרטים, נחזור אליכם בקרוב.\nלשאלות: 052-9067101"; rn.scrollIntoView({ behavior: "smooth", block: "center" });
+      rn.textContent = "הפרטים התקבלו ונחזור אליכם בהקדם.\nלשאלות: 052-9067101"; rn.scrollIntoView({ behavior: "smooth", block: "center" });
       submitBtn.disabled = true; submitBtn.textContent = "הפרטים נשלחו"; return; }
     else if (m) console.warn("submit error:", m);   // נועה 25.10: בלי קוד שגיאה בטופס
     topError.style.display = "block";
@@ -2106,7 +2106,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (window.TELEM_GA) TELEM_GA("begin_checkout", { form: "register" });
     try { sessionStorage.setItem("pay_pending", JSON.stringify(pendingPay)); } catch (e) {}
     const s = CONFIG.supabase;
-    submitBtn.disabled = true; submitBtn.textContent = "מעביר לתשלום…";
+    submitBtn.disabled = true; submitBtn.textContent = "מעבר לתשלום…";
     return fetch(s.url + "/functions/v1/icredit-pay", {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": s.anonKey },
@@ -2115,10 +2115,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); location.href = u; })
       .catch(function(err){
         console.error("icredit-pay failed:", err);
-        topError.textContent = "ההרשמה נשמרה, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - צרו איתנו קשר.";
+        topError.textContent = "ההרשמה נשמרה, אך לא ניתן היה לפתוח את עמוד התשלום. נא ללחוץ שוב על הכפתור; אם התקלה חוזרת, נא לפנות אלינו.";
         topError.style.display = "block";
         topError.scrollIntoView({ behavior: "smooth", block: "center" });
-        submitBtn.disabled = false; submitBtn.textContent = "לנסות שוב לעבור לתשלום";
+        submitBtn.disabled = false; submitBtn.textContent = "מעבר חוזר לתשלום";
       });
   }
 

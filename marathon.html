@@ -641,7 +641,7 @@
         <div class="field" id="field-grade">
           <label for="f-grade"><span data-t="t015">שכבת לימוד</span> <span class="req">*</span></label>
           <select id="f-grade" name="grade" required>
-            <option value="" disabled selected data-t="t016">בחרו שכבה</option>
+            <option value="" disabled selected data-t="t016">בחירת שכבה</option>
             <option value="ה'">ה'</option>
             <option value="ו'">ו'</option>
             <option value="ז'">ז'</option>
@@ -661,7 +661,7 @@
         <!-- 5.19.92 (נועה): ההקבצה ליד הנייד של התלמיד/ה, באותה שורה -->
         <div class="field" id="field-hakbatsa" hidden>
           <label for="f-hakbatsa"><span data-t="t020">הקבצה</span> <span class="req">*</span></label>
-          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected data-t="t021">בחרו</option></select>
+          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected data-t="t021">בחירה</option></select>
           <div class="error-msg" data-t="t022">שדה חובה</div>
         </div>
       </div>
@@ -700,14 +700,14 @@
         <div class="field" id="field-email">
           <label for="f-email"><span data-t="t033">אימייל</span> <span class="req">*</span></label>
           <input type="email" id="f-email" maxlength="100" name="email" autocomplete="email" required>
-          <div class="error-msg" data-t="t034">כתובת אימייל לא תקינה</div>
+          <div class="error-msg" data-t="t034">כתובת האימייל אינה תקינה</div>
         </div>
       </div>
     </fieldset>
 
     <!-- נועה 28.10: שני חלקים – "רק להשאיר פרטים" (התעניינות) או "להירשם עכשיו" (שאר הטופס + תשלום) -->
     <fieldset id="fsMode">
-      <legend data-t="mk.mode_t">איך תרצו להמשיך?</legend>
+      <legend data-t="mk.mode_t">כיצד תרצו להמשיך?</legend>
       <div class="field" id="field-mode">
         <div class="price-options mode-opts">
           <label class="price-option" id="opt-mode-lead">
@@ -716,14 +716,14 @@
           </label>
           <label class="price-option" id="opt-mode-reg">
             <input type="radio" name="mkmode" value="reg">
-            <div><div class="opt-title" data-t="mk.reg_t">✅ להירשם עכשיו</div><div class="opt-sub" data-t="mk.reg_s">שריון מקום, תשלום וסיום – כ-2 דקות</div></div>
+            <div><div class="opt-title" data-t="mk.reg_t">✅ להירשם עכשיו</div><div class="opt-sub" data-t="mk.reg_s">שריון מקום ותשלום – כשתי דקות</div></div>
           </label>
         </div>
         <div class="error-msg" data-t="mk.mode_err">יש לבחור אחת מהאפשרויות</div>
       </div>
     </fieldset>
     <div class="submit-wrap" id="leadWrap" hidden><button type="button" id="leadBtn" data-t="mk.lead_btn">שליחת הפרטים</button></div>
-    <p class="mode-hint" id="modeHint" data-t="mk.mode_hint">בחרו אחת מהאפשרויות כדי להמשיך</p>
+    <p class="mode-hint" id="modeHint" data-t="mk.mode_hint">יש לבחור אחת מהאפשרויות כדי להמשיך</p>
 
     <div id="regPart" hidden>
     <div class="reg-part-h" data-t="mk.reg_h">השלמת ההרשמה</div>
@@ -758,15 +758,15 @@
     </div>
     <div class="amount-breakdown" id="amountBreakdown"></div>
     <div class="pay-method" id="field-payphone">
-      <div class="pm-title"><span data-t="t041">איך תרצו לשלם?</span> <span class="req">*</span></div>
+      <div class="pm-title"><span data-t="t041">באיזה אופן תרצו לשלם?</span> <span class="req">*</span></div>
       <div class="pm-opts" id="pmOpts">
-        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard"><span><b data-t="t042">💳 תשלום באשראי עכשיו</b><small data-t="t043">אחרי השליחה עוברים לעמוד תשלום מאובטח</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b data-t="t044">📞 תשלום טלפוני</b><small data-t="t045">שולחים את טופס ההרשמה, וניצור איתכם קשר לתשלום</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="m.pm_paid">✅ כבר שילמתי בטלפון</b><small data-t="m.pm_paid_sub">נוודא שהתשלום התקבל ונאשר את ההרשמה</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard"><span><b data-t="t042">💳 תשלום באשראי עכשיו</b><small data-t="t043">לאחר השליחה תועברו לעמוד תשלום מאובטח.</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b data-t="t044">📞 תשלום טלפוני</b><small data-t="t045">לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="m.pm_paid">✅ כבר שילמתי בטלפון</b><small data-t="m.pm_paid_sub">לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה.</small></span></label>
       </div>
-      <div class="lock-line pm-lock" data-t="t046">🔒 פרטי האשראי לא נשמרים ולא עוברים באתר הזה בשום שלב - הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
+      <div class="lock-line pm-lock" data-t="t046">🔒 פרטי כרטיס האשראי אינם נשמרים ואינם מועברים דרך אתר זה. הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
       <div class="error-msg" id="payMethodError" data-t="t047">יש לבחור אופן תשלום</div>
-      <div class="pm-only" id="payPhoneOnly" hidden data-t="t048"><b>📞 תשלום טלפוני</b> - שולחים את טופס ההרשמה, וניצור איתכם קשר לתשלום.</div>
+      <div class="pm-only" id="payPhoneOnly" hidden data-t="t048"><b>📞 תשלום טלפוני</b> – לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</div>
     </div>
     <div class="terms-box" id="termsBox">
       <h4 data-t="t049">תנאים כלליים</h4>
@@ -794,7 +794,7 @@
 
     <div class="sig-wrap" id="field-signature">
       <span class="sig-lbl"><span data-t="t058">חתימת ההורה</span> <span class="req">*</span></span>
-      <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph" data-t="t059">חתמו כאן באצבע או בעכבר</div></div>
+      <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph" data-t="t059">נא לחתום כאן באמצעות האצבע או העכבר</div></div>
       <div class="sig-tools"><span id="sigHint" data-t="t060">החתימה נשמרת יחד עם טופס ההרשמה.</span><button type="button" id="sigClear" data-t="t061">ניקוי</button></div>
       <div class="error-msg" id="sigError"></div>
     </div>
@@ -872,19 +872,19 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       { "מפגשים": "מספר המפגשים במילים (למשל: שני מפגשים)", "שיעורים במפגש": "שיעורים אקדמיים בכל מפגש, 45 דק' = שיעור (למשל: שלושה שיעורים אקדמיים)", "משך מפגש": "משך מפגש (למשל: שעתיים ורבע)", "סך השיעורים": "סך כל השיעורים במרתון (מספר)" }, ["מפגשים"]],
     ["mar.line1_one", "המרתון כולל מפגש אחד של {שיעורים במפגש} ({משך מפגש}).", "תיאור – שורה ראשונה (מפגש אחד)",
       { "שיעורים במפגש": "שיעורים אקדמיים במפגש, 45 דק' = שיעור (למשל: שלושה שיעורים אקדמיים)", "משך מפגש": "משך המפגש (למשל: שעתיים ורבע)" }, []],
-    ["mar.line2", "במפגשים אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור – שורה שנייה (כמה מפגשים)", {}, []],
-    ["mar.line2_one", "במפגש אנו חוזרים ועוברים על החומר, מתרגלים ופותרים שאלות ברמת מבחן.", "תיאור – שורה שנייה (מפגש אחד)", {}, []],
-    ["mar.extra_rh", "ניתן להגיע גם למועדי תרגול נוספים עד מועד המבחן, בתיאום מראש איתנו.", "תיאור – תוספת בראש העין", {}, []],
+    ["mar.line2", "במפגשים נחזור על החומר, נתרגל ונפתור שאלות ברמת מבחן.", "תיאור – שורה שנייה (כמה מפגשים)", {}, []],
+    ["mar.line2_one", "במפגש נחזור על החומר, נתרגל ונפתור שאלות ברמת מבחן.", "תיאור – שורה שנייה (מפגש אחד)", {}, []],
+    ["mar.extra_rh", "ניתן להגיע גם למועדי תרגול נוספים עד מועד המבחן, בתיאום מראש עמנו.", "תיאור – תוספת בראש העין", {}, []],
     // 5.20.36 (נועה 2.11): תוספת לכל עיר – ריק = בלי תוספת
     ["mar.extra_hs", "", "תיאור – תוספת בהוד השרון (ריק = בלי תוספת)", {}, []],
     ["mar.extra_ks", "", "תיאור – תוספת בכפר סבא (ריק = בלי תוספת)", {}, []],
     ["mar.legend1", "המפגשים - ימים ושעות", "כותרת המפגשים (כשיש קבוצה אחת)", {}, []],
-    ["mar.intro1", "ממלאים את פרטי התלמיד/ה וההורה, ובסיום עוברים לעמוד תשלום מאובטח.", "הסבר מתחת למפגשים (כשיש קבוצה אחת)", {}, []],
+    ["mar.intro1", "יש למלא את פרטי התלמיד/ה וההורה. בסיום תועברו לעמוד תשלום מאובטח.", "הסבר מתחת למפגשים (כשיש קבוצה אחת)", {}, []],
     ["mar.full", "הקבוצה מלאה", "קבוצה מלאה", {}, []],
-    ["mar.seats", "נשארו {מקומות} מקומות", "מעט מקומות (5 או פחות)", { "מקומות": "כמה מקומות נשארו בקבוצה" }, ["מקומות"]],
+    ["mar.seats", "נותרו {מקומות} מקומות", "מעט מקומות (5 או פחות)", { "מקומות": "כמה מקומות נשארו בקבוצה" }, ["מקומות"]],
     ["mar.price_one", "מחיר המרתון", "שם הסכום (כשיש מחיר אחד)", {}, []],
-    ["mar.closed", "ההרשמה למרתון הזה סגורה, או שהקישור לא תקין. לפרטים: 052-9067101", "הודעה – מרתון סגור / קישור לא תקין", {}, []],
-    ["mar.oldlink", "הקישור הזה לא מעודכן. לקבלת קישור להרשמה: 052-9067101", "הודעה – קישור ישן", {}, []]
+    ["mar.closed", "ההרשמה למרתון זה סגורה, או שהקישור אינו תקין. לפרטים: 052-9067101", "הודעה – מרתון סגור / קישור לא תקין", {}, []],
+    ["mar.oldlink", "קישור זה אינו מעודכן. לקבלת קישור להרשמה: 052-9067101", "הודעה – קישור ישן", {}, []]
   ];
   var MTD = {}; MT.forEach(function(d){ MTD[d[0]] = d[1]; });
   if (window.TX) window.TX.defs("נבנה מנתוני המרתון", MT);
@@ -950,7 +950,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function lockSchool(school){
     var el = document.getElementById("f-school");
     el.value = school; el.readOnly = true; el.classList.add("locked");
-    if (!el.parentNode.querySelector(".lock-note")) { var note = document.createElement("div"); note.className = "lock-note"; note.textContent = "בית הספר נקבע לפי הקישור שקיבלתם"; el.parentNode.appendChild(note); }
+    if (!el.parentNode.querySelector(".lock-note")) { var note = document.createElement("div"); note.className = "lock-note"; note.textContent = "בית הספר נקבע בהתאם לקישור שקיבלתם"; el.parentNode.appendChild(note); }
   }
   function marNotice(text){
     var n = document.getElementById("marNotice");
@@ -1536,12 +1536,12 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
 
   function showSubmitError(err){
-    topError.textContent = "לא הצלחנו לשמור את ההרשמה. אפשר לנסות שוב בעוד רגע, ואם זה חוזר - ליצור איתנו קשר.";
+    topError.textContent = "לא ניתן היה לשמור את ההרשמה. נא לנסות שוב בעוד מספר רגעים; אם התקלה חוזרת, נא לפנות אלינו.";
     // 5.19.53: הודעות מהבדיקה בשרת (form-submit)
     var m = String((err && err.message) || "");
-    if (/bot_check/.test(m)) topError.textContent = "לא הצלחנו לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה. אם זה חוזר – אפשר להתקשר אלינו: 052-9067101";
-    else if (/too many attempts/.test(m)) topError.textContent = "היו יותר מדי ניסיונות שליחה. נא לנסות שוב בעוד כמה דקות.";
-    else if (/form too large/.test(m)) topError.textContent = "הטופס גדול מדי לשליחה (כנראה החתימה). נא לנקות את החתימה, לחתום שוב ולשלוח.";
+    if (/bot_check/.test(m)) topError.textContent = "לא ניתן היה לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה; אם התקלה חוזרת, ניתן לפנות אלינו בטלפון 052-9067101.";
+    else if (/too many attempts/.test(m)) topError.textContent = "נרשמו ניסיונות שליחה רבים מדי. נא לנסות שוב בעוד מספר דקות.";
+    else if (/form too large/.test(m)) topError.textContent = "לא ניתן לשלוח את הטופס, ככל הנראה בשל גודל החתימה. נא למחוק את החתימה, לחתום מחדש ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
     else if (/hakbatsa/.test(m)) { topError.textContent = "נא לבחור הקבצה מהרשימה ולשלוח שוב."; setInvalid("field-hakbatsa", true); }
     else if (/already registered/.test(m)) {   // נועה 25.10: כבר רשום/ה ושילם/ה – לדף התודה, שם כתוב בפירוש שאין צורך להירשם שוב
@@ -1552,7 +1552,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/needs review/.test(m)) {   // אבטחה (כל-21, 3.11): אותו שם בלי טלפון מוכר וכבר רשום – לא שומרים, לא מגלים; נחזור אליהם
       topError.style.display = "none"; var rn = document.getElementById("reviewNote");
       if (!rn) { rn = document.createElement("div"); rn.id = "reviewNote"; rn.setAttribute("role", "status"); rn.style.cssText = "background:#EAF6EC;border:1.5px solid #8CC79A;color:#1E5B2C;border-radius:12px;padding:14px 16px;margin:12px 0;font-size:16px;line-height:1.6;white-space:pre-line;font-weight:600;"; topError.parentNode.insertBefore(rn, topError.nextSibling); }
-      rn.textContent = "קיבלנו את הפרטים, נחזור אליכם בקרוב.\nלשאלות: 052-9067101"; rn.scrollIntoView({ behavior: "smooth", block: "center" });
+      rn.textContent = "הפרטים התקבלו ונחזור אליכם בהקדם.\nלשאלות: 052-9067101"; rn.scrollIntoView({ behavior: "smooth", block: "center" });
       submitBtn.disabled = true; submitBtn.textContent = "הפרטים נשלחו"; return; }
     else if (m) console.warn("submit error:", m);   // נועה 25.10: בלי קוד שגיאה בטופס
     topError.style.display = "block";
@@ -1582,7 +1582,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (window.TELEM_GA) TELEM_GA("begin_checkout", { form: "marathon" });
     try { sessionStorage.setItem("pay_pending", JSON.stringify(pendingPay)); } catch (e) {}
     const s = CONFIG.supabase;
-    submitBtn.disabled = true; submitBtn.textContent = "מעביר לתשלום…";
+    submitBtn.disabled = true; submitBtn.textContent = "מעבר לתשלום…";
     return fetch(s.url + "/functions/v1/icredit-pay", {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": s.anonKey },
@@ -1591,10 +1591,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       .then(function(b){ var u = safePayUrl(b && b.url); if (!u) throw new Error("bad url"); goTop(u); })
       .catch(function(err){
         console.error("icredit-pay failed:", err);
-        topError.textContent = "ההרשמה נשמרה, אבל לא הצלחנו לפתוח את עמוד התשלום. לחצו שוב על הכפתור כדי לנסות שוב, ואם זה חוזר - צרו איתנו קשר.";
+        topError.textContent = "ההרשמה נשמרה, אך לא ניתן היה לפתוח את עמוד התשלום. נא ללחוץ שוב על הכפתור; אם התקלה חוזרת, נא לפנות אלינו.";
         topError.style.display = "block";
         topError.scrollIntoView({ behavior: "smooth", block: "center" });
-        submitBtn.disabled = false; submitBtn.textContent = "לנסות שוב לעבור לתשלום";
+        submitBtn.disabled = false; submitBtn.textContent = "מעבר חוזר לתשלום";
       });
   }
 
@@ -1653,7 +1653,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "marathon_lead", name: v("f-student-first") + " " + v("f-student-last"), event: mName, meetings: ev.meetings || [] }));
       sessionStorage.setItem("reg_saved_at", String(Date.now()));
       sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })()); } catch (e) {}
-    btn.disabled = true; btn.textContent = "שולחים…";
+    btn.disabled = true; btn.textContent = "נשלח…";
     if (isPreviewNow() && EXPLICIT_PREVIEW) { setTimeout(function(){ goTop(tyUrl("lead=1&preview=1")); }, 500); return; }
     callSupabase("submit_interest", payload).then(function(res){
       if (res && res.already) { try { sessionStorage.setItem("reg_already", JSON.stringify({ name: v("f-student-first") + " " + v("f-student-last"), event: mName })); } catch (e) {}
@@ -1661,7 +1661,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "marathon" });
       goTop(tyUrl("lead=1")); }).catch(function(){
       btn.disabled = false; btn.textContent = "שליחת הפרטים";
-      topError.textContent = "לא הצלחנו לשלוח. נסו שוב בעוד רגע, או התקשרו: 052-9067101"; topError.style.display = "block"; });
+      topError.textContent = "לא ניתן היה לשלוח את הטופס. נא לנסות שוב בעוד מספר רגעים, או לפנות אלינו בטלפון 052-9067101."; topError.style.display = "block"; });
   }
   document.getElementById("leadBtn").addEventListener("click", submitLead);
   mkPaint();
@@ -1678,18 +1678,18 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var pr = MSIGN === "sample" ? Promise.resolve({ ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", parent_first: "דנה", parent_last: "לוי", parent_phone: "0500000001", parent_email: "dana@example.com", course: MARATHON.name || "מרתון", registered: !/[?&]unpaid=1/.test(location.search) })
       : fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: MSIGN }) }).then(function(r){ return r.json(); });
     return pr.then(function(d){
-      if (!d || !d.ok) { var why = d && d.reason; bad(why === "signed" ? "הטופס כבר נחתם. תודה!" : why === "expired" ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. אפשר לבקש קישור חדש: 052-9067101"); return; }
+      if (!d || !d.ok) { var why = d && d.reason; bad(why === "signed" ? "הטופס כבר נחתם. תודה." : why === "expired" ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "הקישור אינו תקין או שאינו בתוקף עוד. לקבלת קישור חדש: 052-9067101"); return; }
       var setv = function(id, v){ var el = document.getElementById(id); if (el && v != null && v !== "") el.value = String(v); };
       setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
       setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
       if (d.grade && !document.getElementById("f-grade").value) setv("f-grade", d.grade);
-      info.innerHTML = "<div>" + H("m.intro_card", "שלום {שם ההורה}, זה טופס ההרשמה של <b>{שם התלמיד/ה}</b> – {קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": MARATHON.name || d.course || "" })
-        + "</div><div class=\"sg-sub\">" + H("m.intro_card_sub", "הפרטים כבר ממולאים – בודקים, קוראים, מסמנים את שני האישורים, חותמים ושולחים. לוקח כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
+      info.innerHTML = "<div>" + H("m.intro_card", "שלום {שם ההורה}, להלן טופס ההרשמה של <b>{שם התלמיד/ה}</b> ל{קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": MARATHON.name || d.course || "" })
+        + "</div><div class=\"sg-sub\">" + H("m.intro_card_sub", "הפרטים כבר ממולאים. יש לוודא שהם נכונים, לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
       var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.classList.toggle("unpaid", d.registered === false);
-        pp.innerHTML = d.registered === false ? H("m.card_unpaid", "<b>📞 התשלום יוסדר בטלפון</b> – ניצור איתכם קשר. עכשיו רק לאשר ולחתום.", "הקישור מהכרטיס – עוד לא שולם")
-                                              : H("m.card_paid", "<b>✓ התשלום בוצע</b> – אין צורך לשלם שוב. נשאר רק לאשר ולחתום.", "הקישור מהכרטיס – שולם"); }
+        pp.innerHTML = d.registered === false ? H("m.card_unpaid", "<b>📞 התשלום יוסדר טלפונית</b> ונציגנו ייצרו עמכם קשר. בשלב זה נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – עוד לא שולם")
+                                              : H("m.card_paid", "<b>✓ התשלום בוצע</b> ואין צורך לשלם שוב. נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – שולם"); }
       submitBtn.textContent = SUBMIT_TXT(); if (typeof updateSubmitAvailability === "function") updateSubmitAvailability();
-    }).catch(function(){ bad("לא הצלחנו לטעון את הטופס. נסו שוב מאוחר יותר, ואם זה חוזר – התקשרו: 052-9067101"); });
+    }).catch(function(){ bad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."); });
   }
   form.addEventListener("submit", function(e){
     e.preventDefault();
@@ -1777,13 +1777,13 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
 
     if (pendingPay) { goToPayment(pendingPay.kind, pendingPay.id, pendingPay.secret); return; }
     submitBtn.disabled = true;
-    submitBtn.textContent = isPhonePay() ? "שולח…" : "מעביר לתשלום…";
+    submitBtn.textContent = isPhonePay() ? "שולח…" : "מעבר לתשלום…";
 
     topError.textContent = "נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.";
 
     const signature = signatureImage();
     if (!signature) { document.getElementById("sigError").textContent = "יש לחתום כדי להמשיך."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); return; }
-    submitBtn.textContent = "שולחים את ההרשמה…";
+    submitBtn.textContent = "ההרשמה נשלחת…";
     // תלם 5.19.40: הטופס החתום נשמר בדפדפן (בלשונית הזו בלבד) - בדף התודה יש כפתור "הורדת פרטי ההרשמה"
     // תלם 5.19.40: סיכום לדף התודה - שם, המרתון, המפגשים, סכום
     function regSummary(amount){ var ev = pdfEvent() || {};
@@ -1800,7 +1800,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         saveRegPdf(signedPdf, false);
         try { sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(null))); } catch (err) {}
         goTop(tyUrl("signed=1" + (rs && rs.registered === false ? "&unpaid=1" : "")));
-      }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור עבר. אפשר לבקש קישור חדש: 052-9067101" : "לא הצלחנו לשמור את הטופס. נסו שוב בעוד רגע, ואם זה חוזר – התקשרו: 052-9067101"; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
+      }).catch(function(err){ var m = String(err && err.message || ""); topError.textContent = /already signed/.test(m) ? "הטופס כבר נחתם." : /expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "לא ניתן היה לשמור את הטופס. נא לנסות שוב בעוד מספר רגעים; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."; topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); });
       return;
     }
     if (isPreviewNow()) {
@@ -1850,7 +1850,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       console.error("submit_marathon failed:", err);
       if (/group full/.test(err && err.message)) {
         showSubmitError();
-        topError.textContent = "הקבוצה שבחרתם התמלאה ברגע זה. בחרו קבוצה אחרת ונסו שוב.";
+        topError.textContent = "הקבוצה שבחרתם התמלאה זה עתה. נא לבחור קבוצה אחרת ולשלוח שוב.";
         loadMarathon();
         return;
       }
