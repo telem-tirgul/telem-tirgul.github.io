@@ -214,7 +214,11 @@
   .price-option input{ margin-top:3px; }
   .price-option.selected{ border-color:var(--accent); background:rgba(90,18,22,.04); }
   /* נועה 28.10: "רק להשאיר פרטים" / "להירשם עכשיו" */
-  #fsMode .mode-opts{ display:grid !important; grid-template-columns:1fr 1fr; gap:10px; }
+  #fsMode .mode-opts{ display:grid !important; grid-template-columns:repeat(3,1fr); gap:10px; }
+  /* נועה 6.11: "כבר שילמתי" – אפשרות למעלה; בתשלום – בלי בחירת אופן התשלום */
+  #pmOpts label:has(#f-paypaid){ display:none !important; }
+  html.mk-paid #field-payphone .pm-title, html.mk-paid #pmOpts, html.mk-paid .pm-lock, html.mk-paid #payMethodError{ display:none !important; }
+  html.mk-paid #payPhoneOnly{ display:block !important; background:#EEF6EF; border:1px solid #BFD9C4; color:#2F6B3D; border-radius:12px; padding:10px 14px; font-size:14.5px; }
   #fsMode .price-option{ margin:0 !important; padding:14px 16px; }
   #fsMode .opt-title{ font-size:17px; } #fsMode .opt-sub{ font-size:14px; color:var(--ink-soft); margin-top:4px; line-height:1.4; }
   @media (max-width:600px){ #fsMode .mode-opts{ grid-template-columns:1fr; } }
@@ -712,11 +716,15 @@
         <div class="price-options mode-opts">
           <label class="price-option" id="opt-mode-lead">
             <input type="radio" name="mkmode" value="lead">
-            <div><div class="opt-title" data-t="mk.lead_t">📞 רק להשאיר פרטים</div><div class="opt-sub" data-t="mk.lead_s">נחזור אליכם עם הסבר ופרטים</div></div>
+            <div><div class="opt-title" data-t="mk.lead_t">📝 רק להשאיר פרטים</div><div class="opt-sub" data-t="mk.lead_s">נחזור אליכם עם הסבר ופרטים</div></div>
+          </label>
+          <label class="price-option" id="opt-mode-paid">
+            <input type="radio" name="mkmode" value="paid">
+            <div><div class="opt-title" data-t="mk.paid_t">✅ כבר שילמתי בטלפון</div><div class="opt-sub" data-t="mk.paid_s">לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה</div></div>
           </label>
           <label class="price-option" id="opt-mode-reg">
             <input type="radio" name="mkmode" value="reg">
-            <div><div class="opt-title" data-t="mk.reg_t">✅ להירשם עכשיו</div><div class="opt-sub" data-t="mk.reg_s">שריון מקום ותשלום – כשתי דקות</div></div>
+            <div><div class="opt-title" data-t="mk.reg_t">💳 להירשם ולשלם עכשיו</div><div class="opt-sub" data-t="mk.reg_s">שריון מקום ותשלום – כשתי דקות</div></div>
           </label>
         </div>
         <div class="error-msg" data-t="mk.mode_err">יש לבחור אחת מהאפשרויות</div>
@@ -1599,7 +1607,12 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
 
   // ---------- נועה 28.10: שני חלקים – התעניינות / הרשמה ----------
-  function MK_MODE(){ var r = document.querySelector("input[name=mkmode]:checked"); return r ? r.value : ""; }
+  function MK_MODE(){ var r = document.querySelector("input[name=mkmode]:checked"); return r ? (r.value === "paid" ? "reg" : r.value) : ""; }
+  function mkPaidSet(on){   /* נועה 6.11: "כבר שילמתי בטלפון" נבחר למעלה */
+    document.documentElement.classList.toggle("mk-paid", on);
+    if (on) { payPaidEl.checked = true; var pp = document.getElementById("payPhoneOnly"); if (pp && !pp.dataset.mk) { pp.dataset.mk = pp.innerHTML; } if (pp) { pp.hidden = false; pp.innerHTML = (window.TX && TX.h) ? TX.h("mk.paid_note", "<b>✅ כבר שילמתי בטלפון</b> – לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה.", "הודעה בתשלום – \"כבר שילמתי\" נבחר למעלה", "טופס המרתון") : "<b>✅ כבר שילמתי בטלפון</b> – לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה."; } }
+    else { if (payPaidEl.checked) { payPaidEl.checked = false; if (NO_TERMINAL) payPhoneEl.checked = true; } var pp2 = document.getElementById("payPhoneOnly"); if (pp2 && pp2.dataset.mk != null) { pp2.innerHTML = pp2.dataset.mk; pp2.hidden = true; } }
+    paintPayPhone(); }
   function mkPaint(){
     var m = MK_MODE();
     document.querySelectorAll("#fsMode .price-option").forEach(function(l){ l.classList.toggle("selected", l.querySelector("input").checked); });
@@ -1611,11 +1624,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (window.__mBarUpd) window.__mBarUpd();
   }
   function mkNeedMode(){ var f = document.getElementById("field-mode"); f.classList.add("invalid"); f.scrollIntoView({ behavior: "smooth", block: "center" }); if (window.TELEM_BAD) TELEM_BAD(document.getElementById("leadBtn")); }
-  document.querySelectorAll("input[name=mkmode]").forEach(function(r){ r.addEventListener("change", function(){ mkPaint();
-    if (r.value === "reg" && r.checked) setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }); });
+  document.querySelectorAll("input[name=mkmode]").forEach(function(r){ r.addEventListener("change", function(){ if (r.checked) mkPaidSet(r.value === "paid"); mkPaint();
+    if ((r.value === "reg" || r.value === "paid") && r.checked) setTimeout(function(){ var h = document.querySelector("#regPart .reg-part-h"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }); });
   // נועה 3.11: קישור "נרשמו בטלפון" (marathon.html?m=…&phone=1) – ישר להרשמה (בלי "רק להשאיר פרטים" ובלי בחירת אופן תשלום); ממלאים, חותמים ושולחים. התשלום מטופל מולנו בטלפון
-  if (/[?&]phone=1(&|$)/.test(location.search)) { var rr = document.querySelector('input[name=mkmode][value=reg]'); if (rr) { rr.checked = true; document.getElementById("fsMode").hidden = true; mkPaint(); }
-    if (payPaidEl) { payPaidEl.checked = true; paintPayPhone(); } }   /* נועה 5.11: קישור "שילמו בטלפון" = הטופס הרגיל, ישר להרשמה, עם "כבר שילמתי" מסומן (בלי טופס אישור תנאים נפרד) */
+  if (/[?&]phone=1(&|$)/.test(location.search)) { var rr = document.querySelector('input[name=mkmode][value=paid]'); if (rr) { rr.checked = true; mkPaidSet(true); mkPaint(); } }   /* נועה 6.11: הקישור הישן – "כבר שילמתי" מסומן למעלה */   /* נועה 5.11: קישור "שילמו בטלפון" = הטופס הרגיל, ישר להרשמה, עם "כבר שילמתי" מסומן (בלי טופס אישור תנאים נפרד) */
   // הפרטים שמולאו – נשמרים בדפדפן (לשונית זו), כדי ש"להשלמת ההרשמה" בדף התודה יחזיר טופס ממולא
   var MK_FIELDS = ["f-student-first", "f-student-last", "f-grade", "f-student-phone", "f-hakbatsa", "f-school", "f-parent-first", "f-parent-last", "f-phone", "f-email"];
   function mkSaveDraft(){ try { var d = {}; MK_FIELDS.forEach(function(id){ var e = document.getElementById(id); if (e) d[id] = e.value; });
