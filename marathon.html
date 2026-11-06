@@ -1662,7 +1662,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       student: { first_name: v("f-student-first"), last_name: v("f-student-last"), phone: v("f-student-phone"), grade: v("f-grade"), math_level: needHak ? hakEl.value : null, english_level: null, school: v("f-school") },
       parent: { first_name: v("f-parent-first"), last_name: v("f-parent-last"), phone: v("f-phone"), email: v("f-email") || null } };
     mkSaveDraft();
-    try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "marathon_lead", name: v("f-student-first") + " " + v("f-student-last"), event: mName, meetings: ev.meetings || [] }));
+    try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "marathon_lead", city: (MARATHON && MARATHON.city) || "", school: (MARATHON && MARATHON.school) || "", name: v("f-student-first") + " " + v("f-student-last"), event: mName, meetings: ev.meetings || [] }));
       sessionStorage.setItem("reg_saved_at", String(Date.now()));
       sessionStorage.setItem("reg_form_url", (function(){ var x = new URL(location.href); x.searchParams.delete("embed"); return x.href; })()); } catch (e) {}
     btn.disabled = true; btn.textContent = "נשלח…";

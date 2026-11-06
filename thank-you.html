@@ -153,12 +153,11 @@
     ["ty.lead_register", "{שם} רשום/ה לתרגולים השוטפים{ · עיר}", "שורה מתחת לכותרת – תרגולים שוטפים", { "שם": "השם הפרטי של התלמיד/ה", " · עיר": "העיר עם נקודה לפניה (ריק אם אין עיר)" }, ["שם"]],
     ["ty.lead_event", "{שם} רשום/ה ל{מרתון / מסלול}", "שורה מתחת לכותרת – מרתון / מסלול", { "שם": "השם הפרטי של התלמיד/ה", "מרתון / מסלול": "שם המרתון או המסלול" }, ["שם"]],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
-    ["ty.lead_title", "הפרטים התקבלו – נחזור אליכם", "רק פרטים (מרתון) – כותרת", {}, []],
-    ["ty.lead_lead", "הפרטים התקבלו, ונחזור אליכם בהקדם עם הסבר ופרטים על המרתון.", "רק פרטים (מרתון) – שורה מתחת לכותרת", {}, []],
+    ["ty.lead_title", "תודה, פנייתכם התקבלה", "רק פרטים (מרתון) – כותרת", {}, []],
+    ["ty.lead_lead", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם, עם מידע מלא על המרתון ועל אופן ההרשמה.", "רק פרטים (מרתון) – שורה מתחת לכותרת", {}, []],
     ["ty.lead_cta_t", "מעוניינים להירשם כבר עכשיו?", "רק פרטים (מרתון) – כותרת התיבה", {}, []],
     ["ty.lead_cta_s", "נותר להשלים את ההרשמה ואת התשלום", "רק פרטים (מרתון) – טקסט התיבה", {}, []],
     ["ty.lead_cta_btn", "להשלמת ההרשמה ←", "רק פרטים (מרתון) – כפתור", {}, []],
-    ["ty.lead_sum_t", "הפרטים שהשארתם", "רק פרטים (מרתון) – כותרת הפרטים", {}, []],
     ["ty.row_name", "שם התלמיד/ה", "פרטים – שם", {}, []],
     ["ty.row_mar", "מרתון", "פרטים – מרתון", {}, []],
     ["ty.row_track", "מסלול", "פרטים – מסלול", {}, []],
@@ -215,18 +214,18 @@
       document.title = "כבר רשומים - תלם"; return;
     }
     // נועה 28.10: טופס המרתון – "רק להשאיר פרטים". כותרת, וקריאה בולטת להשלמת ההרשמה (חוזרת לטופס ממולא)
-    if ((/[?&]lead=1/.test(location.search) || (x && x.kind === "marathon_lead")) && !TY_EDIT) {
+    if (((/[?&]lead=1/.test(location.search) || (x && x.kind === "marathon_lead")) && !TY_EDIT) || (TY_EDIT && TYV === "lead")) {   // נועה 6.11: גם בעורך הנוסחים (tyv=lead)
       $("title").textContent = tyT("ty.lead_title"); $("title").classList.add("ty-ok"); $("stChip").hidden = true;
       $("lead").textContent = tyT("ty.lead_lead"); $("lead").hidden = false;
       var back = null; try { back = sessionStorage.getItem("reg_form_url"); } catch (e) {}
+      if (TY_EDIT && !back) back = "marathon.html";
       if (back) { var u = new URL(back, location.href); u.searchParams.set("cont", "1");
         var cta = document.createElement("div"); cta.className = "lead-cta";
         var t1 = document.createElement("div"); t1.className = "t"; t1.textContent = tyT("ty.lead_cta_t");
         var t2 = document.createElement("div"); t2.className = "s"; t2.textContent = tyT("ty.lead_cta_s");
         var a = document.createElement("a"); a.href = u.href; a.textContent = tyT("ty.lead_cta_btn");
         cta.appendChild(t1); cta.appendChild(t2); cta.appendChild(a); $("lead").after(cta); }
-      if (x && (x.name || x.event)) { if (x.name) row(tyT("ty.row_name"), x.name); if (x.event) row(tyT("ty.row_mar"), x.event); $("sumT").textContent = tyT("ty.lead_sum_t"); $("sumT").hidden = false; box.hidden = false;
-        if (x.meetings && x.meetings.length) { var ul0 = $("meet"); x.meetings.forEach(function(m){ var li = document.createElement("li"); li.textContent = m; ul0.appendChild(li); }); ul0.hidden = false; $("meetT").textContent = tyT("ty.meet_t"); $("meetT").hidden = false; } }
+      // נועה 6.11: בהשארת פרטים – בלי סיכום הפרטים ובלי מועדי המפגשים
       document.title = "הפרטים התקבלו - תלם"; return;
     }
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
@@ -338,9 +337,9 @@
 <script>
 /* כל-22 (קובץ 160): אחרי הרשמה / מרתון – הזמנה לקבוצת העדכונים של בית הספר, רק כשיש לבית הספר קישור (school_wa_public) */
 (function(){
-  if (/[?&](already|lead)=1/.test(location.search)) return;
+  if (/[?&]already=1/.test(location.search)) return;   // נועה 6.11: גם להשארת פרטים
   var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
-  if (!x || !x.city || !x.school || x.school === "אחר" || (x.kind !== "register" && x.kind !== "marathon")) return;
+  if (!x || !x.city || !x.school || x.school === "אחר" || ["register", "marathon", "marathon_lead"].indexOf(x.kind) < 0) return;
   fetch("https://oulivucqbpmbavbavfvy.supabase.co/rest/v1/rpc/school_wa_public", { method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" }, body: JSON.stringify({ p_city: x.city, p_school: x.school }) })
     .then(function(r){ return r.ok ? r.json() : null; }).then(function(u){
       if (typeof u !== "string" || !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{10,40}$/.test(u)) return;

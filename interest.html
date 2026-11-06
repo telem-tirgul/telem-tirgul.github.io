@@ -409,6 +409,8 @@
   @media (max-width:520px){ .field label{ font-size:13.5px; } input[type=text], input[type=email], input[type=tel], select{ font-size:15px; padding-inline:10px; } }
   .closed-box{ background:var(--paper); border:1.5px solid var(--accent); border-radius:16px; padding:22px 18px; text-align:center; font-size:17px; line-height:1.8; margin:10px 0 18px; }
   .closed-box a{ color:var(--accent); font-weight:800; }
+  .wa-join{ margin:16px 0 4px; padding:16px; border-radius:16px; background:#EAF6EC; border:1.5px solid #8CC79A; text-align:center; } .wa-join .t{ font-weight:800; font-size:17px; color:#1E5B2C; margin-bottom:10px; }
+  .wa-join .wa-btn{ display:inline-block; background:#25D366; color:#fff; font-weight:800; text-decoration:none; border-radius:999px; padding:10px 22px; }
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -565,7 +567,8 @@
     </fieldset>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" tabindex="-1" autocomplete="off"></label></div>
   </form>
-  <div id="doneBox" hidden><div class="done-box" data-t="t033">תודה, הפרטים התקבלו ונחזור אליכם בהקדם.</div></div>
+  <div id="doneBox" hidden><div class="done-box" data-t="t033">תודה, פנייתכם התקבלה. נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם.</div>
+    <div class="wa-join" id="waJoin" hidden><div class="t">💬 <span data-t="i.wa_t">הצטרפו לקבוצת העדכונים השקטה של</span> <span id="waSch"></span> <span data-t="i.wa_t2">בווטסאפ</span></div><a class="wa-btn" id="waBtn" href="#" target="_blank" rel="noopener" data-t="i.wa_btn">להצטרפות לקבוצה</a></div></div>
 
   <footer><span data-t="t034">תלם - המרכז לשיעורי תרגול</span><br>
     <span class="contact"><span data-t="t035">טלפון:</span> <a href="tel:0529067101">052-9067101</a> <span data-t="t036">· אימייל:</span> <a href="mailto:telem.tr@gmail.com">telem.tr@gmail.com</a></span></footer>
@@ -873,7 +876,10 @@ $("intForm").addEventListener("submit", function(e){
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: schVal() },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };
   const btn = $("submitBtn"); btn.__lbl = btn.innerHTML; btn.disabled = true; btn.textContent = "שולח…";
-  const done = () => { if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "interest" }); $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; window.scrollTo(0, 0); };
+  const done = () => { if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "interest" }); $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; { const ib = document.querySelector(".intro"); if (ib) ib.hidden = true; } window.scrollTo(0, 0);
+    // נועה 6.11: גם בהתעניינות – הזמנה לקבוצת העדכונים של בית הספר (כמו בדף התודה), רק כשיש לבית הספר קישור
+    const wc = $("f-city").value, wsch = $("f-school").value;
+    if (wc && wsch && wsch !== "אחר") callSupabase("school_wa_public", { p_city: wc, p_school: wsch }, true).then(u => { if (typeof u !== "string" || !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{10,40}$/.test(u)) return; $("waSch").textContent = wsch; $("waBtn").href = u; $("waJoin").hidden = false; }).catch(() => {}); };
   if (PREVIEW) { setTimeout(done, 400); return; }
   callSupabase("submit_interest", payload).then(done).catch(function(){ $("topError").textContent = "לא ניתן היה לשלוח את הטופס. נא לנסות שוב בעוד מספר רגעים, או לפנות אלינו בטלפון 052-9067101."; $("topError").style.display = "block"; btn.disabled = false; btn.innerHTML = btn.__lbl || "שליחה"; });
 });
