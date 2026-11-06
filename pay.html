@@ -836,23 +836,24 @@ function rpcRaw(fn, body){
     .then(r => r.json().catch(() => null).then(b => { if (!r.ok) throw new Error((b && b.message) || "HTTP " + r.status); return b; }));
 }
 // שדות שהצוות יכול לבקש. ערך שהצוות מילא - מוצג נעול; ריק + חובה - ההורה ממלא.
+// נועה 6.11: בדיוק כמו טופס ההרשמה – אותם שדות, שמות וסדר
 const FIELDS = [
-  ["student_first", "שם פרטי תלמיד/ה", "text"],
-  ["student_last",  "שם משפחה תלמיד/ה", "text"],
-  ["city",          "עיר", ["ראש העין", "כפר סבא", "הוד השרון"]],
-  ["school",        "בית ספר", "text"],
-  ["grade",         "שכבה", ["ה'", "ו'", "ז'", "ח'", "ט'", "י'", "יא'", "יב'"]],
-  ["class_num",     "מספר כיתה", "text"],
   ["track",         "מסלול", ["מקצוע אחד - פעמיים בשבוע", "מקצוע אחד - ללא הגבלה", "שני מקצועות - מתמטיקה ואנגלית", "אחר"]],
   ["subject",       "מקצוע", ["מתמטיקה", "אנגלית", "מתמטיקה ואנגלית"]],
-  ["parent_name",   "שם מלא של ההורה", "text"],
+  ["student_first", "שם פרטי תלמיד/ה", "text"],
+  ["student_last",  "שם משפחה תלמיד/ה", "text"],
+  ["student_phone", "נייד תלמיד/ה", "tel"],
+  ["city",          "עיר", ["ראש העין", "כפר סבא", "הוד השרון"]],
+  ["school",        "בית ספר", "text"],
+  ["grade",         "שכבת לימוד", ["ה'", "ו'", "ז'", "ח'", "ט'", "י'", "יא'", "יב'"]],
+  ["class_num",     "מספר כיתה", "text"],
+  ["parent_name",   "שם ההורה", "text"],
   ["parent_phone",  "טלפון הורה", "tel"],
-  ["parent_email",  "אימייל (לחשבונית)", "email"]
+  ["parent_email",  "אימייל", "email"]
 ];
-// תלם 5.19.46: השדות בכרטיסים קטנים (2-4 שדות), כמו בטופס המרתון
-const FIELD_GROUPS = [["פרטי התלמיד/ה", ["student_first", "student_last"]], ["בית הספר", ["city", "school", "grade", "class_num"]], ["המסלול", ["track", "subject"]], ["פרטי ההורה", ["parent_name", "parent_phone", "parent_email"]]];
+const FIELD_GROUPS = [["המסלול", ["track", "subject"]], ["פרטי התלמיד/ה", ["student_first", "student_last", "student_phone"]], ["בית הספר", ["city", "school", "grade", "class_num"]], ["פרטי ההורה", ["parent_name", "parent_phone", "parent_email"]]];
 const BASE_REQ = ["parent_name", "parent_phone", "student_first"];
-const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first", "student_last", "school", "grade", "class_num"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
+const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first", "student_last", "student_phone", "school", "grade", "class_num"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
 const money = (n) => "₪" + Number(n).toLocaleString("he-IL", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const dateHe = (d) => { if (!d) return ""; const p = String(d).split("-"); return p.length === 3 ? (+p[2]) + "." + (+p[1]) + "." + p[0] : d; };
 var LINK = null;
@@ -976,7 +977,7 @@ $("payForm").addEventListener("submit", function(e){
     const v = (el.value || "").trim(), k = el.dataset.key;
     let bad = el.dataset.req === "1" && !v;
     if (!bad && v && k === "parent_email" && !el.readOnly) bad = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
-    if (!bad && v && k === "parent_phone" && !el.readOnly) bad = !/^0\d{8,9}$/.test(v.replace(/\D/g, ""));
+    if (!bad && v && (k === "parent_phone" || k === "student_phone") && !el.readOnly) bad = !/^0\d{8,9}$/.test(v.replace(/\D/g, ""));
     $("field-" + k).classList.toggle("invalid", bad); if (bad) ok = false;
     if (v && !el.readOnly) values[k] = v;
   });
