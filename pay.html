@@ -1009,5 +1009,7 @@ $("payForm").addEventListener("submit", function(e){
 });
 })();
 </script>
+<script>/* נועה 6.11 (מהירות): "השכמה" של שרת התשלום בטעינת הדף – בלחיצה על "לתשלום" לא מחכים לו */
+setTimeout(function(){ try { fetch("https://oulivucqbpmbavbavfvy.supabase.co/functions/v1/icredit-pay", { method: "OPTIONS" }).catch(function(){}); } catch (e) {} }, 800);</script>
 </body>
 </html>
