@@ -863,11 +863,22 @@ function fill(d){
   $("loadBox").hidden = true;
   if (d.status === "paid") { showDone("התשלום כבר התקבל. תודה!"); return; }
   if (d.status === "cancelled") { showBad("הקישור בוטל. לפרטים: 052-9067101"); return; }
+  if (d.status === "expired") { showBad("תוקף הקישור פג. לקישור חדש ניתן לפנות אלינו: 052-9067101"); return; }   // נועה 6.11: קישור חודש ניסיון – 7 ימים
   if (d.status === "submitted") { showQuick(d, true); return; }   // נועה 6.11: לאחר שליחת הטופס – הפרטים נעולים; נותר רק לשלם
   if (d.quick) { showQuick(d); return; }   // 5.19.58: קישור להרשמה שכבר נחתמה (icredit-18) - בלי שדות, חתימה ותקנון
   $("payForm").hidden = false;
   $("v-desc").textContent = d.description || "תשלום לתלם";
   $("v-amount").textContent = money(d.one_time_amount);
+  if (d.trial) {   // נועה 6.11: חודש ניסיון (icredit-37/38) – היום חודש אחד; אם ממשיכים – חודש + דמי הרשמה (+ חומרים), ואז ב-1 בכל חודש
+    const t = d.trial; $("v-amount").previousElementSibling.textContent = "היום – חודש ניסיון";
+    $("v-desc-sub").textContent = "חודש הניסיון: מ-" + dm(t.start) + " עד " + dateHe(t.end) + ". התשלום מתבצע בעמוד תשלום מאובטח, וחשבונית תישלח אליכם במייל.";
+    if (t.second_amount) {
+      $("recurRow").hidden = false; $("v-recur").textContent = money(t.second_amount); $("v-recur-lbl").innerHTML = "";
+      $("v-recur-lbl").appendChild(document.createTextNode("אם ממשיכים – ב-" + dm(t.second_date)));
+      const sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = trialTxt(t); $("v-recur-lbl").appendChild(sm);
+    }
+    $("consentText").textContent = "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של חודש הניסיון בכרטיס האשראי בעמוד התשלום המאובטח. אם ההרשמה תימשך לאחר חודש הניסיון – אני מאשר/ת חיוב אוטומטי באותו כרטיס בסכומים ובמועדים המפורטים למעלה.";
+  } else
   if (d.monthly_amount) {
     $("recurRow").hidden = false;
     // 5.19.58 (הלקוחה): בלי "× 8" - הסכום לבד, ומתחת בטקסט קטן: מספר התשלומים, מאיזה תאריך ועד יוני כולל
@@ -908,6 +919,12 @@ if (PREVIEW && !CODE) fill(SAMPLE);
 else if (CODE.length < 32) showBad("הקישור לא תקין. לפרטים: 052-9067101");
 else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("pay_link_public", { p_code: CODE })).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא הצלחנו לטעון את הטופס. נסו שוב בעוד רגע, או התקשרו: 052-9067101"));
 
+function dm(d){ const p = String(d || "").split("-"); return p.length === 3 ? (+p[2]) + "." + (+p[1]) : d; }
+function trialTxt(t){
+  const inc = ["חודש"].concat(Number(t.registration_fee) > 0 ? ["דמי הרשמה"] : [], Number(t.materials_fee) > 0 ? ["חומרי תרגול"] : []);
+  const inc2 = inc.length > 1 ? inc.slice(0, -1).join(", ") + " ו" + inc[inc.length - 1] : inc[0];
+  return "(" + inc2 + ")" + (Number(t.charges_after) > 0 ? ", ולאחר מכן " + money(t.monthly) + " ב-1 בכל חודש עד " + t.last_month + " (" + t.charges_after + " חיובים)" : "") + ". ההמשך לאחר חודש הניסיון – רק בתיאום עמנו; אם לא ממשיכים, לא יבוצע חיוב נוסף.";
+}
 function recurTxt(d){ return d.monthly_count + " תשלומים חודשיים" + (d.first_monthly_date ? ", החל מ-" + dateHe(d.first_monthly_date) : "") + " ועד חודש יוני כולל"; }
 // 5.19.58: קישור "מהיר" - רק סיכום + כפתור לתשלום (ישר ל-icredit-pay; השרת מסמן את הקישור בעצמו)
 function showQuick(d, sent){
@@ -916,6 +933,7 @@ function showQuick(d, sent){
   const esc2 = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   box.innerHTML = (sent ? '<div class="q-sent">✓ הטופס התקבל, והפרטים נעולים לשינוי. נותר להשלים את התשלום.<small>לתיקון הפרטים ניתן לפנות אלינו: 052-9067101</small></div>' : "") + '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם"))
     + row("לתשלום עכשיו", esc2(money(d.one_time_amount)), "q-amt")
+    + (d.trial && d.trial.second_amount ? row("אם ממשיכים – ב-" + esc2(dm(d.trial.second_date)), esc2(money(d.trial.second_amount)) + '<small class="recur-sub">' + esc2(trialTxt(d.trial)) + '</small>') : "")
     + (d.monthly_amount ? row("ואחר כך תשלום חודשי", esc2(money(d.monthly_amount)) + '<small class="recur-sub">' + esc2(recurTxt(d)) + '</small>') : "")
     + '</div><div class="q-err" id="qErr" hidden></div><button type="button" class="q-go" id="qGo">לתשלום מאובטח ←</button>'
     + '<div class="q-lock">🔒 פרטי האשראי מוזנים בעמוד המאובטח של חברת הסליקה ולא נשמרים אצלנו.</div>';
