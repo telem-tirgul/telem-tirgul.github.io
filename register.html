@@ -1513,6 +1513,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     return m;
   }
   function firstMonthText(city){
+    return "";   // נועה 6.11: בלי שורת "שכר הלימוד עבור חודש ההרשמה" (חישוב לפי ה-20) – בהרשמה ובהתעניינות
     var r = lateJoinRule(city);
     // 5.19.58: השרת מחשב רק apply="first" (icredit-18) - חוק "last" לא מוצג
     if (!r || r.apply !== "first") return "<li>" + RH("r.first_month", "שכר הלימוד עבור חודש ההרשמה - שכר לימוד חודשי מלא (ניתן יהיה להשלים את שיעורי התרגול החסרים בתיאום עמנו).", "כרטיס המסלול – חודש ההרשמה") + "</li>";
