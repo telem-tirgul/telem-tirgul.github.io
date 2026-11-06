@@ -111,9 +111,13 @@ window.TELEM_TK = function(o){
   var price = o.regular == null ? "" : (o.earlyOn && o.early != null
     ? '<div class="tk-price"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><div class="tk-row"><b>' + e(o.early) + ' ₪</b><span>' + T("tk.early", "להרשמה מוקדמת<br><small>עד {תאריך}</small>", "מחיר להרשמה מוקדמת", { "תאריך": o.cut }) + '</span></div><div class="tk-row"><b>' + e(o.regular) + ' ₪</b><span>' + T("tk.regular", "להרשמה רגילה<br><small>מ-{תאריך} ואילך</small>", "מחיר להרשמה רגילה", { "תאריך": o.cut }) + '</span></div></div>'
     : '<div class="tk-price tk-one"><span class="tk-lbl">' + T("tk.monthly", "תשלום חודשי", "התשלום החודשי – הכותרת") + '</span><b>' + e(o.regular) + ' ₪</b></div>');
-  var FL = { "דמי שיבוץ והרשמה": ["tk.fee_reg", "דמי שיבוץ והרשמה"], "חומרי תרגול ועזרי לימוד דיגיטליים": ["tk.fee_mat", "חומרי תרגול ועזרי לימוד דיגיטליים"] };
-  var fees = (o.fees || []).filter(function(f){ return f && f.amount; }).map(function(f){ var fl = FL[f.label]; return '<b>' + e(f.amount) + ' ₪</b> ' + (fl ? T(fl[0], fl[1], "תשלום בעת ההרשמה – " + fl[1]) : e(f.label)) + (f.offset ? " " + T("tk.offset", "(יקוזז מתשלום חודש {חודש})", "הערת קיזוז", { "חודש": o.offMonth || "יוני" }) : ""); });
-  var once = fees.length ? '<p class="tk-once">' + T("tk.once", "בנוסף, בעת ההרשמה:", "פתיחת השורה של התשלום בעת ההרשמה") + " " + fees.join(" ו-") + '</p>' : "";
+  // נועה 6.11: משפט אחד, עריך כולו ("נוסחי הטפסים" → כרטיסי המסלולים); עם חומרי תרגול / בלי
+  var fReg = (o.fees || []).filter(function(f){ return f && f.amount && f.label === "דמי שיבוץ והרשמה"; })[0], fMat = (o.fees || []).filter(function(f){ return f && f.amount && f.label !== "דמי שיבוץ והרשמה"; })[0];
+  var fv = { "דמי הרשמה": fReg ? fReg.amount : "", "חומרי תרגול": fMat ? fMat.amount : "", "חודש": o.offMonth || "יוני" };
+  var FM = ["tk.fees_mat", "עלות עבור חומרי תרגול ועזרי לימוד דיגיטליים בסך {חומרי תרגול} ₪ ודמי שיבוץ והרשמה בסך {דמי הרשמה} ₪ ייגבו בעת ההרשמה ויקוזזו מעלות חודש {חודש} בהתאם לתנאי ההתקשרות.", "תשלום בעת ההרשמה – עיר עם חומרי תרגול"],
+      FR = ["tk.fees_reg", "דמי שיבוץ והרשמה בסך {דמי הרשמה} ₪ ייגבו בעת ההרשמה ויקוזזו מעלות חודש {חודש} בהתאם לתנאי ההתקשרות.", "תשלום בעת ההרשמה – עיר בלי חומרי תרגול"];
+  if (window.TX && TX.def) [FM, FR].forEach(function(d){ TX.def(d[0], d[1], d[2], { "דמי הרשמה": "", "חומרי תרגול": "", "חודש": "" }, { group: G }); });   // שני הנוסחים מופיעים בעורך תמיד
+  var once = !fReg && !fMat ? "" : '<p class="tk-once">' + (fMat ? T(FM[0], FM[1], FM[2], fv) : T(FR[0], FR[1], FR[2], fv)) + '</p>';
   var extra = (o.extra || []).filter(Boolean).map(function(x){ return '<p class="tk-once tk-more">' + x + '</p>'; }).join("");
   var body = '<div class="tk-body">' + (o.body ? '<p class="tk-desc">' + e(o.body) + '</p>' : "") + price + once + extra + '</div>';
   var cls = 'tk c-' + e(o.color || "red");
