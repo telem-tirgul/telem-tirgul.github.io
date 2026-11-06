@@ -97,6 +97,7 @@
   .pg-head .org{ font-family:'Heebo','Segoe UI',sans-serif; font-weight:900; font-size:clamp(22px,4.5vw,30px); color:#2E1C19; margin:4px 0 0; }
   .card{ max-width:640px !important; border-radius:16px !important; }
   .meet-note{ font-size:14px; color:#6b5a4c; margin:6px 2px 0; }   /* נועה 6.11 */
+  #paidLine{ display:block !important; text-align:center; } #paidLine .pl-big{ display:block; font-size:clamp(18px, 4.8vw, 22px); font-weight:800; color:#2E7D32; } #paidLine small{ font-size:14px !important; margin-top:3px !important; }   /* נועה 6.11 */
 </style>
 <link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
@@ -290,12 +291,12 @@
     // 5.19.93 (נועה): גם בלי פרטי הרשמה (דף תשלום / הפרטים פגו) – אותו עיצוב, בלי התיבה הירוקה
     document.getElementById("title").textContent = reg ? tyT("ty.paid_title_reg") : tyT("ty.paid_title");
     // 5.19.62: אחרי תשלום - בלי תגית "שולם" למעלה (התיבה הירוקה "התשלום התקבל בהצלחה" מספיקה)
-    { var cp = document.getElementById("stChip"); cp.className = "st-chip ok"; cp.textContent = tyT("ty.chip_paid"); cp.hidden = false; }   // נועה 6.11: כמו בתשלום טלפוני – תגית מתחת לכותרת, בלי הווי הירוק
+    document.getElementById("stChip").hidden = true;   // נועה 6.11: בלי תגית ליד – "✓ התשלום התקבל בהצלחה" כשורה גדולה מתחת לכותרת
     // 5.19.91 (נועה): במקום התיבה הירוקה הגדולה – שורה ירוקה קטנה מתחת לשם: "✓ התשלום התקבל בהצלחה · חשבונית תישלח אליכם במייל"
     var ld = document.getElementById("lead"), pm = document.getElementById("payMsg");
     if (pm) pm.hidden = true;
     var pl = document.getElementById("paidLine"); if (!pl) { pl = document.createElement("p"); pl.id = "paidLine"; pl.className = "paid-line"; ld.parentNode.insertBefore(pl, ld.nextSibling); }
-    pl.innerHTML = (reg ? tyH("ty.paid_line") : "") + "<small>" + tyH("ty.paid_small") + "</small>";
+    pl.innerHTML = '<span class="pl-big">✓ ' + tyH("ty.paid_line") + '</span>' + "<small>" + tyH("ty.paid_small") + "</small>";
     if (!reg) return;
     var nl = document.getElementById("next");
     [].slice.call(nl.children).forEach(function(li){ if (li.getAttribute("data-inv")) li.remove(); });
