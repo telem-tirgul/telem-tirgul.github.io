@@ -1668,7 +1668,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
 
   /* נועה 5.11: הקישור האישי מכרטיס התלמיד – טופס המרתון עצמו, ממולא מהכרטיס; בלי בחירת קבוצה ובלי תשלום (התשלום – בטלפון) */
   function mCardInit(){
-    if (!MARATHON) { location.replace(new URL("sign.html?c=" + MSIGN, location.href).href); return; }   /* המרתון סגור להרשמה – טופס החתימה הנפרד */
+    if (!MARATHON) { if (MSIGN !== "sample") location.replace(new URL("sign.html?c=" + MSIGN, location.href).href); return; }   /* המרתון סגור להרשמה – טופס החתימה הנפרד */
     var H = function(k, d, l, v){ return (window.TX && TX.h) ? TX.h(k, d, l, "הקישור האישי מהכרטיס", v) : d; };
     document.documentElement.classList.add("sig-only", "mk-card");
     var rr = document.querySelector("input[name=mkmode][value=reg]"); if (rr) { rr.checked = true; mkPaint(); }
