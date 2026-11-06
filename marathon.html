@@ -474,7 +474,7 @@
   @media (min-width:900px){
     .wrap{ max-width:1000px; }
     #marathonForm{ display:block; }
-    .layout-side{ position:static; display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:stretch; margin-bottom:18px; }
+    .layout-side{ position:static; display:grid; grid-template-columns:minmax(0,2fr) minmax(0,3fr); gap:18px; align-items:start; margin-bottom:18px; }   /* נועה 6.11: התיאור צר יותר, המפגשים רחבים; בלי מתיחה לגובה */
     .layout-side > .mar-info, .layout-side > fieldset{ margin:0; }
     .layout-side > .mar-info{ display:flex; flex-direction:column; justify-content:center; font-size:16.5px; }
     .side-price{ display:none !important; }
@@ -573,6 +573,7 @@
   #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
   #field-first-time.invalid .price-options{ border-color:#C9554F; }
   .top-error.amt-note{ background:#FFF7E0 !important; border-color:#E0B84F !important; color:#5A4300 !important; }
+  .grp-note{ font-size:14px; color:var(--ink-soft,#6b5a4c); margin:8px 2px 2px; }   /* נועה 6.11 */
 </style>
 <link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=8"></script>
 <script>
@@ -617,6 +618,7 @@
       <div class="field" id="field-group">
         <div class="field-title" hidden data-t="t008">קבוצה</div>
         <div class="price-options" id="groupOptions"><div class="hint">טוען את הקבוצות…</div></div>
+        <div class="grp-note" data-t="m.meet_note">*נפגש בכניסה למבנה בית הספר.</div><!-- נועה 6.11 -->
         <div class="error-msg" id="groupError" data-t="t009">יש לבחור קבוצה</div>
       </div>
     </fieldset>

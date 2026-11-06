@@ -153,6 +153,9 @@
     ["ty.lead_register", "{שם} רשום/ה לתרגולים השוטפים{ · עיר}", "שורה מתחת לכותרת – תרגולים שוטפים", { "שם": "השם הפרטי של התלמיד/ה", " · עיר": "העיר עם נקודה לפניה (ריק אם אין עיר)" }, ["שם"]],
     ["ty.lead_event", "{שם} רשום/ה ל{מרתון / מסלול}", "שורה מתחת לכותרת – מרתון / מסלול", { "שם": "השם הפרטי של התלמיד/ה", "מרתון / מסלול": "שם המרתון או המסלול" }, ["שם"]],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
+    ["ty.chip_paid", "✓ שולם", "תגית – אחרי תשלום באשראי", {}, []],
+    ["ty.int_title", "טופס ההתעניינות התקבל", "התעניינות – כותרת", {}, []],
+    ["ty.int_msg", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם, עם מידע מלא על התרגולים ועל אופן ההרשמה.", "התעניינות – ההודעה בתיבה", {}, []],
     ["ty.lead_title", "תודה, פנייתכם התקבלה", "רק פרטים (מרתון) – כותרת", {}, []],
     ["ty.lead_lead", "נציג/ת תלם ייצור/תיצור עמכם קשר בהקדם, עם מידע מלא על המרתון ועל אופן ההרשמה.", "רק פרטים (מרתון) – שורה מתחת לכותרת", {}, []],
     ["ty.lead_cta_t", "מעוניינים להירשם כבר עכשיו?", "רק פרטים (מרתון) – כותרת התיבה", {}, []],
@@ -215,8 +218,8 @@
     }
     // נועה 28.10: טופס המרתון – "רק להשאיר פרטים". כותרת, וקריאה בולטת להשלמת ההרשמה (חוזרת לטופס ממולא)
     if (((/[?&]lead=1/.test(location.search) || (x && x.kind === "marathon_lead")) && !TY_EDIT) || (TY_EDIT && TYV === "lead")) {   // נועה 6.11: גם בעורך הנוסחים (tyv=lead)
-      $("title").textContent = tyT("ty.lead_title"); $("title").classList.add("ty-ok"); $("stChip").hidden = true;
-      $("lead").textContent = tyT("ty.lead_lead"); $("lead").hidden = false;
+      $("title").textContent = tyT("ty.lead_title"); $("stChip").hidden = true;   // נועה 6.11: עיצוב כמו בתשלום טלפוני (בלי הווי הירוק)
+      var pmL = $("pendingMsg"); pmL.innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.lead_lead") + '</span>'; pmL.hidden = false;
       var back = null; try { back = sessionStorage.getItem("reg_form_url"); } catch (e) {}
       if (TY_EDIT && !back) back = "marathon.html";
       if (back) { var u = new URL(back, location.href); u.searchParams.set("cont", "1");
@@ -224,9 +227,15 @@
         var t1 = document.createElement("div"); t1.className = "t"; t1.textContent = tyT("ty.lead_cta_t");
         var t2 = document.createElement("div"); t2.className = "s"; t2.textContent = tyT("ty.lead_cta_s");
         var a = document.createElement("a"); a.href = u.href; a.textContent = tyT("ty.lead_cta_btn");
-        cta.appendChild(t1); cta.appendChild(t2); cta.appendChild(a); $("lead").after(cta); }
+        cta.appendChild(t1); cta.appendChild(t2); cta.appendChild(a); pmL.after(cta); }
       // נועה 6.11: בהשארת פרטים – בלי סיכום הפרטים ובלי מועדי המפגשים
       document.title = "הפרטים התקבלו - תלם"; return;
+    }
+    // נועה 6.11: טופס ההתעניינות – אותו מבנה כמו "טופס ההרשמה התקבל" (תשלום טלפוני), בלי סיכום
+    if ((/[?&]interest=1/.test(location.search) && !TY_EDIT) || (TY_EDIT && TYV === "interest")) {
+      $("title").textContent = tyT("ty.int_title"); $("stChip").hidden = true;
+      var pmI = $("pendingMsg"); pmI.innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.int_msg") + '</span>'; pmI.hidden = false;
+      document.title = "טופס ההתעניינות התקבל - תלם"; return;
     }
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
     if (phone && pending && !preview) {
@@ -245,7 +254,8 @@
     if (preview) { var chp = $("stChip"); chp.className = "st-chip info"; chp.textContent = "👁 תצוגה מקדימה"; var pm = $("pendingMsg"); pm.className = "status info"; pm.innerHTML = '<span class="ic">👁</span><span>תצוגה מקדימה - ההרשמה לא נשמרה ולא בוצע תשלום.</span>'; pm.hidden = false; }
     else if (pending) { if (!phone) $("pendingMsg").innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.pending") + '</span>'; $("pendingMsg").hidden = false; }
     // 5.19.91 (נועה): בלי תגית "✓ התקבל" באמצע – הכותרת עצמה בירוק עם וי ("✓ ההרשמה התקבלה")
-    { var chk = $("stChip"); if (chk && / ok/.test(" " + chk.className)) { chk.hidden = true; $("title").classList.add("ty-ok"); $("title").textContent = $("title").textContent.replace(/!$/, ""); } }
+    // נועה 6.11: כל דפי התודה בעיצוב של התשלום הטלפוני – בלי הווי הירוק למעלה (התגית נשארת)
+    $("title").textContent = $("title").textContent.replace(/!$/, "");
     if (!x) return;
     if (x.name) row(tyT("ty.row_name"), x.name);
     if (x.event || x.track) row(x.event ? tyT("ty.row_mar") : tyT("ty.row_track"), x.event || x.track);
@@ -280,7 +290,7 @@
     // 5.19.93 (נועה): גם בלי פרטי הרשמה (דף תשלום / הפרטים פגו) – אותו עיצוב, בלי התיבה הירוקה
     document.getElementById("title").textContent = reg ? tyT("ty.paid_title_reg") : tyT("ty.paid_title");
     // 5.19.62: אחרי תשלום - בלי תגית "שולם" למעלה (התיבה הירוקה "התשלום התקבל בהצלחה" מספיקה)
-    document.getElementById("stChip").hidden = true; document.getElementById("title").classList.add("ty-ok");
+    { var cp = document.getElementById("stChip"); cp.className = "st-chip ok"; cp.textContent = tyT("ty.chip_paid"); cp.hidden = false; }   // נועה 6.11: כמו בתשלום טלפוני – תגית מתחת לכותרת, בלי הווי הירוק
     // 5.19.91 (נועה): במקום התיבה הירוקה הגדולה – שורה ירוקה קטנה מתחת לשם: "✓ התשלום התקבל בהצלחה · חשבונית תישלח אליכם במייל"
     var ld = document.getElementById("lead"), pm = document.getElementById("payMsg");
     if (pm) pm.hidden = true;
@@ -339,7 +349,7 @@
 (function(){
   if (/[?&]already=1/.test(location.search)) return;   // נועה 6.11: גם להשארת פרטים
   var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
-  if (!x || !x.city || !x.school || x.school === "אחר" || ["register", "marathon", "marathon_lead"].indexOf(x.kind) < 0) return;
+  if (!x || !x.city || !x.school || x.school === "אחר" || ["register", "marathon", "marathon_lead", "interest"].indexOf(x.kind) < 0) return;
   fetch("https://oulivucqbpmbavbavfvy.supabase.co/rest/v1/rpc/school_wa_public", { method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" }, body: JSON.stringify({ p_city: x.city, p_school: x.school }) })
     .then(function(r){ return r.ok ? r.json() : null; }).then(function(u){
       if (typeof u !== "string" || !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{10,40}$/.test(u)) return;

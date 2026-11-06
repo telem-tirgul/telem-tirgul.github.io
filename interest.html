@@ -876,7 +876,10 @@ $("intForm").addEventListener("submit", function(e){
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: schVal() },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };
   const btn = $("submitBtn"); btn.__lbl = btn.innerHTML; btn.disabled = true; btn.textContent = "שולח…";
-  const done = () => { if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "interest" }); $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; { const ib = document.querySelector(".intro"); if (ib) ib.hidden = true; } window.scrollTo(0, 0);
+  const done = () => { if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "interest" }); // נועה 6.11: דף תודה כמו "טופס ההרשמה התקבל" (thank-you.html?interest=1) – כולל ההצטרפות לווטסאפ של בית הספר
+    try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "interest", city: $("f-city").value, school: $("f-school").value })); } catch(e) {}
+    if (!PREVIEW) { location.href = new URL("thank-you.html?interest=1", location.href).href; return; }
+    $("intForm").hidden = true; $("tracksBox").hidden = true; $("doneBox").hidden = false; { const ib = document.querySelector(".intro"); if (ib) ib.hidden = true; } window.scrollTo(0, 0);
     // נועה 6.11: גם בהתעניינות – הזמנה לקבוצת העדכונים של בית הספר (כמו בדף התודה), רק כשיש לבית הספר קישור
     const wc = $("f-city").value, wsch = $("f-school").value;
     if (wc && wsch && wsch !== "אחר") callSupabase("school_wa_public", { p_city: wc, p_school: wsch }, true).then(u => { if (typeof u !== "string" || !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{10,40}$/.test(u)) return; $("waSch").textContent = wsch; $("waBtn").href = u; $("waJoin").hidden = false; }).catch(() => {}); };
