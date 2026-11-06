@@ -857,6 +857,8 @@ const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first"
 const money = (n) => "₪" + Number(n).toLocaleString("he-IL", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const dateHe = (d) => { if (!d) return ""; const p = String(d).split("-"); return p.length === 3 ? (+p[2]) + "." + (+p[1]) + "." + p[0] : d; };
 var LINK = null;
+// נועה 6.11: עיר + בית ספר לדף התודה (קבוצת הווטסאפ של בית הספר)
+function payCS(){ var F = (LINK && LINK.fields) || {}, fv = function(k){ return (F[k] && F[k].value) || (LINK && LINK[k]) || ""; }; return { city: (($("f-city") || {}).value || fv("city")), school: (($("f-school") || {}).value || fv("school")) }; }
 function showBad(msg){ $("loadBox").hidden = true; $("payForm").hidden = true; $("doneBox").hidden = false; $("doneBox").innerHTML = '<div class="bad-box"></div>'; $("doneBox").firstChild.textContent = msg; }
 function showDone(msg){ $("loadBox").hidden = true; $("payForm").hidden = true; $("doneBox").hidden = false; $("doneBox").innerHTML = '<div class="done-box"></div>'; $("doneBox").firstChild.textContent = msg; }
 function fill(d){
@@ -946,7 +948,7 @@ function showQuick(d, sent){
   $("qGo").onclick = function(){
     const s = CONFIG.supabase, p = { kind: "pay_link", id: CODE }, btn = this;
     try { sessionStorage.setItem("pay_pending", JSON.stringify(p)); sessionStorage.setItem("reg_form_url", location.href);
-          sessionStorage.setItem("reg_summary", JSON.stringify({ name: d.student_name || "", track: d.description, amount: Number(d.one_time_amount) })); } catch (e) {}
+          sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "pay_link", name: d.student_name || "", track: d.description, amount: Number(d.one_time_amount), city: payCS().city, school: payCS().school })); } catch (e) {}
     btn.disabled = true; btn.textContent = "מעביר לתשלום…"; if (window.TELEM_GA) TELEM_GA("begin_checkout", { form: "pay" });
     fetch(s.url + "/functions/v1/icredit-pay", { method: "POST", headers: { "Content-Type": "application/json", "apikey": s.anonKey }, body: JSON.stringify(p) })
       .then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })
@@ -957,7 +959,7 @@ function showQuick(d, sent){
 function goToPayment(){
   const s = CONFIG.supabase, p = { kind: "pay_link", id: CODE };
   try { sessionStorage.setItem("pay_pending", JSON.stringify(p)); sessionStorage.setItem("reg_form_url", location.href);
-        sessionStorage.setItem("reg_summary", JSON.stringify({ name: (($("f-student_first") || {}).value || ""), track: LINK.description, amount: Number(LINK.one_time_amount) })); } catch (e) {}
+        sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "pay_link", name: (($("f-student_first") || {}).value || ""), track: LINK.description, amount: Number(LINK.one_time_amount), city: payCS().city, school: payCS().school })); } catch (e) {}
   submitBtn.disabled = true; submitBtn.textContent = "מעביר לתשלום…"; if (window.TELEM_GA) TELEM_GA("begin_checkout", { form: "pay" });
   return fetch(s.url + "/functions/v1/icredit-pay", { method: "POST", headers: { "Content-Type": "application/json", "apikey": s.anonKey }, body: JSON.stringify(p) })
     .then(function(r){ return r.json().then(function(b){ if (!r.ok || !b || !b.url) throw new Error((b && b.error) || ("HTTP " + r.status)); return b; }); })

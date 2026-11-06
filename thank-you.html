@@ -78,7 +78,7 @@
   #lead{ color:#3B2A25 !important; font-weight:500 !important; }
   .top #paidLine, #paidLine{ color:#3B2A25 !important; } #paidLine small{ display:block; font-size:12.5px; font-weight:500; color:var(--ink-soft, #6B5F55); margin-top:1px; } .paid-line{ display:inline-block; margin:12px auto 0 !important; background:none; border-radius:0; padding:0; font-size:14px !important; font-weight:600 !important; line-height:1.45; }
   .ty-h{ margin:18px 0 8px !important; font-size:clamp(22px, 6.2vw, 30px) !important; line-height:1.25; }
-  .wa-join{ margin:16px 0 4px; padding:16px; border-radius:16px; background:#EAF6EC; border:1.5px solid #8CC79A; text-align:center; } .wa-join .t{ font-weight:800; font-size:17px; color:#1E5B2C; margin-bottom:10px; } .wa-join .s{ font-size:14px; color:#2F5F3A; margin:4px 0 10px; }
+  .wa-join{ margin:16px 0 4px; padding:16px; border-radius:16px; background:#fff; border:1px solid var(--border, #E6DDD3); text-align:center; } .wa-join .t{ font-weight:700; font-size:16.5px; color:inherit; margin-bottom:10px; }   /* נועה 6.11: רק הקישור בירוק */ .wa-join .s{ font-size:14px; color:inherit; margin:4px 0 10px; }
   .wa-join .wa-btn{ display:inline-block; background:#25D366; color:#fff; font-weight:800; text-decoration:none; border-radius:999px; padding:10px 22px; }
   .lead-cta{ margin:16px 0 4px; padding:18px; border-radius:16px; background:var(--warn-bg, #F6EAD0); text-align:center; } .lead-cta .t{ font-weight:800; font-size:18px; color:var(--accent, #7A1F2B); margin-bottom:4px; } .lead-cta .s{ color:var(--ink-soft, #5d544f); margin-bottom:12px; } .lead-cta a{ display:inline-block; background:#5A1216; color:#fff; font-weight:800; padding:12px 26px; border-radius:999px; text-decoration:none; font-family:'Heebo',sans-serif; } .lead-cta a:hover{ background:#3E0D10; }
   .st-chip{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 14px; font-weight:700; font-size:14.5px; margin:0 0 6px; }
@@ -351,9 +351,9 @@
 <script>
 /* כל-22 (קובץ 160): אחרי הרשמה / מרתון – הזמנה לקבוצת העדכונים של בית הספר, רק כשיש לבית הספר קישור (school_wa_public) */
 (function(){
-  if (/[?&]already=1/.test(location.search)) return;   // נועה 6.11: גם להשארת פרטים
-  var x = null; try { x = JSON.parse(sessionStorage.getItem("reg_summary") || "null"); } catch (e) {}
-  if (!x || !x.city || !x.school || x.school === "אחר" || ["register", "marathon", "marathon_lead", "interest"].indexOf(x.kind) < 0) return;
+  // נועה 6.11: בכל דפי התודה (הרשמה, מרתון, השארת פרטים, התעניינות, קישור אישי, כבר רשום/ה) – לפי עיר + בית ספר
+  var x = null; try { x = JSON.parse(sessionStorage.getItem(/[?&]already=1/.test(location.search) ? "reg_already" : "reg_summary") || "null"); } catch (e) {}
+  if (!x || !x.city || !x.school || x.school === "אחר") return;
   fetch("https://oulivucqbpmbavbavfvy.supabase.co/rest/v1/rpc/school_wa_public", { method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" }, body: JSON.stringify({ p_city: x.city, p_school: x.school }) })
     .then(function(r){ return r.ok ? r.json() : null; }).then(function(u){
       if (typeof u !== "string" || !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{10,40}$/.test(u)) return;

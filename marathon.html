@@ -1557,7 +1557,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/already registered/.test(m)) {   // נועה 25.10: כבר רשום/ה ושילם/ה – לדף התודה, שם כתוב בפירוש שאין צורך להירשם שוב
       ["reg_pdf", "reg_pdf_name", "reg_summary", "reg_studentFullName", "reg_saved_at"].forEach(function(k){ try { sessionStorage.removeItem(k); } catch (e) {} });
       try { var nmA = ((document.getElementById("f-student-first").value || "") + " " + (document.getElementById("f-student-last").value || "")).trim();
-            sessionStorage.setItem("reg_already", JSON.stringify({ name: nmA, event: (MARATHON && MARATHON.name) || "מרתון מתמטיקה" })); } catch (e) {}
+            sessionStorage.setItem("reg_already", JSON.stringify({ name: nmA, event: (MARATHON && MARATHON.name) || "מרתון מתמטיקה", city: (MARATHON && MARATHON.city) || "", school: (MARATHON && MARATHON.school) || "" })); } catch (e) {}
       goTop(tyUrl("already=1")); return; }
     else if (/needs review/.test(m)) {   // אבטחה (כל-21, 3.11): אותו שם בלי טלפון מוכר וכבר רשום – לא שומרים, לא מגלים; נחזור אליהם
       topError.style.display = "none"; var rn = document.getElementById("reviewNote");
@@ -1670,7 +1670,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     btn.disabled = true; btn.textContent = "נשלח…";
     if (isPreviewNow() && EXPLICIT_PREVIEW) { setTimeout(function(){ goTop(tyUrl("lead=1&preview=1")); }, 500); return; }
     callSupabase("submit_interest", payload).then(function(res){
-      if (res && res.already) { try { sessionStorage.setItem("reg_already", JSON.stringify({ name: v("f-student-first") + " " + v("f-student-last"), event: mName })); } catch (e) {}
+      if (res && res.already) { try { sessionStorage.setItem("reg_already", JSON.stringify({ name: v("f-student-first") + " " + v("f-student-last"), event: mName, city: (MARATHON && MARATHON.city) || "", school: (MARATHON && MARATHON.school) || "" })); } catch (e) {}
         goTop(tyUrl("already=1")); return; }
       if (window.TELEM_GA) TELEM_GA("generate_lead", { form: "marathon" });
       goTop(tyUrl("lead=1")); }).catch(function(){
