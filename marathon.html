@@ -568,6 +568,9 @@
   #fsFirstTime .price-option > div{ width:100%; }
   #fsFirstTime .opt-title{ font-size:13.5px !important; font-weight:700; line-height:1.4; color:var(--ink); }
   #fsFirstTime .opt-price{ margin-top:4px; }
+  .mar-prices{ display:flex; flex-direction:column; gap:8px; }
+  .mar-prices .mp-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border, #E6DDD3); border-radius:12px; background:#fff; }
+  .mar-prices .mp-row[hidden]{ display:none; } .mar-prices b{ font-family:'Heebo',sans-serif; font-size:19px; font-weight:800; color:var(--accent); white-space:nowrap; }
   #fsFirstTime .price-option:is(.selected, :has(input:checked)){ background:var(--accent) !important; }
   #fsFirstTime .price-option:is(.selected, :has(input:checked)) :is(.opt-title, .opt-price){ color:#fff !important; }
   #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
@@ -712,6 +715,14 @@
     </fieldset>
 
     <!-- נועה 28.10: שני חלקים – "רק להשאיר פרטים" (התעניינות) או "להירשם עכשיו" (שאר הטופס + תשלום) -->
+    <!-- נועה 7.11: המחיר – בחלק משלו, לפני הבחירה (רואים אותו גם מי שרק משאיר/ה פרטים) -->
+    <fieldset id="fsPrice">
+      <legend data-t="mk.price_t">מחיר המרתון</legend>
+      <div class="mar-prices">
+        <div class="mp-row"><span data-t="mk.price_first">מרתון ראשון בשנת הלימודים</span><b id="mpFirst">295 ₪</b></div>
+        <div class="mp-row" id="mpRepRow"><span data-t="mk.price_rep">מי שכבר השתתף/ה במרתון בשנת הלימודים</span><b id="mpRep">236 ₪</b></div>
+      </div>
+    </fieldset>
     <fieldset id="fsMode">
       <legend data-t="mk.mode_t">כיצד תרצו להמשיך?</legend>
       <div class="field" id="field-mode">
@@ -1069,6 +1080,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         CONFIG.priceFirstTime = Number(MARATHON.price_first); CONFIG.priceReturning = Number(MARATHON.price_repeat) || Number(MARATHON.price_first);
         document.querySelector("#opt-first .opt-price").textContent = PRICE(CONFIG.priceFirstTime);
         document.querySelector("#opt-returning .opt-price").textContent = PRICE(CONFIG.priceReturning);
+        { var mf = document.getElementById("mpFirst"), mr = document.getElementById("mpRep"), rr = document.getElementById("mpRepRow");
+          if (mf) mf.textContent = PRICE(CONFIG.priceFirstTime); if (mr) mr.textContent = PRICE(CONFIG.priceReturning); if (rr) rr.hidden = CONFIG.priceReturning === CONFIG.priceFirstTime; }
         document.getElementById("marPriceFirst").textContent = PRICE(CONFIG.priceFirstTime);
         document.getElementById("marPriceRepeat").textContent = PRICE(CONFIG.priceReturning);
         // מחיר אחד למרתון: לא שואלים אם זה המרתון הראשון, ומציגים מחיר אחד
