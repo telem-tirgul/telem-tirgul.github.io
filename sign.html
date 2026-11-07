@@ -504,7 +504,7 @@
   select{ padding-inline-end:36px !important; }
   .req, label .req, .sig-lbl .req{ color:#B3241F !important; font-weight:800; }
 </style>
-<link rel="stylesheet" href="site-look.css?v=6"><script src="site-look.js?v=10"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
+<link rel="stylesheet" href="site-look.css?v=7"><script src="site-look.js?v=10"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 </head>
 <body>
 <div class="wrap">
@@ -516,11 +516,11 @@
   <form id="payForm" novalidate hidden>
     <div class="top-error form-error" id="topError" style="display:none;"></div>
     <div id="fieldsBox"></div>
-    <div class="sg-note">ניתן לעדכן או להשלים את הפרטים. לשינוי בקורס, במסלול או בבית הספר נא לפנות אלינו בוואטסאפ: <a href="https://wa.me/972529067101">052-9067101</a></div>
-    <section class="sec-card"><div class="sec-h">תנאי ההתקשרות</div>
+    <div class="sg-note" data-t="sg.note">ניתן לעדכן או להשלים את הפרטים. לשינוי בקורס, במסלול או בבית הספר נא לפנות אלינו בוואטסאפ: <a href="https://wa.me/972529067101">052-9067101</a></div>
+    <section class="sec-card"><div class="sec-h" data-t="sg.terms_h">תנאי ההתקשרות</div>
       <div class="terms-box" id="termsBox"><p>טוען את התנאים...</p></div>
     </section>
-    <section class="sec-card" id="ackCard"><div class="sec-h">אישור וחתימה</div>
+    <section class="sec-card" id="ackCard"><div class="sec-h" data-t="sg.ack_h">אישור וחתימה</div>
       <div class="consents-box">
       <label class="consent" id="field-terms">
         <input type="checkbox" id="f-terms" required>
@@ -529,17 +529,17 @@
       <div class="error-msg" id="termsError"></div>
       <label class="consent" id="field-consent">
         <input type="checkbox" id="f-consent" required>
-        <span id="consentText">אני מאשר/ת שהפרטים נכונים.</span>
+        <span id="consentText" data-t="sg.consent">אני מאשר/ת שהפרטים נכונים.</span>
       </label>
       <div class="error-msg" id="consentError"></div>
       </div>
       <div class="sig-wrap" id="field-signature">
-        <span class="sig-lbl"><span>חתימת ההורה</span> <span class="req">*</span></span>
-        <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph">נא לחתום כאן באמצעות האצבע או העכבר</div></div>
-        <div class="sig-tools"><span id="sigHint">החתימה נשמרת יחד עם הטופס.</span><button type="button" id="sigClear">ניקוי</button></div>
+        <span class="sig-lbl"><span data-t="sg.sig">חתימת ההורה</span> <span class="req">*</span></span>
+        <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph" data-t="sg.sig_ph">נא לחתום כאן באמצעות האצבע או העכבר</div></div>
+        <div class="sig-tools"><span id="sigHint" data-t="sg.sig_hint">החתימה נשמרת יחד עם הטופס.</span><button type="button" id="sigClear">ניקוי</button></div>
         <div class="error-msg" id="sigError"></div>
       </div>
-      <div class="submit-wrap"><button type="submit" id="submitBtn" disabled>אישור ושליחה</button></div><!-- נועה 3.11: הכפתור בתוך הכרטיס האחרון, כמו במרתון -->
+      <div class="submit-wrap"><button type="submit" id="submitBtn" disabled data-t="sg.submit">אישור ושליחה</button></div><!-- נועה 3.11: הכפתור בתוך הכרטיס האחרון, כמו במרתון -->
     </section>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></label></div>
   </form>
@@ -916,11 +916,17 @@ function fill(d){
   LINK = d;
   fillDetails(d);
   { const mar = /^מרתון/.test(String(d.course || "")), sb = document.querySelector(".subtitle");   // נועה 4.11: הכותרת וכותרת המשנה – כמו בטופס ההרשמה / המרתון
-    if (sb) sb.textContent = (mar ? "טופס הרשמה למרתון מתמטיקה" : "טופס הרשמה לתרגולים השוטפים") + (d.city ? " · " + d.city : "");
+    if (sb) sb.textContent = (window.TX && TX.s ? (mar ? TX.s("sg.sub_mar", "טופס הרשמה למרתון מתמטיקה", "כותרת – מרתון", "טופס החתימה (קישור אישי)") : TX.s("sg.sub_reg", "טופס הרשמה לתרגולים השוטפים", "כותרת – תרגול שוטף", "טופס החתימה (קישור אישי)")) : (mar ? "טופס הרשמה למרתון מתמטיקה" : "טופס הרשמה לתרגולים השוטפים")) + (d.city ? " · " + d.city : "");
     document.title = mar ? "טופס הרשמה למרתון מתמטיקה - תלם" : "טופס הרשמה לתרגולים - תלם"; }
   const ib = $("introBox"); ib.hidden = false; ib.innerHTML = "";
-  const t1 = document.createElement("div"); t1.textContent = "שלום" + (d.parent_first ? " " + d.parent_first : "") + ", זה טופס ההרשמה עבור "; const st = document.createElement("strong"); st.textContent = d.student_first || "התלמיד/ה"; t1.appendChild(st); t1.appendChild(document.createTextNode(d.course ? " – " + d.course + "." : "."));
-  const t2 = document.createElement("div"); t2.className = "sg-sub"; t2.textContent = "יש לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.";
+  // נועה 7.11: הנוסחים נערכים ב"נוסחי הטפסים"
+  const G = "טופס החתימה (קישור אישי)", has = !!(window.TX && TX.h);
+  const hv = { "הורה": d.parent_first || "", "תלמיד": d.student_first || "התלמיד/ה", "קורס": d.course ? " – " + d.course : "" };
+  const t1 = document.createElement("div"), t2 = document.createElement("div"); t2.className = "sg-sub";
+  if (has) { t1.innerHTML = TX.h("sg.hello", "שלום {הורה}, זה טופס ההרשמה עבור <b>{תלמיד}</b>{קורס}.", "פתיחה", G, hv);
+             t2.innerHTML = TX.h("sg.sub", "יש לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "הסבר מתחת לפתיחה", G); }
+  else { t1.textContent = "שלום" + (d.parent_first ? " " + d.parent_first : "") + ", זה טופס ההרשמה עבור "; const st = document.createElement("strong"); st.textContent = hv["תלמיד"]; t1.appendChild(st); t1.appendChild(document.createTextNode(hv["קורס"] + "."));
+         t2.textContent = "יש לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה."; }
   ib.appendChild(t1); ib.appendChild(t2);
   loadTerms(d.city, /^מרתון/.test(String(d.course || ""))).then(function(){ TERMS_OK = true; updateSubmitAvailability(); }).catch(function(){});
   $("loadBox").hidden = true; $("payForm").hidden = false; sigResize();

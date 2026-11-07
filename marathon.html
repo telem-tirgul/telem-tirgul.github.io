@@ -730,7 +730,7 @@
           </label>
           <label class="price-option" id="opt-mode-paid">
             <input type="radio" name="mkmode" value="paid">
-            <div><div class="opt-title" data-t="mk.paid_t">✅ כבר שילמתי בטלפון</div><div class="opt-sub" data-t="mk.paid_s">לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה</div></div>
+            <div><div class="opt-title" data-t="mk.paid_t">✅ שולם טלפונית</div></div>
           </label>
           <label class="price-option" id="opt-mode-reg">
             <input type="radio" name="mkmode" value="reg">
@@ -780,7 +780,7 @@
       <div class="pm-opts" id="pmOpts">
         <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard"><span><b data-t="t042">💳 תשלום באשראי עכשיו</b><small data-t="t043">לאחר השליחה תועברו לעמוד תשלום מאובטח.</small></span></label>
         <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b data-t="t044">📞 תשלום טלפוני</b><small data-t="t045">לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="m.pm_paid">✅ כבר שילמתי בטלפון</b><small data-t="m.pm_paid_sub">לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה.</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="m.pm_paid">✅ שולם טלפונית</b></span></label>
       </div>
       <div class="lock-line pm-lock" data-t="t046">🔒 פרטי כרטיס האשראי אינם נשמרים ואינם מועברים דרך אתר זה. הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
       <div class="error-msg" id="payMethodError" data-t="t047">יש לבחור אופן תשלום</div>
@@ -1453,7 +1453,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var g = (MARATHON.groups || []).filter(function(x){ return x.session_id === sid; })[0] || (MARATHON.groups || [])[0];
     var dEl = document.getElementById("marInfoDesc"), desc = dEl ? (dEl.innerText || dEl.textContent || "").replace(/\s*\n\s*/g, " ") : "";
     return { name: MARATHON.name || "מרתון מתמטיקה", desc: desc.trim(), meetings: g ? meetingsOf(g).map(meetingText) : [],
-      payMethod: isPaidBefore() ? "שולם בטלפון (לפי ההורה) - נוודא שהתשלום התקבל" : document.getElementById("f-payphone").checked ? "תשלום טלפוני - ניצור קשר לתשלום" : document.getElementById("f-paycard").checked ? "כרטיס אשראי (עמוד תשלום מאובטח)" : "" };
+      payMethod: isPaidBefore() || (MSIGN && window.__SG_REG !== false) ? "שולם טלפונית" : MSIGN ? "תשלום טלפוני - ניצור קשר לתשלום" : document.getElementById("f-payphone").checked ? "תשלום טלפוני - ניצור קשר לתשלום" : document.getElementById("f-paycard").checked ? "כרטיס אשראי (עמוד תשלום מאובטח)" : "" };
   }
   function makeSignedPdf(title, signerName){
     return new Promise(function(resolve){
@@ -1633,7 +1633,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function MK_MODE(){ var r = document.querySelector("input[name=mkmode]:checked"); return r ? (r.value === "paid" ? "reg" : r.value) : ""; }
   function mkPaidSet(on){   /* נועה 6.11: "כבר שילמתי בטלפון" נבחר למעלה */
     document.documentElement.classList.toggle("mk-paid", on);
-    if (on) { payPaidEl.checked = true; var pp = document.getElementById("payPhoneOnly"); if (pp && !pp.dataset.mk) { pp.dataset.mk = pp.innerHTML; } if (pp) { pp.hidden = false; pp.innerHTML = (window.TX && TX.h) ? TX.h("mk.paid_note", "<b>✅ כבר שילמתי בטלפון</b> – לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה.", "הודעה בתשלום – \"כבר שילמתי\" נבחר למעלה", "טופס המרתון") : "<b>✅ כבר שילמתי בטלפון</b> – לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה."; } }
+    if (on) { payPaidEl.checked = true; var pp = document.getElementById("payPhoneOnly"); if (pp && !pp.dataset.mk) { pp.dataset.mk = pp.innerHTML; } if (pp) { pp.hidden = false; pp.innerHTML = (window.TX && TX.h) ? TX.h("mk.paid_note", "<b>✅ שולם טלפונית</b>", "הודעה בתשלום – \"כבר שילמתי\" נבחר למעלה", "טופס המרתון") : "<b>✅ שולם טלפונית</b>"; } }
     else { if (payPaidEl.checked) { payPaidEl.checked = false; if (NO_TERMINAL) payPhoneEl.checked = true; } var pp2 = document.getElementById("payPhoneOnly"); if (pp2 && pp2.dataset.mk != null) { pp2.innerHTML = pp2.dataset.mk; pp2.hidden = true; } }
     paintPayPhone(); }
   function mkPaint(){
@@ -1720,9 +1720,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       if (d.grade && !document.getElementById("f-grade").value) setv("f-grade", d.grade);
       info.innerHTML = "<div>" + H("m.intro_card", "שלום {שם ההורה}, להלן טופס ההרשמה של <b>{שם התלמיד/ה}</b> ל{קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": MARATHON.name || d.course || "" })
         + "</div><div class=\"sg-sub\">" + H("m.intro_card_sub", "הפרטים כבר ממולאים. יש לוודא שהם נכונים, לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
-      var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.classList.toggle("unpaid", d.registered === false);
+      var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.classList.toggle("unpaid", d.registered === false); window.__SG_REG = d.registered;
         pp.innerHTML = d.registered === false ? H("m.card_unpaid", "<b>📞 התשלום יוסדר טלפונית</b> ונציגנו ייצרו עמכם קשר. בשלב זה נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – עוד לא שולם")
-                                              : H("m.card_paid", "<b>✓ התשלום בוצע</b> ואין צורך לשלם שוב. נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – שולם"); }
+                                              : H("m.card_paid", "<b>✓ שולם טלפונית</b>", "הקישור מהכרטיס – שולם"); }
       submitBtn.textContent = SUBMIT_TXT(); if (typeof updateSubmitAvailability === "function") updateSubmitAvailability();
     }).catch(function(){ bad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."); });
   }

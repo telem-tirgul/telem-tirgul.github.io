@@ -741,7 +741,7 @@
       <div class="pm-opts" id="pmOpts">
         <label class="pm-opt"><input type="radio" name="paymethod" value="card" id="f-paycard" checked><span><b data-t="t058">💳 תשלום באשראי עכשיו</b><small data-t="t059">לאחר השליחה תועברו לעמוד תשלום מאובטח של חברת הסליקה.</small></span></label>
         <label class="pm-opt"><input type="radio" name="paymethod" value="phone" id="f-payphone"><span><b data-t="t060">📞 תשלום טלפוני</b><small data-t="t061">לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</small></span></label>
-        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="r.pm_paid">✅ כבר שילמתי בטלפון</b><small data-t="r.pm_paid_sub">לאחר שנוודא שהתשלום התקבל, נאשר את ההרשמה.</small></span></label>
+        <label class="pm-opt"><input type="radio" name="paymethod" value="paid" id="f-paypaid"><span><b data-t="r.pm_paid">✅ שולם טלפונית</b></span></label>
       </div>
       <div class="lock-line pm-lock" data-t="t062">🔒 פרטי כרטיס האשראי אינם נשמרים ואינם מועברים דרך אתר זה. הזנתם מתבצעת בעמוד מאובטח ונפרד של חברת הסליקה.</div>
       <div class="pm-only" id="payPhoneOnly" hidden data-t="t063"><b>📞 תשלום טלפוני</b> – לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</div>
@@ -1003,7 +1003,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // נועה 3.11: קישור "נרשמו בטלפון" (register.html?city=…&phone=1) – ממלאים את כל הפרטים וחותמים; התשלום מטופל מולנו בטלפון (בלי אשראי בטופס)
   var PHONE_REG = PHONE_REG_;
   // נועה 3.11: בלי שום דבר על תשלום – רק הפרטים, התנאים והחתימה
-  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = RH("r.paid_note", "<b>✓ התשלום בוצע</b> ואין צורך לשלם שוב. נותר רק לאשר את התנאים ולחתום.", "במקום אופן התשלום – שילמו בטלפון"); } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.id = "amtFirstLbl"; a1.innerHTML = RH("r.first_paid", "תשלום ראשון – שולם טלפונית", "הסכום הראשון – שילמו בטלפון"); }
+  if (PHONE_REG) { payPhoneEl.checked = true; document.documentElement.classList.add("sig-only"); var pp = document.getElementById("payPhoneOnly"); if (pp) { pp.removeAttribute("data-t"); pp.hidden = false; pp.innerHTML = RH("r.paid_note", "<b>✓ שולם טלפונית</b>", "במקום אופן התשלום – שילמו בטלפון"); } var a1 = document.querySelector('.amount-row > [data-t="t056"]'); if (a1) { a1.removeAttribute("data-t"); a1.id = "amtFirstLbl"; a1.innerHTML = RH("r.first_paid", "תשלום ראשון – שולם טלפונית", "הסכום הראשון – שילמו בטלפון"); }
     var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_paid", "להלן טופס ההרשמה לתרגול השוטף תשפ\"ז.", "פתיחה – שילמו בטלפון") + "</div><div class=\"sg-sub\">" + RH("r.intro_paid_sub", "יש למלא את הפרטים, לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "פתיחה – שילמו בטלפון (שורה שנייה)") + "</div>";
     // נועה 3.11: נראה כמו "טופס חתימה על התנאים" מכרטיס התלמיד (sign.html) – רק בלי פרטים ממולאים
     var sgh = document.getElementById("sigHint"); if (sgh) { sgh.removeAttribute("data-t"); sgh.innerHTML = RH("r.sig_hint_paid", "החתימה נשמרת יחד עם הטופס.", "הסבר מתחת לחתימה – שילמו בטלפון"); }
@@ -1251,7 +1251,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var sub = [cityEl.value, getSchoolValue && getSchoolValue()].filter(Boolean).join(" · ");
     var pc = document.getElementById("f-paycard"), pp = document.getElementById("f-payphone");
     return { head: t ? t.textContent.trim() : "פרטי המסלול", sub: sub, name: sub, desc: d ? (d.innerText || d.textContent || "").replace(/\s*\n\s*/g, " ").trim() : "", meetings: [],
-      payMethod: pp && pp.checked ? "תשלום טלפוני - ניצור קשר לתשלום" : "כרטיס אשראי (עמוד תשלום מאובטח) + הוראת קבע חודשית" };
+      payMethod: isPaidBefore() || (PHONE_REG && window.__SG_REG !== false) ? "שולם טלפונית" : pp && pp.checked ? "תשלום טלפוני - ניצור קשר לתשלום" : "כרטיס אשראי (עמוד תשלום מאובטח) + הוראת קבע חודשית" };
   }
   function pdfSplit(data){
     var out = [], reg = [];
@@ -1873,6 +1873,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
     setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
     [cityEl, schoolEl, schoolOtherEl, subjectEl, subjectChoiceEl].forEach(function(el){ if (el) { el.disabled = true; el.classList.add("sg-lock"); } }); document.documentElement.classList.add("sg-prefill");
+    window.__SG_REG = d.registered;
     if (d.registered === false) {   /* נועה 5.11 (166): הקורס עוד לא "רשום" – לא "התשלום בוצע" */
       var pu = document.getElementById("payPhoneOnly"); if (pu) { pu.classList.add("unpaid"); pu.innerHTML = RH("r.card_unpaid", "<b>📞 התשלום יוסדר טלפונית</b> ונציגנו ייצרו עמכם קשר. בשלב זה נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – עוד לא שולם"); }
       var au = document.getElementById("amtFirstLbl"); if (au) au.innerHTML = RH("r.first_unpaid", "תשלום ראשון – ייגבה טלפונית", "הסכום הראשון – הקישור מהכרטיס, עוד לא שולם"); }
