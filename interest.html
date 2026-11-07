@@ -724,7 +724,7 @@ const TRK_SEL = new Set(P_REG);   // נועה 3.11: המסלולים שסומנ�
 const trkPick = (t) => '<label class="ti-pick" title="סימון המסלול שמעניין אתכם"><input type="checkbox" data-trk="' + t + '"' + (TRK_SEL.has(t) ? " checked" : "") + ' aria-label="המסלול הזה מעניין אותי"></label>';
 function trkPut(card, t){ const h = card.querySelector(".tk-head") || card.querySelector("summary") || card;
   h.insertAdjacentHTML("afterbegin", trkPick(t));
-  card.classList.add("ti-card"); card.classList.toggle("ti-on", TRK_SEL.has(t)); card.dataset.trkc = t; return card; }
+  card.classList.add("ti-card"); card.classList.toggle("ti-on", TRK_SEL.has(t)); card.dataset.trkc = t; if (TRK_SEL.has(t) && card.tagName === "DETAILS") card.open = true; return card; }
 let TRK_INIT = P_REG.length === 1 ? P_REG[0] : "";
 function trackPickFill(shutT){
   const sel = $("f-track"), pick = $("trackPick"); if (!sel || !pick) return;
@@ -798,7 +798,8 @@ function renderTracks(){
 renderTracks();
 // הלחיצה על "מעניין אותי" לא פותחת / סוגרת את הכרטיס (הוא בתוך שורת הכותרת)
 $("tracksBox").addEventListener("click", (e) => { const l = e.target.closest && e.target.closest(".ti-pick"); if (!l) return; e.preventDefault(); e.stopPropagation();
-  const c = l.querySelector("[data-trk]"), on = !c.checked; c.checked = on; on ? TRK_SEL.add(c.dataset.trk) : TRK_SEL.delete(c.dataset.trk); const k = l.closest(".ti-card"); if (k) k.classList.toggle("ti-on", on); }, true);
+  const c = l.querySelector("[data-trk]"), on = !c.checked; c.checked = on; on ? TRK_SEL.add(c.dataset.trk) : TRK_SEL.delete(c.dataset.trk); const k = l.closest(".ti-card"); if (k) k.classList.toggle("ti-on", on);
+  if (on) { const dt = l.closest("details"); if (dt) dt.open = true; } }, true);   // נועה 7.11: סימון – פותח גם את המסגרת
 // בחירת מקצוע בתוך המסלול – מסמנת גם את המסלול כ"מעניין אותי"
 $("tracksBox").addEventListener("change", (e) => { const r = e.target; if (!r || !r.dataset || !r.dataset.subjt) return; const t = r.dataset.subjt; SUBJ[t] = r.value;
   const k = r.closest(".ti-card"); if (k) { k.querySelectorAll(".tk-subj label").forEach(l => l.classList.toggle("on", l.contains(r))); const c = k.querySelector("[data-trk]"); if (c && !c.checked) { c.checked = true; TRK_SEL.add(t); k.classList.add("ti-on"); } } });
