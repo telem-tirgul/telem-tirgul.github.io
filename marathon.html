@@ -384,7 +384,9 @@
   /* נועה 5.11: הקישור האישי מכרטיס התלמיד – אותו טופס מרתון, ממולא */
   .mk-cardinfo{ background:#F3E3C3; border-radius:18px; padding:14px 16px; margin:0 0 14px; font-size:15.5px; line-height:1.7; color:#3A2A1F; }
   .mk-cardinfo .sg-sub{ margin-top:6px; font-size:.93em; }
-  html.mk-card #groupFieldset, html.mk-card #fsMode, html.mk-card #modeHint, html.mk-card .side-price, html.mk-card .amount-row, html.mk-card #amountBreakdown, html.mk-card #field-hakbatsa{ display:none !important; }
+  /* נועה 7.11: בקישור האישי – גם מועדי המפגשים (לקריאה בלבד) */
+  html.mk-card #groupFieldset .price-option input[type=radio]{ display:none; } html.mk-card #groupFieldset .price-option{ pointer-events:none; }
+  html.mk-card #fsMode, html.mk-card #modeHint, html.mk-card .side-price, html.mk-card .amount-row, html.mk-card #amountBreakdown, html.mk-card #field-hakbatsa{ display:none !important; }
   html.mk-card #payPhoneOnly.unpaid{ background:#FFF6E0 !important; border-color:#E9CF8F !important; color:#6B4D12 !important; }
   html.sig-only #termsBox{ max-height:none !important; overflow:visible !important; }
   /* נועה 4.11: "שילמו בטלפון" – הסכום כמו בטופס; במקום אופן התשלום – "✓ התשלום בוצע בטלפון" */
@@ -1059,6 +1061,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     return Promise.all([fetch(s.url + "/rest/v1/rpc/marathon_public", { method: "POST", headers: headers, body: JSON.stringify({ p_code: MARATHON_CODE }) })
       .then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }), window.TX && window.TX.ready]).then(function(a){ var m = a[0];
         MARATHON = m || null;
+        if (/[?&]closed=1(&|$)/.test(location.search) && /[?&](preview|txedit)=1(&|$)/.test(location.search)) MARATHON = null;   // נועה 7.11: תצוגה של "ההרשמה סגורה" (בנוסחי הטפסים)
         if (!MARATHON) { marNotice(ttx("mar.closed")); document.getElementById("groupOptions").innerHTML = ""; submitBtn.disabled = true; MAR_BLOCKED = true;
           form.hidden = true; return; }   // תלם 5.19.38: סגור - רק ההודעה, בלי שום תוכן
         lockSchool(MARATHON.school || "");

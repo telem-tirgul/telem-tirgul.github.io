@@ -1807,7 +1807,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // תלם 5.19.48 (קובץ 68): טופס ההרשמה בעיר סגור - הודעה במקום הטופס (בתצוגה מקדימה מהמערכת - הטופס מוצג)
   var REG_OPEN = null;
   function regClosedCheck(){
-    var c = cityEl.value, x = REG_OPEN && c && REG_OPEN[c], prev = /[?&]preview=1(&|$)/.test(location.search), closed = !!(x && x.registerOpen === false) && !prev;
+    var c = cityEl.value, x = REG_OPEN && c && REG_OPEN[c], prev = /[?&]preview=1(&|$)/.test(location.search), closed = (!!(x && x.registerOpen === false) && !prev) || (prev && /[?&]closed=1(&|$)/.test(location.search));   // נועה 7.11: תצוגה של "ההרשמה סגורה" בנוסחי הטפסים
     // 5.19.56 (קובץ 72): מסלול סגור - לא מופיע לבחירה; קישור למסלול סגור / כל המסלולים סגורים = הטופס סגור
     var shut = (x && Array.isArray(x.registerClosedTracks) && !prev) ? x.registerClosedTracks : [], linkTrk = (location.search.match(/[?&]track=([^&]+)/) || [])[1];
     linkTrk = linkTrk ? decodeURIComponent(linkTrk) : "";
