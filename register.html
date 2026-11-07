@@ -1126,7 +1126,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
           // נועה 7.11: המחיר – קטן ופחות בולט (מסגרת לבנה, לא ריבוע אדום)
           var bx = xR - w, bh = 100 + more.reduce(function(a, r){ return a + r[0].length * 20 + 32; }, 0), by = y0 + 6; rr(bx, by, priceW, bh, 14, "#fff", C.line);
           put(price[0], bx + priceW - 22, by + 20, F(16, 700), C.soft);
-          put(String(price[1]).replace(/\s+/g, ""), bx + priceW - 22, by + 46, F(30, 800), C.red);
+          ctx.direction = "ltr"; put("₪" + String(price[1]).replace(/[^\d.,]/g, ""), bx + priceW - 22, by + 46, F(30, 800), C.red); ctx.direction = "rtl";
           var yy = by + 96; more.forEach(function(r){ r[0].forEach(function(l){ put(l, bx + priceW - 22, yy, F(14, 700), C.soft); yy += 20; }); put(r[1], bx + priceW - 22, yy + 2, F(19, 800), C.ink); yy += 32; });
           y = Math.max(y, by + bh);
         }
