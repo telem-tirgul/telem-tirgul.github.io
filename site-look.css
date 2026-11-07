@@ -19,7 +19,8 @@ html body :is(.hero, .wrap) .subtitle :is(#subtitleLocation, .sub-loc):empty, ht
 html body :is(.hero, .wrap) .subtitle #subtitleLocation::before{ content:none !important; }
 
 /* משפט הפתיחה (ובמרתון – תיאור המרתון) */
-html body .mar-info{ background:#F3E3C3 !important; border:none !important; border-radius:22px 22px 22px 6px !important; box-shadow:none !important; color:#3E0D10 !important; }
+/* נועה 7.11: תיאור המרתון – אותו צבע, עם צל ופינות כמו שאר המסגרות */
+html body .mar-info{ background:#F3E3C3 !important; border:none !important; border-radius:28px 28px 28px 8px !important; box-shadow:0 14px 34px -22px rgba(62,13,16,.45) !important; padding:22px 24px 14px !important; color:#3E0D10 !important; }
 html body .intro{ background:#F3E3C3 !important; border:none !important; border-radius:22px 22px 22px 6px !important; box-shadow:none !important;
   color:#3E0D10 !important; font-size:16.5px !important; }
 html body .intro strong, html body .intro .lock-line{ color:#5A1216 !important; }
