@@ -651,10 +651,12 @@ if (window.TX) { TX.obj("track", CONFIG.trackInfo, ["title", "body"], "תיאו�
 const Q = new URLSearchParams(location.search), PREVIEW = Q.get("preview") === "1";
 if (PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר"; document.body.insertBefore(pb, document.body.firstChild); }
 const P_CITY = (Q.get("city") || "").slice(0, 40), P_SCHOOL = (Q.get("school") || "").slice(0, 60);
-const P_MAR = (Q.get("m") || "").slice(0, 40);   // קישור התעניינות למרתון מסוים (קוד המרתון)
+// נועה 7.11: התעניינות במרתון – רק בטופס המרתון ("להשאיר פרטים"). קישור ישן עם m= עובר לטופס המרתון.
+if (Q.get("m") && !PREVIEW) location.replace("marathon.html?m=" + encodeURIComponent(Q.get("m").slice(0, 40)));
+const P_MAR = "";
 let MAR = null;
 const marDates = () => { if (!MAR) return ""; const d = [...new Set((MAR.groups || []).flatMap(g => g.dates || []))].sort(); const f = (x) => { const [, mo, da] = x.split("-"); return Number(da) + "." + Number(mo); }; return d.length <= 4 ? d.map(f).join(", ") : f(d[0]) + "–" + f(d[d.length - 1]); };
-const P_TRACKS = (Q.get("tracks") || "").split(",").map(s => s.trim()).filter(t => CONFIG.trackInfo[t] || t === "marathon");
+const P_TRACKS = (Q.get("tracks") || "").split(",").map(s => s.trim()).filter(t => CONFIG.trackInfo[t]);
 function schoolOpts(city){
   const list = CONFIG.citySchools[city] || [];
   // נועה 3.11: גם "אחר" – ואז מקלידים את שם בית הספר
