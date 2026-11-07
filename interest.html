@@ -290,6 +290,7 @@
   .terms-box li{ margin:3px 0; }
 
   #tracksFs > legend::before{ content:""; counter-increment:none; width:22px; height:22px; border-radius:0; background:var(--accent); -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5z'/%3E%3Cpath d='m2 13 10 5 10-5'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 8l10 5 10-5-10-5z'/%3E%3Cpath d='m2 13 10 5 10-5'/%3E%3C/svg%3E") center/contain no-repeat; }
+  .trk-err, .tk-subj .tks-err{ color:#B8463F; font-weight:700; font-size:13.5px; margin-top:8px; } .trk-err::before, .tk-subj .tks-err::before{ content:"⚠ "; } .tks-req{ color:#B3241F; font-weight:800; } .tk-subj.invalid{ border-color:#C9554F !important; flex-wrap:wrap !important; } .tk-subj .tks-err{ flex:0 0 100%; margin:0; }
   #tracksFs .tp-sub{ font-size:14px; color:#4A3F38; margin:-4px 0 12px; } #tracksBox{ display:flex; flex-direction:column; gap:12px; } #tracksBox .tk{ margin:0 !important; } #tracksFs[hidden]{ display:none; }
   #intForm fieldset .submit-wrap{ margin:16px 0 6px !important; } #intForm fieldset .disclaimer{ margin:14px 0 0; }
   .submit-wrap{ text-align:center; margin-top:30px; }
@@ -535,7 +536,7 @@
   <div class="intro"><div id="introText">נא להשאיר פרטים, ונחזור אליכם עם מלוא המידע על התרגולים בעיר ובבית הספר שלכם.</div></div>
   <div class="trk-pick" id="trackPick" hidden><div class="field"><label for="f-track" data-t="t037">מסלול</label><select id="f-track"></select></div></div><!-- את-25 (נועה 23.10): בחירת / החלפת מסלול -->
   <form id="intForm" novalidate>
-    <fieldset id="tracksFs"><legend data-t="i.trk_h">המסלולים</legend><div class="tp-sub" data-t="i.trk_sub">ניתן לסמן מסלול אחד או יותר (לא חובה). לחיצה על מסלול תציג את כל הפרטים והמחירים.</div><div id="tracksBox"></div></fieldset><!-- נועה 3.11: כמו המרתון – כרטיס בחירה בלי מספר -->
+    <fieldset id="tracksFs"><legend data-t="i.trk_h">המסלולים</legend><div class="tp-sub" data-t="i.trk_sub">יש לסמן מסלול אחד לפחות. לחיצה על מסלול תציג את כל הפרטים והמחירים.</div><div id="tracksBox"></div><div class="trk-err" id="trkErr" hidden data-t="i.trk_err">יש לסמן לפחות מסלול אחד</div></fieldset><!-- נועה 3.11: כמו המרתון – כרטיס בחירה בלי מספר -->
     <div class="top-error form-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
     <fieldset>
       <legend data-t="t003">פרטי התלמיד/ה</legend>
@@ -779,7 +780,7 @@ function renderTracks(){
       if (!box.__fz) box.__fz = fees;
       const cd = trkPut(w.firstChild, t);
       // נועה 6.11: שדה "מקצוע" בתוך המסלול (מקצוע אחד / ללא הגבלה) – לא חובה
-      if (t === "single" || t === "unlimited-single") { const bd = cd.querySelector(".tk-body"); if (bd) bd.insertAdjacentHTML("afterbegin", '<div class="tk-subj" role="radiogroup" aria-label="מקצוע"><span class="tks-l"><span data-tx="tk.subj">מקצוע</span> <span class="tks-opt">(לא חובה)</span></span>'
+      if (t === "single" || t === "unlimited-single") { const bd = cd.querySelector(".tk-body"); if (bd) bd.insertAdjacentHTML("afterbegin", '<div class="tk-subj" role="radiogroup" aria-label="מקצוע"><span class="tks-l"><span data-tx="tk.subj">מקצוע</span> <span class="tks-req">*</span></span>'
         + ["מתמטיקה", "אנגלית"].map(x => '<label class="' + (SUBJ[t] === x ? "on" : "") + '"><input type="radio" name="tksubj-' + t + '" data-subjt="' + t + '" value="' + x + '"' + (SUBJ[t] === x ? " checked" : "") + '> ' + x + '</label>').join("") + '</div>'); }
       box.appendChild(cd); return;
     }
@@ -799,9 +800,11 @@ renderTracks();
 // הלחיצה על "מעניין אותי" לא פותחת / סוגרת את הכרטיס (הוא בתוך שורת הכותרת)
 $("tracksBox").addEventListener("click", (e) => { const l = e.target.closest && e.target.closest(".ti-pick"); if (!l) return; e.preventDefault(); e.stopPropagation();
   const c = l.querySelector("[data-trk]"), on = !c.checked; c.checked = on; on ? TRK_SEL.add(c.dataset.trk) : TRK_SEL.delete(c.dataset.trk); const k = l.closest(".ti-card"); if (k) k.classList.toggle("ti-on", on);
-  if (on) { const dt = l.closest("details"); if (dt) dt.open = true; } }, true);   // נועה 7.11: סימון – פותח גם את המסגרת
+  if (on) { const dt = l.closest("details"); if (dt) dt.open = true; $("trkErr").hidden = true; }
+  if (!on) { const sj = k && k.querySelector(".tk-subj.invalid"); if (sj) { sj.classList.remove("invalid"); const er = sj.querySelector(".tks-err"); if (er) er.remove(); } } }, true);   // נועה 7.11: סימון – פותח גם את המסגרת
 // בחירת מקצוע בתוך המסלול – מסמנת גם את המסלול כ"מעניין אותי"
 $("tracksBox").addEventListener("change", (e) => { const r = e.target; if (!r || !r.dataset || !r.dataset.subjt) return; const t = r.dataset.subjt; SUBJ[t] = r.value;
+  { const sj = r.closest(".tk-subj"); if (sj) { sj.classList.remove("invalid"); const er = sj.querySelector(".tks-err"); if (er) er.remove(); } $("trkErr").hidden = true; }
   const k = r.closest(".ti-card"); if (k) { k.querySelectorAll(".tk-subj label").forEach(l => l.classList.toggle("on", l.contains(r))); const c = k.querySelector("[data-trk]"); if (c && !c.checked) { c.checked = true; TRK_SEL.add(t); k.classList.add("ti-on"); } } });
 if (P_MAR) (window.TELEM_HOLD || function(p){ return p; })(callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){}));
 // 5.19.58: כמו בטופס ההרשמה - שכר הלימוד של חודש ההרשמה לפי חוק "הצטרפות מאוחרת" ממסך חוקי החיוב (billing_rules_public)
@@ -894,6 +897,12 @@ $("intForm").addEventListener("submit", function(e){
   bad("field-city", !city); bad("field-sfirst", !$("f-sfirst").value.trim()); bad("field-slast", !$("f-slast").value.trim()); bad("field-pfirst", !$("f-pfirst").value.trim());
   bad("field-school-other", $("f-school").value === "אחר" && !$("f-school-other").value.trim());
   bad("field-pphone", !/^0\d{8,9}$/.test(ph)); bad("field-sphone", !!sph && !/^0\d{8,9}$/.test(sph)); bad("field-email", !!em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em));
+  // נועה 7.11: חובה לסמן מסלול אחד לפחות, ובמסלול מקצוע אחד / ללא הגבלה – גם מקצוע
+  if (!IS_MAR && !$("tracksFs").hidden) { const none = !TRK_SEL.size; $("trkErr").hidden = !none; if (none) ok = false;
+    $("tracksBox").querySelectorAll(".ti-card").forEach(k => { const t = k.dataset.trkc, sj = k.querySelector(".tk-subj"); if (!sj) return;
+      const miss = TRK_SEL.has(t) && !SUBJ[t]; sj.classList.toggle("invalid", miss); let er = sj.querySelector(".tks-err");
+      if (miss && !er) sj.insertAdjacentHTML("beforeend", '<div class="tks-err">יש לבחור מקצוע</div>'); if (!miss && er) er.remove();
+      if (miss) { ok = false; if (k.tagName === "DETAILS") k.open = true; } }); }
   $("topError").style.display = ok ? "none" : "block"; if (!ok) { if (window.TELEM_BAD) TELEM_BAD($("submitBtn")); return; } if (window.TELEM_OK) TELEM_OK();
   const picked = IS_MAR ? P_TRACKS.filter(t => t === "marathon" || TRK_SEL.has(t)) : Object.keys(CONFIG.trackInfo).filter(t => TRK_SEL.has(t));   // נועה 3.11: מה שסומן (בלי סימון – כל המסלולים)
   const courses = picked.map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title + (SUBJ[t] && TRK_SEL.has(t) ? " – " + SUBJ[t] : ""));
