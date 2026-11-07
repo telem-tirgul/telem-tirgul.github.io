@@ -1,3 +1,7 @@
+// נועה 7.11: שהנוסח לא "יקפוץ" להורה – הדף מוסתר עד שהנוסח מהמערכת הגיע (texts.js מסיר), לכל היותר 1.2 שניות
+(function(){ try { if (/[?&]txedit=1(&|$)/.test(location.search)) return; var h = document.documentElement; h.classList.add("tx-wait");
+  var st = document.createElement("style"); st.textContent = "html.tx-wait body{visibility:hidden}"; (document.head || h).appendChild(st);
+  setTimeout(function(){ h.classList.remove("tx-wait"); }, 1200); } catch(e) {} })();
 // את-46 (נועה 29.10): Google Analytics בכל הטפסים – בלי מידע אישי.
 //  לגוגל נשלחת רק כתובת הדף בלי פרמטרים, חוץ מ: city, school, tracks, track, m, embed, lead, pending, already + utm_* (נועה 29.10: לדעת כמה נכנסו מכל SMS) (קוד משפחה / טלפון / קוד תשלום / ref – לא).
 //  לא מודדים: תצוגה מקדימה / עורך הנוסחים / בדיקות, טופס שנפתח מתוך מערכת הניהול (וכל מה שנפתח אחריו באותה לשונית), ולא מחוץ לאתר.
