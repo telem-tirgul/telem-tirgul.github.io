@@ -193,6 +193,8 @@
   // בעורך הנוסחים (txedit=1): הרשמה לדוגמה; tyv = reg / phone / paid
   var TY_EDIT = window.TX && window.TX.edit, TYV = (/[?&]tyv=(\w+)/.exec(location.search) || [])[1] || "reg";
   var TY_SAMPLE = { kind: "marathon", name: "דנה לוי", event: "מרתון מתמטיקה שכבת ט' · בראשית", amount: 354, meetings: ["יום שלישי, 8.9 · 16:30–18:45", "יום רביעי, 16.9 · 16:30–18:45"] };
+  // נועה 7.11: בעורך – דוגמה של תרגולים שוטפים (tys=reg) או של מרתון (tys=mar)
+  if (/[?&]tys=reg/.test(location.search)) TY_SAMPLE = { kind: "register", name: "דנה לוי", track: "מסלול מקצוע אחד", subject: "מתמטיקה", amount: 393, city: "ראש העין", school: "בארי" };
 </script>
 <script>
   // הפרטים נשמרו בדפדפן בעת מילוי הטופס - לתצוגה בלבד.
