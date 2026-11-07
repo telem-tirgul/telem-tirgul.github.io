@@ -1123,10 +1123,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         if (price) {
           // תלם 5.19.45: שורות נוספות (תשלום חודשי) - הכותרת נגלשת בתוך הריבוע
           var more = pay.main.slice(1).map(function(r){ return [wrap(r[0], F(15, 700), priceW - 48), String(r[1]).replace(/\s+/g, " ")]; });
-          var bx = xR - w, bh = 130 + more.reduce(function(a, r){ return a + r[0].length * 21 + 36; }, 0), by = y0 + 6; rr(bx, by, priceW, bh, 16, C.red);
-          put(price[0], bx + priceW - 24, by + 22, F(19, 700), C.goldL);
-          put(String(price[1]).replace(/\s+/g, ""), bx + priceW - 24, by + 54, F(46, 900), "#fff");
-          var yy = by + 124; more.forEach(function(r){ r[0].forEach(function(l){ put(l, bx + priceW - 24, yy, F(15, 700), C.goldL); yy += 21; }); put(r[1], bx + priceW - 24, yy + 2, F(24, 800), "#fff"); yy += 36; });
+          // נועה 7.11: המחיר – קטן ופחות בולט (מסגרת לבנה, לא ריבוע אדום)
+          var bx = xR - w, bh = 100 + more.reduce(function(a, r){ return a + r[0].length * 20 + 32; }, 0), by = y0 + 6; rr(bx, by, priceW, bh, 14, "#fff", C.line);
+          put(price[0], bx + priceW - 22, by + 20, F(16, 700), C.soft);
+          put(String(price[1]).replace(/\s+/g, ""), bx + priceW - 22, by + 46, F(30, 800), C.red);
+          var yy = by + 96; more.forEach(function(r){ r[0].forEach(function(l){ put(l, bx + priceW - 22, yy, F(14, 700), C.soft); yy += 20; }); put(r[1], bx + priceW - 22, yy + 2, F(19, 800), C.ink); yy += 32; });
           y = Math.max(y, by + bh);
         }
       });
