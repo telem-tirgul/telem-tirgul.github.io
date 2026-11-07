@@ -535,16 +535,16 @@
   <div class="subtitle"><span data-t="t002">טופס התעניינות בתרגולים השוטפים</span><span id="subtitleLocation" class="sub-l2"></span></div>
   <div class="intro"><div id="introText">נא להשאיר פרטים, ונחזור אליכם עם מלוא המידע על התרגולים בעיר ובבית הספר שלכם.</div></div>
   <div class="trk-pick" id="trackPick" hidden><div class="field"><label for="f-track" data-t="t037">מסלול</label><select id="f-track"></select></div></div><!-- את-25 (נועה 23.10): בחירת / החלפת מסלול -->
-  <form id="intForm" novalidate>
+  <form id="intForm" novalidate autocomplete="off"><!-- נועה 7.11: בלי ערכים קודמים מהדפדפן -->
     <fieldset id="tracksFs"><legend data-t="i.trk_h">המסלולים</legend><div class="tp-sub" data-t="i.trk_sub">יש לסמן מסלול אחד לפחות. לחיצה על מסלול תציג את כל הפרטים והמחירים.</div><div id="tracksBox"></div><div class="trk-err" id="trkErr" hidden data-t="i.trk_err">יש לסמן לפחות מסלול אחד</div></fieldset><!-- נועה 3.11: כמו המרתון – כרטיס בחירה בלי מספר -->
     <div class="top-error form-error" id="topError" style="display:none;">נא להשלים את הפרטים החסרים ולתקן את השדות המסומנים, ולאחר מכן לשלוח שוב.</div>
     <fieldset>
       <legend data-t="t003">פרטי התלמיד/ה</legend>
       <div class="row">
-        <div class="field" id="field-sfirst"><label for="f-sfirst"><span data-t="t004">שם פרטי תלמיד/ה</span> <span class="req">*</span></label><input type="text" id="f-sfirst" maxlength="60"><div class="error-msg" data-t="t005">שדה חובה</div></div>
-        <div class="field" id="field-slast"><label for="f-slast"><span data-t="t006">שם משפחה תלמיד/ה</span> <span class="req">*</span></label><input type="text" id="f-slast" maxlength="60"><div class="error-msg">שדה חובה</div></div>
+        <div class="field" id="field-sfirst"><label for="f-sfirst"><span data-t="t004">שם פרטי תלמיד/ה</span> <span class="req">*</span></label><input type="text" id="f-sfirst" maxlength="60" autocomplete="off"><div class="error-msg" data-t="t005">שדה חובה</div></div>
+        <div class="field" id="field-slast"><label for="f-slast"><span data-t="t006">שם משפחה תלמיד/ה</span> <span class="req">*</span></label><input type="text" id="f-slast" maxlength="60" autocomplete="off"><div class="error-msg">שדה חובה</div></div>
       </div>
-      <div class="field" id="field-sphone"><label for="f-sphone" data-t="t007">נייד תלמיד/ה</label><input type="text" id="f-sphone" type="tel" inputmode="numeric" maxlength="15"><div class="error-msg" data-t="t008">מספר הטלפון אינו תקין</div></div>
+      <div class="field" id="field-sphone"><label for="f-sphone" data-t="t007">נייד תלמיד/ה</label><input type="text" id="f-sphone" type="tel" inputmode="numeric" maxlength="15" autocomplete="off"><div class="error-msg" data-t="t008">מספר הטלפון אינו תקין</div></div>
     </fieldset>
     <fieldset>
       <legend data-t="t009">בית הספר</legend>
@@ -553,7 +553,7 @@
         <div class="field" id="field-school"><label for="f-school"><span data-t="t013">בית ספר</span></label><select id="f-school"><option value="">בחרו עיר תחילה</option></select><div class="error-msg">שדה חובה</div></div>
       </div>
       <div class="row">
-        <div class="field" id="field-school-other" hidden><label for="f-school-other"><span>שם בית הספר</span> <span class="req">*</span></label><input type="text" id="f-school-other" maxlength="60"><div class="error-msg">נא לכתוב את שם בית הספר</div></div><!-- נועה 3.11: "אחר" – בשורה של השכבה, השכבה עוברת לעמודה השנייה -->
+        <div class="field" id="field-school-other" hidden><label for="f-school-other"><span>שם בית הספר</span> <span class="req">*</span></label><input type="text" id="f-school-other" maxlength="60" autocomplete="off"><div class="error-msg">נא לכתוב את שם בית הספר</div></div><!-- נועה 3.11: "אחר" – בשורה של השכבה, השכבה עוברת לעמודה השנייה -->
         <div class="field"><label for="f-grade" data-t="t014">שכבת לימוד</label><select id="f-grade"><option value="" data-t="t015">בחירה</option><option>ה'</option><option>ו'</option><option>ז'</option><option>ח'</option><option>ט'</option><option>י'</option><option>יא'</option><option>יב'</option></select></div>
         <div id="gradePad"></div>
       </div>
@@ -565,12 +565,12 @@
     <fieldset>
       <legend data-t="t022">פרטי ההורה</legend>
       <div class="row">
-        <div class="field" id="field-pfirst"><label for="f-pfirst"><span data-t="t023">שם פרטי הורה</span> <span class="req">*</span></label><input type="text" id="f-pfirst" maxlength="60"><div class="error-msg" data-t="t024">שדה חובה</div></div>
-        <div class="field"><label for="f-plast" data-t="t025">שם משפחה הורה</label><input type="text" id="f-plast" maxlength="60"></div>
+        <div class="field" id="field-pfirst"><label for="f-pfirst"><span data-t="t023">שם פרטי הורה</span> <span class="req">*</span></label><input type="text" id="f-pfirst" maxlength="60" autocomplete="off"><div class="error-msg" data-t="t024">שדה חובה</div></div>
+        <div class="field"><label for="f-plast" data-t="t025">שם משפחה הורה</label><input type="text" id="f-plast" maxlength="60" autocomplete="off"></div>
       </div>
       <div class="row">
-        <div class="field" id="field-pphone"><label for="f-pphone"><span data-t="t026">טלפון הורה</span> <span class="req">*</span></label><input type="text" id="f-pphone" type="tel" inputmode="numeric" maxlength="15"><div class="error-msg" data-t="t027">מספר הטלפון אינו תקין</div></div>
-        <div class="field" id="field-email"><label for="f-email" data-t="t028">אימייל (לא חובה)</label><input type="text" id="f-email" type="email" dir="ltr" maxlength="120"><div class="error-msg" data-t="t029">כתובת האימייל אינה תקינה</div></div>
+        <div class="field" id="field-pphone"><label for="f-pphone"><span data-t="t026">טלפון הורה</span> <span class="req">*</span></label><input type="text" id="f-pphone" type="tel" inputmode="numeric" maxlength="15" autocomplete="off"><div class="error-msg" data-t="t027">מספר הטלפון אינו תקין</div></div>
+        <div class="field" id="field-email"><label for="f-email" data-t="t028">אימייל (לא חובה)</label><input type="text" id="f-email" type="email" dir="ltr" maxlength="120" autocomplete="off"><div class="error-msg" data-t="t029">כתובת האימייל אינה תקינה</div></div>
       </div>
       <div class="field"><label for="f-filled" data-t="t030">מי ממלא/ת את הטופס?</label><select id="f-filled"><option>הורה</option><option>תלמיד</option></select></div>
       <div class="field"><label for="f-notes" data-t="t031">הערות (לא חובה)</label><textarea id="f-notes" maxlength="2000" rows="3"></textarea></div>
@@ -890,6 +890,8 @@ setTimeout(hakLoad, 0);
       });
     });
   }
+// נועה 7.11: חזרה לדף (כפתור "אחורה" אחרי השליחה) – טופס נקי, בלי הפרטים הקודמים
+window.addEventListener("pageshow", (e) => { if (e.persisted) location.reload(); });
 $("intForm").addEventListener("submit", function(e){
   e.preventDefault();
   let ok = true; const bad = (id, b) => { $(id).classList.toggle("invalid", b); if (b) ok = false; };
