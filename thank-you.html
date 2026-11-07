@@ -152,7 +152,6 @@
     ["ty.title_phone", "טופס ההרשמה התקבל", "כותרת – תשלום טלפוני (עוד לא שולם)", {}, []],
     ["ty.chip_wait", "⏳ ממתין לתשלום", "תגית – תשלום טלפוני", {}, []],
     ["ty.pending_phone", "נציג תלם ייצור עמכם קשר בהקדם להשלמת התשלום.", "התיבה הצהובה – תשלום טלפוני", {}, []],
-    ["ty.pending_paidphone", "תודה. נוודא שהתשלום שביצעתם טלפונית התקבל.", "התיבה הצהובה – \"כבר שילמתי בטלפון\"", {}, []],
     ["ty.pending", "ניצור עמכם קשר בימים הקרובים לצורך הסדרת התשלום.", "התיבה הצהובה – ממתין לתשלום (לא טלפוני)", {}, []],
     ["ty.sum_t", "פרטי ההרשמה", "כותרת – פרטי ההרשמה", {}, []],
     ["ty.meet_note", "*נפגשים בכניסה למבנה בית הספר.", "מרתון – הערה מתחת למועדי המפגשים", {}, []],
@@ -245,7 +244,7 @@
       // 5.19.57: גם בתשלום טלפוני - הוי הירוק ליד הכותרת (הטופס התקבל); הסטטוס בתיבה הצהובה
       var paidPh = unpaid || /[?&]paid=1/.test(location.search) || (TY_EDIT && TYV === "phpaid");   // נועה 6.11: נחתם מהקישור האישי = כמו "כבר שילמתי"   // נועה 6.11: "כבר שילמתי בטלפון" – בלי "ממתין לתשלום"
       var ch0 = $("stChip"); ch0.className = "st-chip wait"; ch0.textContent = tyT("ty.chip_wait"); ch0.hidden = !!paidPh;
-      var pm0 = $("pendingMsg"); pm0.innerHTML = paidPh ? '<span class="ic">🔍</span><span>' + tyH("ty.pending_paidphone") + '</span>' : '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>';   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
+      var pm0 = $("pendingMsg"); pm0.innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.pending_phone") + '</span>'; if (paidPh) { pm0.hidden = true; pm0.__off = true; }   // נועה 7.11: "כבר שילמתי" – בלי התיבה   /* נועה 4.11: "כבר שילמתי" */   // 5.19.57: נוסח הלקוחה
     }
     var regLike = x && (x.kind === "marathon" || x.kind === "register");   // 5.19.42: גם הרשמה לתרגולים השוטפים
     if (regLike && !(phone && pending && !preview)) {
@@ -254,7 +253,7 @@
       // נועה 6.11: בלי "{שם} רשום/ה ל…" – אין כאן אישור הרשמה
     }
     if (preview) { var chp = $("stChip"); chp.className = "st-chip info"; chp.textContent = "👁 תצוגה מקדימה"; chp.hidden = false; var pm = $("pendingMsg"); pm.className = "status info"; pm.innerHTML = '<span class="ic">👁</span><span>תצוגה מקדימה - ההרשמה לא נשמרה ולא בוצע תשלום.</span>'; pm.hidden = false; }
-    else if (pending) { if (!phone) $("pendingMsg").innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.pending") + '</span>'; $("pendingMsg").hidden = false; }
+    else if (pending) { if (!phone) $("pendingMsg").innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.pending") + '</span>'; $("pendingMsg").hidden = !!$("pendingMsg").__off; }
     // 5.19.91 (נועה): בלי תגית "✓ התקבל" באמצע – הכותרת עצמה בירוק עם וי ("✓ ההרשמה התקבלה")
     // נועה 6.11: כל דפי התודה בעיצוב של התשלום הטלפוני – בלי הווי הירוק למעלה (התגית נשארת)
     $("title").textContent = $("title").textContent.replace(/!$/, "");
