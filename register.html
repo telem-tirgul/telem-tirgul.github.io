@@ -1818,7 +1818,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var box = document.getElementById("closedBox");
     if (!box) { box = document.createElement("div"); box.id = "closedBox"; box.className = "closed-box"; form.parentNode.insertBefore(box, form); }
     box.hidden = !closed; form.hidden = closed;
-    if (closed) box.innerHTML = "<b>ההרשמה" + (c ? " ב" + c.replace(/[<>&]/g, "") : "") + " כרגע סגורה.</b><br>לפרטים ולהרשמה: <a href=\"tel:0529067101\">052-9067101</a>";
+    if (closed) box.innerHTML = window.TX && TX.h ? TX.h("r.closed", "<b>ההרשמה{בעיר} כרגע סגורה.</b><br>לפרטים ולהרשמה: <a href=\"tel:0529067101\">052-9067101</a>", "הודעה – ההרשמה סגורה", "ההרשמה סגורה", { "בעיר": c ? " ב" + c : "" })   // נועה 7.11: עריך
+      : "<b>ההרשמה" + (c ? " ב" + c.replace(/[<>&]/g, "") : "") + " כרגע סגורה.</b><br>לפרטים ולהרשמה: <a href=\"tel:0529067101\">052-9067101</a>";
   }
   cityEl.addEventListener("change", regClosedCheck);
   updateSubjectChoiceVisibility();

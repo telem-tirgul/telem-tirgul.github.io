@@ -516,7 +516,7 @@
       <div class="error-msg" id="termsError"></div>
       <label class="consent" id="field-consent">
         <input type="checkbox" id="f-consent" required>
-        <span id="consentText">אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של הסכום המיידי בכרטיס האשראי בעמוד התשלום המאובטח.</span>
+        <span id="consentText" data-t="t015">אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של הסכום המיידי בכרטיס האשראי בעמוד התשלום המאובטח.</span>
       </label>
       <div class="error-msg" id="consentError"></div>
       </div>
@@ -851,6 +851,10 @@ const FIELDS = [
   ["parent_phone",  "טלפון הורה", "tel"],
   ["parent_email",  "אימייל", "email"]
 ];
+// נועה 7.11: כל טקסט בטופס עריך מ"נוסחי הטפסים" (span data-tx – מתעדכן לבד)
+const PG = "דף התשלום – שדות וטקסטים";
+const PX = (k, def, lbl) => window.TX && TX.h ? TX.h("p." + k, def, lbl, PG) : String(def).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const SUBMIT_T = () => window.TX && TX.s ? TX.s("p.submit", "המשך לתשלום מאובטח", "כפתור השליחה", PG) : "המשך לתשלום מאובטח";
 const FIELD_GROUPS = [["המסלול", ["track", "subject"]], ["פרטי התלמיד/ה", ["student_first", "student_last", "student_phone"]], ["בית הספר", ["city", "school", "grade", "class_num"]], ["פרטי ההורה", ["parent_name", "parent_phone", "parent_email"]]];
 const BASE_REQ = ["parent_name", "parent_phone", "student_first"];
 const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first", "student_last", "student_phone", "school", "grade", "class_num"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
@@ -882,18 +886,17 @@ function fill(d){
     $("recurRow").hidden = false;
     // 5.19.58 (הלקוחה): בלי "× 8" - הסכום לבד, ומתחת בטקסט קטן: מספר התשלומים, מאיזה תאריך ועד יוני כולל
     $("v-recur").textContent = money(d.monthly_amount);
-    $("v-recur-lbl").innerHTML = "";
-    $("v-recur-lbl").appendChild(document.createTextNode("תשלום חודשי - באותו כרטיס"));
+    $("v-recur-lbl").innerHTML = PX("recur", "תשלום חודשי - באותו כרטיס", "שורת התשלום החודשי");
     const sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = recurTxt(d); $("v-recur-lbl").appendChild(sm);
-    $("consentText").textContent = "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של הסכום המיידי בכרטיס האשראי בעמוד התשלום המאובטח, וכן חיוב חודשי אוטומטי באותו כרטיס בסכום ובמספר החיובים המפורטים למעלה.";
+    $("consentText").innerHTML = PX("consent_recur", "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של הסכום המיידי בכרטיס האשראי בעמוד התשלום המאובטח, וכן חיוב חודשי אוטומטי באותו כרטיס בסכום ובמספר החיובים המפורטים למעלה.", "אישור – עם תשלום חודשי");
   }
   const box = $("fieldsBox"), f = d.fields || {}; let shown = 0;
   const grpBox = {};
-  FIELD_GROUPS.forEach(function(g){ const fs = document.createElement("fieldset"); fs.hidden = true; const lg = document.createElement("legend"); lg.textContent = g[0]; fs.appendChild(lg); const r = document.createElement("div"); r.className = "row"; fs.appendChild(r); box.appendChild(fs); g[1].forEach(function(k){ grpBox[k] = r; }); });
+  FIELD_GROUPS.forEach(function(g){ const fs = document.createElement("fieldset"); fs.hidden = true; const lg = document.createElement("legend"); lg.innerHTML = PX("g." + g[1][0], g[0], "כותרת – " + g[0]); fs.appendChild(lg); const r = document.createElement("div"); r.className = "row"; fs.appendChild(r); box.appendChild(fs); g[1].forEach(function(k){ grpBox[k] = r; }); });
   // נועה 6.11: שם ההורה – שני שדות (פרטי + משפחה), כמו במרתון ובשאר הטפסים; נשלח לשרת כ-parent_name
   function mk(k, label, type, val, req, gk){
     const wrap = document.createElement("div"); wrap.className = "field"; wrap.id = "field-" + k;
-    const lab = document.createElement("label"); lab.htmlFor = "f-" + k; lab.textContent = label + " ";
+    const lab = document.createElement("label"); lab.htmlFor = "f-" + k; lab.innerHTML = PX("f." + k, label, "שם השדה – " + label) + " ";
     if (req && (!val || EDITABLE.indexOf(gk || k) >= 0)) { const r = document.createElement("span"); r.className = "req"; r.textContent = "*"; lab.appendChild(r); }
     wrap.appendChild(lab);
     let el;
@@ -906,7 +909,7 @@ function fill(d){
     if (val && ed) { if (el.tagName === "SELECT" && ![].some.call(el.options, function(o){ return o.value === val; })) { const op = document.createElement("option"); op.value = val; op.textContent = val; el.appendChild(op); } el.value = val; el.dataset.orig = val; }
     el.id = "f-" + k; el.dataset.key = k; el.dataset.req = req || (val && ed) ? "1" : "";
     wrap.appendChild(el);
-    const err = document.createElement("div"); err.className = "error-msg"; err.textContent = "שדה חובה"; wrap.appendChild(err);
+    const err = document.createElement("div"); err.className = "error-msg"; err.innerHTML = PX("req", "שדה חובה", "הודעה – שדה חובה"); wrap.appendChild(err);
     const gb = grpBox[gk || k] || box; gb.appendChild(wrap); gb.parentNode.hidden = false;
   }
   FIELDS.forEach(function(def){
@@ -922,6 +925,7 @@ function fill(d){
 }
 const SAMPLE = { status: "opened", description: "הרשמה לתרגולים + חודש ראשון", one_time_amount: 582, monthly_amount: 464, monthly_count: 8, first_monthly_date: "2026-11-01",
   needs_student: true, fields: { parent_name: { value: "מיכל לוי", required: true }, parent_email: { value: "", required: true }, subject: { value: "מתמטיקה" } } };
+submitBtn.textContent = SUBMIT_T(); { let last = submitBtn.textContent; document.addEventListener("telem-texts", () => { if (submitBtn.textContent === last) { submitBtn.textContent = SUBMIT_T(); last = submitBtn.textContent; } }); }
 if (PREVIEW && !CODE) fill(SAMPLE);
 else if (CODE.length < 32) showBad("הקישור לא תקין. לפרטים: 052-9067101");
 else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("pay_link_public", { p_code: CODE })).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא ניתן היה לטעון את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101"));
@@ -932,7 +936,8 @@ function trialTxt(t){
   const inc2 = inc.length > 1 ? inc.slice(0, -1).join(", ") + " ו" + inc[inc.length - 1] : inc[0];
   return "(" + inc2 + ")" + (Number(t.charges_after) > 0 ? ", ולאחר מכן " + money(t.monthly) + " ב-1 בכל חודש עד " + t.last_month + " (" + t.charges_after + " חיובים)" : "") + ". ההמשך לאחר חודש הניסיון – רק בתיאום עמנו; אם לא ממשיכים, לא יבוצע חיוב נוסף.";
 }
-function recurTxt(d){ return d.monthly_count + " תשלומים חודשיים" + (d.first_monthly_date ? ", החל מ-" + dateHe(d.first_monthly_date) : "") + " ועד חודש יוני כולל"; }
+function recurTxt(d){ const v = { "מספר": d.monthly_count, "מתאריך": d.first_monthly_date ? ", החל מ-" + dateHe(d.first_monthly_date) : "" };   // נועה 7.11: עריך
+  return window.TX && TX.s ? TX.s("p.recur_sub", "{מספר} תשלומים חודשיים{מתאריך} ועד חודש יוני כולל", "מספר התשלומים החודשיים", PG, v) : v["מספר"] + " תשלומים חודשיים" + v["מתאריך"] + " ועד חודש יוני כולל"; }
 // 5.19.58: קישור "מהיר" - רק סיכום + כפתור לתשלום (ישר ל-icredit-pay; השרת מסמן את הקישור בעצמו)
 function showQuick(d, sent){
   const box = document.createElement("div"); box.className = "quick-box"; box.id = "quickBox";
@@ -1003,7 +1008,7 @@ $("payForm").addEventListener("submit", function(e){
       .catch(function(err){
         const m = String(err && err.message || "");
         topError.textContent = /used link/.test(m) ? "הטופס כבר נשלח, או שהקישור בוטל. לפרטים: 052-9067101" : /missing field/.test(m) ? "חסרים פרטים בטופס." : /invalid student phone/.test(m) ? "נייד התלמיד/ה לא תקין." : /link expired/.test(m) ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : /invalid (email|phone)/.test(m) ? "האימייל או הטלפון לא תקינים." : "לא ניתן היה לשלוח את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101";
-        topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = "המשך לתשלום מאובטח";
+        topError.style.display = "block"; submitBtn.disabled = false; submitBtn.textContent = SUBMIT_T();
       });
   });
 });

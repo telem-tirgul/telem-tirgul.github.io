@@ -560,7 +560,7 @@
     </section>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></label></div>
     <p style="font-size:13px; color:var(--ink-soft);" data-t="t039">* תאריך ביטול ההרשמה ייחשב לתאריך קבלת הטופס החתום, ובכפוף לאישור הנהלת תלם.</p>
-    <div class="submit-wrap"><button type="submit" id="submitBtn" disabled>שליחת טופס הביטול</button></div>
+    <div class="submit-wrap"><button type="submit" id="submitBtn" disabled data-t="t050">שליחת טופס הביטול</button></div>
   </form>
   <div id="doneBox" hidden></div>
 
@@ -911,6 +911,7 @@ function rpcRaw(fn, body){
   return fetch(s.url + "/rest/v1/rpc/" + fn, { method: "POST", headers: headers, body: JSON.stringify(body) })
     .then(r => r.json().catch(() => null).then(b => { if (!r.ok) throw new Error((b && b.message) || "HTTP " + r.status); return b; }));
 }
+if (window.TX && TX.obj) TX.obj("track", CONFIG.trackInfo, ["title", "body"], "תיאור המסלולים");   // נועה 7.11: אותו נוסח כמו בטופס ההרשמה, עריך
 const TRACK_TITLE = (t) => (CONFIG.trackInfo[t] || {}).title || t || "";
 function showBad(msg){ $("loadBox").hidden = true; $("canForm").hidden = true; $("doneBox").hidden = false; $("doneBox").innerHTML = '<div class="bad-box"></div>'; $("doneBox").firstChild.textContent = msg; }
 function fill(d){

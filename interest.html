@@ -648,6 +648,7 @@ const CONFIG = {
     }
 };
 const $ = (id) => document.getElementById(id);
+if (window.TX) TX.def("i.closed", "<b>ההרשמה סגורה כעת.</b><br>לפרטים: <a href=\"tel:0529067101\">052-9067101</a>", "הודעה – ההרשמה סגורה", {}, { group: "ההרשמה סגורה" });   // נועה 7.11: מופיע בנוסחי הטפסים גם כשהטופס פתוח
 if (window.TX) { TX.obj("track", CONFIG.trackInfo, ["title", "body"], "תיאור המסלולים"); document.addEventListener("telem-texts", () => { try { renderTracks(); } catch(e) {} }); }   // 5.19.100: תיאור המסלולים מהמערכת
 const Q = new URLSearchParams(location.search), PREVIEW = Q.get("preview") === "1";
 if (PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר"; document.body.insertBefore(pb, document.body.firstChild); }
@@ -848,7 +849,7 @@ function intClosedCheck(){
   if (!closed && shut.length && all.every(t => shut.includes(t))) closed = true;
   let box = $("closedBox"); if (!box) { box = document.createElement("div"); box.id = "closedBox"; box.className = "closed-box"; $("intForm").parentNode.insertBefore(box, $("intForm")); }
   box.hidden = !closed; $("intForm").hidden = closed; const tb = $("tracksBox"); if (tb) tb.hidden = closed; const ib = document.querySelector(".intro"); if (ib) ib.hidden = closed;
-  if (closed) box.innerHTML = "<b>ההרשמה סגורה כעת.</b><br>לפרטים: <a href=\"tel:0529067101\">052-9067101</a>";
+  if (closed) box.innerHTML = window.TX && TX.h ? TX.h("i.closed", "<b>ההרשמה סגורה כעת.</b><br>לפרטים: <a href=\"tel:0529067101\">052-9067101</a>", "הודעה – ההרשמה סגורה", "ההרשמה סגורה") : "<b>ההרשמה סגורה כעת.</b><br>לפרטים: <a href=\"tel:0529067101\">052-9067101</a>";   // נועה 7.11: עריך
 }
 $("f-city").addEventListener("change", intClosedCheck);
 const digits = (v) => String(v || "").replace(/\D/g, "");

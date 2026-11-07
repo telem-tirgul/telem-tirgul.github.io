@@ -65,7 +65,7 @@
     <h1 data-t="t002">התשלום לא הושלם</h1>
     <p data-t="t003">תהליך ההרשמה לא הושלם, מאחר שהתשלום לא אושר. לא בוצע חיוב בכרטיס האשראי.</p>
     <p data-t="t004">ניתן לחזור לטופס ולנסות שוב. אם הבעיה חוזרת, נשמח לעמוד לרשותכם בפרטי הקשר שלהלן.</p>
-    <a class="back" id="retry" href="register.html">לנסות שוב</a>
+    <a class="back" id="retry" href="register.html" data-t="t010">לנסות שוב</a>
     <div class="contact"><span data-t="t005">לשאלות:</span> <a href="tel:0529067101">052-9067101</a> · <a href="mailto:telem.tr@gmail.com">telem.tr@gmail.com</a></div>
   </div>
   <script src="texts.js?v=3"></script><!-- תלם 5.19.100: נוסחי הטפסים מהמערכת -->
@@ -83,8 +83,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       fetch("https://oulivucqbpmbavbavfvy.supabase.co/functions/v1/icredit-pay", {
         method: "POST", headers: { "Content-Type": "application/json", "apikey": "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" }, body: JSON.stringify(p)
       }).then(function(r){ return r.json(); }).then(function(b){
-        var u = safePayUrl(b && b.url); if (u) location.href = u; else { btn.textContent = "לנסות שוב"; alertBox(); }
-      }).catch(function(){ btn.textContent = "לנסות שוב"; alertBox(); });
+        var u = safePayUrl(b && b.url); if (u) location.href = u; else { btn.innerHTML = btn.__txSet ? btn.__txLast : (btn.__txDef || "לנסות שוב"); alertBox(); }
+      }).catch(function(){ btn.innerHTML = btn.__txSet ? btn.__txLast : (btn.__txDef || "לנסות שוב"); alertBox(); });
     });
     function alertBox(){ var d = document.createElement("p"); d.textContent = "לא הצלחנו לפתוח את עמוד התשלום. נסו שוב בעוד רגע, או צרו איתנו קשר."; btn.parentNode.insertBefore(d, btn); }
   })();

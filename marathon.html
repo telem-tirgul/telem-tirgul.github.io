@@ -625,7 +625,7 @@
     </div>
 
     <fieldset id="groupFieldset">
-      <legend id="groupLegend">בחירת קבוצה - ימים ושעות</legend>
+      <legend id="groupLegend" data-t="t080">בחירת קבוצה - ימים ושעות</legend>
       <div class="field" id="field-group">
         <div class="field-title" hidden data-t="t008">קבוצה</div>
         <div class="price-options" id="groupOptions"><div class="hint">טוען את הקבוצות…</div></div>
@@ -904,7 +904,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     ["mar.seats", "נותרו {מקומות} מקומות", "מעט מקומות (5 או פחות)", { "מקומות": "כמה מקומות נשארו בקבוצה" }, ["מקומות"]],
     ["mar.price_one", "מחיר המרתון", "שם הסכום (כשיש מחיר אחד)", {}, []],
     ["mar.closed", "ההרשמה למרתון זה סגורה. לפרטים: 052-9067101", "הודעה – מרתון סגור", {}, []],
-    ["mar.oldlink", "קישור זה אינו מעודכן. לקבלת קישור להרשמה: 052-9067101", "הודעה – קישור ישן", {}, []]
+    ["mar.oldlink", "קישור זה אינו מעודכן. לקבלת קישור להרשמה: 052-9067101", "הודעה – קישור ישן", {}, []],
+    // נועה 7.11: כפתור השליחה – עריך (כמו בטופס ההרשמה)
+    ["mar.btn_card", "שליחה ומעבר לתשלום מאובטח ←", "כפתור השליחה – אשראי", {}, [], true],
+    ["mar.btn_phone", "שליחת ההרשמה", "כפתור השליחה – תשלום טלפוני / להשאיר פרטים", {}, [], true],
+    ["mar.btn_paid", "אישור ושליחה", "כפתור השליחה – קישור אישי", {}, [], true]
   ];
   var MTD = {}; MT.forEach(function(d){ MTD[d[0]] = d[1]; });
   if (window.TX) window.TX.defs("נבנה מנתוני המרתון", MT);
@@ -1023,7 +1027,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function renderGroups(){
     var box = document.getElementById("groupOptions"), gs = (MARATHON && MARATHON.groups) || [];
     box.innerHTML = "";
-    if (!gs.length) { box.innerHTML = '<div class="hint">אין כרגע קבוצות פתוחות להרשמה.</div>'; return; }
+    if (!gs.length) { box.innerHTML = '<div class="hint">' + (window.TX && TX.h ? TX.h("mar.no_groups", "אין כרגע קבוצות פתוחות להרשמה.", "הודעה – אין קבוצות פתוחות", "נבנה מנתוני המרתון") : "אין כרגע קבוצות פתוחות להרשמה.") + '</div>'; return; }
     { var dh = marDesc(meetingsOf(gs[0]) || [], MARATHON && MARATHON.city); if (dh) document.getElementById("marInfoDesc").innerHTML = dh; }
     gs.forEach(function(g){
       var full = g.seats_left != null && g.seats_left <= 0;
@@ -1208,11 +1212,12 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const isPhonePay = () => payPhoneEl.checked || isPaidBefore();
   const isPreviewNow = () => EXPLICIT_PREVIEW || (NO_TERMINAL && !isPhonePay());
   const isCardPay = () => document.getElementById("f-paycard").checked;
-  const SUBMIT_TXT = () => MSIGN ? "אישור ושליחה" : isPhonePay() ? "שליחת ההרשמה" : isCardPay() ? "שליחה ומעבר לתשלום מאובטח ←" : "שליחת ההרשמה";
+  let LAST_BTN = "";
+  const SUBMIT_TXT = () => (LAST_BTN = ttx(MSIGN ? "mar.btn_paid" : isCardPay() && !isPhonePay() ? "mar.btn_card" : "mar.btn_phone"));
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
     const c = document.getElementById("consentText"); c.textContent = MSIGN || isPaidBefore() ? (c.dataset.paid || "אני מאשר/ת שהפרטים נכונים.") : isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום · נועה 6.11: קישור אישי / "כבר שילמתי" – רק "הפרטים נכונים"
-    if (!submitBtn.disabled || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור ושליחה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
+    if (!submitBtn.disabled || submitBtn.textContent === LAST_BTN || /^(שליחה ומעבר|שליחת ההרשמה|המשך לתשלום|אישור ושליחה)/.test(submitBtn.textContent)) submitBtn.textContent = SUBMIT_TXT();
     document.getElementById("field-payphone").classList.remove("invalid");
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)

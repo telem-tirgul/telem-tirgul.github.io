@@ -470,7 +470,7 @@
     </fieldset>
 
     <fieldset id="slotsFieldset">
-      <legend><span id="slotsLegendText">מועדים מועדפים</span> <span class="req">*</span></legend>
+      <legend><span id="slotsLegendText" data-t="t070">מועדים מועדפים</span> <span class="req">*</span></legend>
 
       <div class="hint" id="slotsPlaceholder" data-t="t036">הדף יתעדכן כשתבחרו עיר בראש הטופס.</div>
 
@@ -949,7 +949,7 @@
     var isFT = isFreeTextMode();
     introKfarSaba.hidden = !isFT;
     introDefault.hidden = isFT;
-    slotsLegendTextEl.textContent = isFT ? 'לוח סיום יום הלימודים' : 'מועדים מועדפים';
+    slotsLegendTextEl.innerHTML = window.TX && TX.h ? (isFT ? TX.h('sh.legend_ft', 'לוח סיום יום הלימודים', 'כותרת – לוח סיום יום הלימודים', 'כותרות שמשתנות') : TX.h('sh.legend', 'מועדים מועדפים', 'כותרת – מועדים מועדפים', 'כותרות שמשתנות')) : (isFT ? 'לוח סיום יום הלימודים' : 'מועדים מועדפים');   // נועה 7.11: עריך
   }
 
   var introSlotsRangeEl = document.getElementById('introSlotsRange');
