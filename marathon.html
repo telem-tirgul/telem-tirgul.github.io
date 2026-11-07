@@ -612,7 +612,7 @@
       <div id="marInfoDesc">שיעורי לימוד ותרגול אקדמיים.</div>
       <div class="grp-note" data-t="m.meet_note">*נפגשים בכניסה למבנה בית הספר.</div><!-- נועה 6.11 -->
       <div class="mar-price-line"><!-- נועה 7.11: המחיר – שורה אחת בתוך מסגרת התיאור -->
-        <span data-t="mk.price_t">מחיר המרתון:</span> <b id="mpFirst">295 ₪</b> <span class="mp-once" data-t="mk.price_once">(תשלום חד-פעמי)</span>
+        <span data-t="mk.price_t">מחיר המרתון:</span> <b id="mpFirst">295 ₪</b>
         <span id="mpRepRow" hidden> · <span data-t="mk.price_rep">מרתון נוסף השנה:</span> <b id="mpRep">236 ₪</b></span>
       </div>
       <div class="mar-info-label" hidden data-t="t005">מחיר (תשלום חד-פעמי):</div>
@@ -901,7 +901,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     ["mar.full", "הקבוצה מלאה", "קבוצה מלאה", {}, []],
     ["mar.seats", "נותרו {מקומות} מקומות", "מעט מקומות (5 או פחות)", { "מקומות": "כמה מקומות נשארו בקבוצה" }, ["מקומות"]],
     ["mar.price_one", "מחיר המרתון", "שם הסכום (כשיש מחיר אחד)", {}, []],
-    ["mar.closed", "ההרשמה למרתון זה סגורה, או שהקישור אינו תקין. לפרטים: 052-9067101", "הודעה – מרתון סגור / קישור לא תקין", {}, []],
+    ["mar.closed", "ההרשמה למרתון זה סגורה. לפרטים: 052-9067101", "הודעה – מרתון סגור", {}, []],
     ["mar.oldlink", "קישור זה אינו מעודכן. לקבלת קישור להרשמה: 052-9067101", "הודעה – קישור ישן", {}, []]
   ];
   var MTD = {}; MT.forEach(function(d){ MTD[d[0]] = d[1]; });
