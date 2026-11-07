@@ -145,11 +145,11 @@
   // בעורך במערכת – הטיוטה מגיעה מהעורך (sessionStorage של אותו אתר, לפני שהקוד של הטופס רץ – גם לתבניות), ושינויים חיים דרך TX.preview
   // TX.ready – הנוסח מהמסד הגיע (או שיש עותק שמור / תקלה / עברו 2 שניות). טקסט שנבנה בקוד מחכה לזה בכניסה הראשונה.
   var readyFn, done = false; TX.ready = new Promise(function(res){ readyFn = res; });
-  var ready = function(){ if (!done) { done = true; readyFn(); } };
+  var ready = function(){ if (!done) { done = true; readyFn(); } try { document.documentElement.classList.remove("tx-wait"); } catch(e) {} };
   if (EDIT) { ready(); var em = null; try { em = JSON.parse(sessionStorage.getItem("telem_tx_edit_" + FORM) || "null"); } catch(e) {} if (em) set(em, false); return; }
   var cached = null; try { cached = JSON.parse(localStorage.getItem(LS) || "null"); } catch(e) {}
-  if (cached) { set(cached, false); ready(); }
-  setTimeout(ready, 2000);
+  if (cached) set(cached, false);   // נועה 7.11: מציגים רק אחרי הנוסח מהמסד (או 1.2 שניות) – בלי קפיצה
+  setTimeout(ready, 1200);
   fetch(SB + "/rest/v1/form_texts?select=key,value&form=eq." + encodeURIComponent(FORM), { headers: { apikey: KEY } })
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(rows){ if (!rows) { ready(); return; } var m = {}; rows.forEach(function(r){ m[r.key] = r.value; });
