@@ -475,8 +475,8 @@
     .wrap{ max-width:1000px; }
     #marathonForm{ display:block; }
     .layout-side{ position:static; display:grid; grid-template-columns:minmax(0,2fr) minmax(0,3fr); gap:18px; align-items:stretch; margin-bottom:18px; }   /* נועה 6.11: התיאור צר יותר, המפגשים רחבים; שתי המסגרות באותו גובה */
-    .layout-side > .mar-info, .layout-side > fieldset{ margin:0; }
-    .layout-side > .mar-info{ display:flex; flex-direction:column; justify-content:center; font-size:16.5px; }
+    .layout-side .mar-info, .layout-side > .mar-col, .layout-side > fieldset{ margin:0; }
+    .layout-side .mar-info{ display:flex; flex-direction:column; justify-content:center; font-size:16.5px; }
     .side-price{ display:none !important; }
   }
   /* תלם 5.19.41: בלי הכוכבית בכרטיס התיאור (הלקוחה) */
@@ -513,7 +513,7 @@
   /* 5.19.47: כמה קבוצות - כל שורות המפגשים באותו רוחב (מיושר), והתיאור במחשב מתחיל למעלה */
   #groupOptions .price-option > div{ flex:1 1 auto; min-width:0; }
   #groupOptions .opt-title .mt{ width:100%; box-sizing:border-box; }
-  .layout-side > .mar-info{ justify-content:flex-start !important; }
+  .layout-side .mar-info{ justify-content:flex-start !important; }
   #groupOptions .opt-title .mt.mt2{ display:grid !important; grid-template-columns:auto 1fr auto; align-items:center; column-gap:10px; row-gap:2px; }
   #groupOptions .opt-title .mt.mt2::before{ grid-row:1; }
   #groupOptions .mt2 .md{ font-weight:700; }
@@ -568,9 +568,11 @@
   #fsFirstTime .price-option > div{ width:100%; }
   #fsFirstTime .opt-title{ font-size:13.5px !important; font-weight:700; line-height:1.4; color:var(--ink); }
   #fsFirstTime .opt-price{ margin-top:4px; }
-  .mar-prices{ display:flex; flex-direction:column; gap:8px; }
-  .mar-prices .mp-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--border, #E6DDD3); border-radius:12px; background:#fff; }
-  .mar-prices .mp-row[hidden]{ display:none; } .mar-prices b{ font-family:'Heebo',sans-serif; font-size:19px; font-weight:800; color:var(--accent); white-space:nowrap; }
+  .mar-col{ display:flex; flex-direction:column; gap:12px; min-width:0; } .mar-col > .mar-info{ flex:1 1 auto; margin:0; }
+  .mar-price{ background:var(--paper); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:12px 16px; }
+  .mar-price .mp-h{ font-weight:800; color:var(--accent); margin-bottom:6px; }
+  .mar-price .mp-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:6px 0; } .mar-price .mp-row + .mp-row{ border-top:1px solid var(--border); }
+  .mar-price .mp-row[hidden]{ display:none; } .mar-price b{ font-family:'Heebo',sans-serif; font-size:18px; font-weight:800; color:var(--accent); white-space:nowrap; }
   #fsFirstTime .price-option:is(.selected, :has(input:checked)){ background:var(--accent) !important; }
   #fsFirstTime .price-option:is(.selected, :has(input:checked)) :is(.opt-title, .opt-price){ color:#fff !important; }
   #fsFirstTime .price-option:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:-3px; }
@@ -606,6 +608,7 @@
   <form id="marathonForm" novalidate>
 
     <div class="layout-side">
+    <div class="mar-col"><!-- נועה 7.11: המחיר – מתחת לתיאור, ליד מועדי המפגשים -->
     <div class="mar-info" id="marInfo">
       <div class="mar-info-title" id="marInfoTitle" hidden data-t="t004">מרתון מתמטיקה</div>
       <div id="marInfoDesc">שיעורי לימוד ותרגול אקדמיים.</div>
@@ -615,6 +618,12 @@
         <li><b id="marPriceFirst">295 ₪</b> <span data-t="t006">- מרתון ראשון בשנת הלימודים</span></li>
         <li><b id="marPriceRepeat">236 ₪</b> <span data-t="t007">- למי שכבר השתתף/ה במרתון השנה</span></li>
       </ul>
+    </div>
+    <div class="mar-price" id="marPrice">
+      <div class="mp-h" data-t="mk.price_t">מחיר המרתון</div>
+      <div class="mp-row"><span data-t="mk.price_first">מרתון ראשון בשנת הלימודים</span><b id="mpFirst">295 ₪</b></div>
+      <div class="mp-row" id="mpRepRow"><span data-t="mk.price_rep">מי שכבר השתתף/ה במרתון בשנת הלימודים</span><b id="mpRep">236 ₪</b></div>
+    </div>
     </div>
 
     <fieldset id="groupFieldset">
@@ -715,14 +724,6 @@
     </fieldset>
 
     <!-- נועה 28.10: שני חלקים – "רק להשאיר פרטים" (התעניינות) או "להירשם עכשיו" (שאר הטופס + תשלום) -->
-    <!-- נועה 7.11: המחיר – בחלק משלו, לפני הבחירה (רואים אותו גם מי שרק משאיר/ה פרטים) -->
-    <fieldset id="fsPrice">
-      <legend data-t="mk.price_t">מחיר המרתון</legend>
-      <div class="mar-prices">
-        <div class="mp-row"><span data-t="mk.price_first">מרתון ראשון בשנת הלימודים</span><b id="mpFirst">295 ₪</b></div>
-        <div class="mp-row" id="mpRepRow"><span data-t="mk.price_rep">מי שכבר השתתף/ה במרתון בשנת הלימודים</span><b id="mpRep">236 ₪</b></div>
-      </div>
-    </fieldset>
     <fieldset id="fsMode">
       <legend data-t="mk.mode_t">כיצד תרצו להמשיך?</legend>
       <div class="field" id="field-mode">
