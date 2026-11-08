@@ -246,7 +246,10 @@
   .bd-row + .bd-row{ border-top:1px dashed var(--border); }
   .bd-row b{ color:var(--ink); font-weight:600; white-space:nowrap; }
   .amount-row-recur{ margin-bottom:20px; }
-  .tr-h{ font-weight:700; color:var(--ink, #2B2320); margin:14px 2px 6px; }   /* תש-57 */
+  /* תש-57 (נועה 8.11): התשלום השני ויתר התשלומים – מסגרות כמו "בנוסף, תשלום חודשי" בטופס ההרשמה, באותו צבע */
+  #ackCard .amount-row.tr-next{ background:#FBF5E8 !important; border:1px solid #E2C98F !important; border-radius:12px; margin:10px 0 0 !important; align-items:flex-start; }
+  #ackCard .amount-row.tr-next span{ font-weight:700; color:var(--accent, #5A1216); } #ackCard .amount-row.tr-next strong{ font-size:18px !important; }
+  #trialRows{ margin-bottom:16px; }
   #ackCard .amount-row .tr-sub{ display:block; font-size:12.5px !important; font-weight:400 !important; color:var(--muted, #8A7F78) !important; margin-top:2px; }
   .amount-row-recur strong{ font-size:18px; }
 
@@ -510,9 +513,8 @@
       <div class="amount-row"><span data-t="t006">סכום לתשלום מיידי</span><strong id="v-amount"></strong></div>
       <div class="amount-row amount-row-recur" id="recurRow" hidden><span id="v-recur-lbl">תשלום חודשי</span><strong id="v-recur"></strong></div>
       <div id="trialRows" hidden><!-- תש-57 (נועה 8.11): חודש ניסיון – תשלום ראשון עכשיו, ואם נשארים: תשלום שני ויתר התשלומים -->
-        <div class="tr-h" id="trStayH"></div>
-        <div class="amount-row"><span id="trSecLbl"></span><strong id="trSec"></strong></div>
-        <div class="amount-row amount-row-recur"><span id="trRestLbl"></span><strong id="trRest"></strong></div>
+        <div class="amount-row amount-row-recur tr-next"><span id="trSecLbl"></span><strong id="trSec"></strong></div>
+        <div class="amount-row amount-row-recur tr-next"><span id="trRestLbl"></span><strong id="trRest"></strong></div>
       </div>
       <div class="terms-box" id="termsBox" hidden></div>
       <div class="consents-box">
@@ -892,7 +894,6 @@ function fill(d){
     const t = d.trial, v = { "מתאריך": dm(t.start), "עד תאריך": dm(t.end), "תאריך": dm(t.second_date), "חודש אחרון": t.last_month || "", "מספר": t.charges_after || "" };
     $("v-amount").previousElementSibling.innerHTML = PX("tr.first", "תשלום ראשון – עכשיו", "חודש ניסיון – שורת התשלום הראשון") + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + PS("tr.first_sub", "חודש ניסיון: מ-{מתאריך} עד {עד תאריך}", "חודש ניסיון – מתחת לתשלום הראשון", v) + "</small>";
     const inc = ["חודש"].concat(Number(t.late_extra) > 0 ? ["50% על חודש ההצטרפות"] : [], Number(t.registration_fee) > 0 ? ["דמי הרשמה"] : [], Number(t.materials_fee) > 0 ? ["חומרי תרגול"] : []);
-    $("trStayH").innerHTML = PX("tr.stay", "אם מחליטים להישאר בתלם:", "חודש ניסיון – הכותרת מעל התשלום השני");
     $("trSecLbl").innerHTML = PS("tr.second", "תשלום שני – ב-{תאריך}", "חודש ניסיון – התשלום השני", v) + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + esc(inc.join(" + ")) + "</small>";
     $("trSec").textContent = money(t.second_amount);
     if (Number(t.charges_after) > 0) { $("trRestLbl").innerHTML = PX("tr.rest", "יתר התשלומים", "חודש ניסיון – יתר התשלומים") + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + PS("tr.rest_sub", "ב-1 בכל חודש · {מספר} תשלומים עד {חודש אחרון}", "חודש ניסיון – מתחת ליתר התשלומים", v) + "</small>"; $("trRest").textContent = money(t.monthly); }
