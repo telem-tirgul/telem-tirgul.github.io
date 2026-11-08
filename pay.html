@@ -246,6 +246,8 @@
   .bd-row + .bd-row{ border-top:1px dashed var(--border); }
   .bd-row b{ color:var(--ink); font-weight:600; white-space:nowrap; }
   .amount-row-recur{ margin-bottom:20px; }
+  .tr-h{ font-weight:700; color:var(--ink, #2B2320); margin:14px 2px 6px; }   /* תש-57 */
+  #ackCard .amount-row .tr-sub{ display:block; font-size:12.5px !important; font-weight:400 !important; color:var(--muted, #8A7F78) !important; margin-top:2px; }
   .amount-row-recur strong{ font-size:18px; }
 
   .pay-phone{ background:#FBF5E8; border:1.5px solid #E2C98F; border-radius:10px; padding:10px 12px; margin-bottom:10px; }
@@ -507,6 +509,11 @@
       <div class="ti-box"><h3 id="v-desc"></h3></div>
       <div class="amount-row"><span data-t="t006">סכום לתשלום מיידי</span><strong id="v-amount"></strong></div>
       <div class="amount-row amount-row-recur" id="recurRow" hidden><span id="v-recur-lbl">תשלום חודשי</span><strong id="v-recur"></strong></div>
+      <div id="trialRows" hidden><!-- תש-57 (נועה 8.11): חודש ניסיון – תשלום ראשון עכשיו, ואם נשארים: תשלום שני ויתר התשלומים -->
+        <div class="tr-h" id="trStayH"></div>
+        <div class="amount-row"><span id="trSecLbl"></span><strong id="trSec"></strong></div>
+        <div class="amount-row amount-row-recur"><span id="trRestLbl"></span><strong id="trRest"></strong></div>
+      </div>
       <div class="terms-box" id="termsBox" hidden></div>
       <div class="consents-box">
       <label class="consent" id="field-terms">
@@ -854,6 +861,8 @@ const FIELDS = [
 // נועה 7.11: כל טקסט בטופס עריך מ"נוסחי הטפסים" (span data-tx – מתעדכן לבד)
 const PG = "דף התשלום – שדות וטקסטים";
 const PX = (k, def, lbl) => window.TX && TX.h ? TX.h("p." + k, def, lbl, PG) : String(def).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const PS = (k, def, lbl, v) => window.TX && TX.h ? TX.h("p." + k, def, lbl, PG, v) : esc(String(def).replace(/\{([^}]+)\}/g, (m, n) => v && v[n] != null ? v[n] : m));   // תש-57: נוסח עם ערכים
 const SUBMIT_T = () => window.TX && TX.s ? TX.s("p.submit", "המשך לתשלום מאובטח", "כפתור השליחה", PG) : "המשך לתשלום מאובטח";
 const FIELD_GROUPS = [["המסלול", ["track", "subject"]], ["פרטי התלמיד/ה", ["student_first", "student_last", "student_phone"]], ["בית הספר", ["city", "school", "grade", "class_num"]], ["פרטי ההורה", ["parent_name", "parent_phone", "parent_email"]]];
 const BASE_REQ = ["parent_name", "parent_phone", "student_first"];
@@ -879,8 +888,16 @@ function fill(d){
   $("payForm").hidden = false;
   $("v-desc").textContent = d.description || "תשלום לתלם";
   $("v-amount").textContent = money(d.one_time_amount);
-  if (d.trial) {   // נועה 6.11 (שני שלבים): חודש ניסיון = תשלום על חודש אחד, בלי הוראת קבע; ההמשך – בקישור הרשמה נפרד
-    const t = d.trial; $("v-amount").previousElementSibling.textContent = "חודש ניסיון: מ-" + dm(t.start) + " עד " + dm(t.end);
+  if (d.trial) {   // תש-57 (נועה 8.11): חודש ניסיון = הרשמה רגילה – תשלום ראשון עכשיו; "אם מחליטים להישאר בתלם:" תשלום שני ויתר התשלומים
+    const t = d.trial, v = { "מתאריך": dm(t.start), "עד תאריך": dm(t.end), "תאריך": dm(t.second_date), "חודש אחרון": t.last_month || "", "מספר": t.charges_after || "" };
+    $("v-amount").previousElementSibling.innerHTML = PX("tr.first", "תשלום ראשון – עכשיו", "חודש ניסיון – שורת התשלום הראשון") + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + PS("tr.first_sub", "חודש ניסיון: מ-{מתאריך} עד {עד תאריך}", "חודש ניסיון – מתחת לתשלום הראשון", v) + "</small>";
+    const inc = ["חודש"].concat(Number(t.late_extra) > 0 ? ["50% על חודש ההצטרפות"] : [], Number(t.registration_fee) > 0 ? ["דמי הרשמה"] : [], Number(t.materials_fee) > 0 ? ["חומרי תרגול"] : []);
+    $("trStayH").innerHTML = PX("tr.stay", "אם מחליטים להישאר בתלם:", "חודש ניסיון – הכותרת מעל התשלום השני");
+    $("trSecLbl").innerHTML = PS("tr.second", "תשלום שני – ב-{תאריך}", "חודש ניסיון – התשלום השני", v) + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + esc(inc.join(" + ")) + "</small>";
+    $("trSec").textContent = money(t.second_amount);
+    if (Number(t.charges_after) > 0) { $("trRestLbl").innerHTML = PX("tr.rest", "יתר התשלומים", "חודש ניסיון – יתר התשלומים") + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + PS("tr.rest_sub", "ב-1 בכל חודש · {מספר} תשלומים עד {חודש אחרון}", "חודש ניסיון – מתחת ליתר התשלומים", v) + "</small>"; $("trRest").textContent = money(t.monthly); }
+    else $("trRest").closest(".amount-row").hidden = true;
+    $("trialRows").hidden = false;
   } else
   if (d.monthly_amount) {
     $("recurRow").hidden = false;
