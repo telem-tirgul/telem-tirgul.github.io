@@ -893,7 +893,7 @@ function fill(d){
   if (d.trial) {   // תש-57 (נועה 8.11): חודש ניסיון = הרשמה רגילה – תשלום ראשון עכשיו; "אם מחליטים להישאר בתלם:" תשלום שני ויתר התשלומים
     const t = d.trial, v = { "מתאריך": dm(t.start), "עד תאריך": dm(t.end), "תאריך": dm(t.second_date), "חודש אחרון": t.last_month || "", "מספר": t.charges_after || "" };
     $("v-amount").previousElementSibling.innerHTML = PX("tr.first", "תשלום ראשון – עכשיו", "חודש ניסיון – שורת התשלום הראשון") + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + PS("tr.first_sub", "חודש ניסיון: מ-{מתאריך} עד {עד תאריך}", "חודש ניסיון – מתחת לתשלום הראשון", v) + "</small>";
-    const inc = ["חודש"].concat(Number(t.late_extra) > 0 ? ["50% על חודש ההצטרפות"] : [], Number(t.registration_fee) > 0 ? ["דמי הרשמה"] : [], Number(t.materials_fee) > 0 ? ["חומרי תרגול"] : []);
+    const inc = (Number(t.late_extra) > 0 ? ["50% על חודש ההצטרפות"] : ["חודש"]).concat(Number(t.registration_fee) > 0 ? ["דמי הרשמה"] : [], Number(t.materials_fee) > 0 ? ["חומרי תרגול"] : []);   // תש-60 (icredit-48): הצטרפות מה-21 – 50% בלי חודש
     $("trSecLbl").innerHTML = PS("tr.second", "תשלום שני – ב-{תאריך}", "חודש ניסיון – התשלום השני", v) + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + esc(inc.join(" + ")) + "</small>";
     $("trSec").textContent = money(t.second_amount);
     if (Number(t.charges_after) > 0) {   // נועה 8.11: בדיוק כמו בהרשמה – "N תשלומים חודשיים, החל מ-DD.MM.YYYY ועד חודש יוני כולל" (אותו נוסח, p.recur_sub)

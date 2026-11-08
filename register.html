@@ -1891,6 +1891,19 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       var why = d && d.reason; signBad(why === "signed" ? "הטופס כבר נחתם. תודה." : why === "expired" ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101");
     }).catch(function(){ signBad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."); });
   }
+  // תש-59 (icredit-47, נועה 8.11): טופס הרשמה אישי מהכרטיס (register.html?city=…&r=CODE) – ממולא מהכרטיס; בשליחה reg_code → לאותו כרטיס
+  var REG_CODE = (location.search.match(/[?&]r=([0-9A-Za-z]{32})(?:&|$)/) || [])[1] || "";
+  if (REG_CODE) {
+    fetch(CONFIG.supabase.url + "/rest/v1/rpc/reg_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: REG_CODE }) })
+      .then(function(r){ return r.json(); }).then(function(d){
+        if (!d || !d.ok) { var why = d && d.reason; signBad(why === "used" ? "ההרשמה בקישור הזה כבר התקבלה. תודה!" : why === "expired" ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101"); return; }
+        var put = function(id, v){ var el = document.getElementById(id); if (!el || v == null || v === "") return; if (el.tagName === "SELECT") { if (![].some.call(el.options, function(o){ return o.value === String(v) || o.text === String(v); })) return; } el.value = v; el.dispatchEvent(new Event("change", { bubbles: true })); el.dispatchEvent(new Event("input", { bubbles: true })); };
+        put("f-student-first", d.student_first); put("f-student-last", d.student_last); put("f-student-phone", d.student_phone);
+        if (d.school) { var se = document.getElementById("f-school"); if (se && [].some.call(se.options, function(o){ return o.value === d.school; })) put("f-school", d.school); else { put("f-school", "אחר"); put("f-school-other", d.school); } }
+        put("f-grade", d.grade); put("f-class", d.class_num);
+        put("f-parent-first", d.parent_first); put("f-parent-last", d.parent_last); put("f-phone", d.parent_phone); put("f-email", d.parent_email);
+      }).catch(function(){});
+  }
   form.addEventListener("submit", function(e){
     e.preventDefault();
 
@@ -2011,6 +2024,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       },
       parent: { first_name: parentFirst, last_name: parentLast, phone: phone, email: email }
     };
+    if (REG_CODE) payload.reg_code = REG_CODE;   // תש-59: ההרשמה לאותו כרטיס
 
     if (SIGN_CODE) {   // נועה 4.11: מהכרטיס – הקורס הקיים מסומן "טופס חתום" (בלי הרשמה חדשה)
       var vals = { student_first: studentFirst, student_last: studentLast, student_phone: studentPhoneEl.value.trim(), grade: grade, class_num: classNum, parent_first: parentFirst, parent_last: parentLast, parent_phone: phone, parent_email: email };
@@ -2133,6 +2147,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/too many attempts/.test(m)) topError.textContent = "נרשמו ניסיונות שליחה רבים מדי. נא לנסות שוב בעוד מספר דקות.";
     else if (/form too large/.test(m)) topError.textContent = "לא ניתן לשלוח את הטופס, ככל הנראה בשל גודל החתימה. נא למחוק את החתימה, לחתום מחדש ולשלוח.";
     else if (/invalid phone/.test(m)) topError.textContent = "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.";
+    else if (/invalid or used link/.test(m)) topError.textContent = "הקישור כבר שימש להרשמה או שאינו תקין. לפרטים: 052-9067101";
+    else if (/link expired/.test(m)) topError.textContent = "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101";
     else if (/registration closed|unknown or closed track/.test(m)) { var schEl = document.getElementById("f-school"), sch = schEl && schEl.value ? schEl.value : ((document.getElementById("f-city") || {}).value || "");
       topError.textContent = "ההרשמה לתרגול השוטף" + (sch ? " ב" + sch : "") + " סגורה כרגע.\nלפרטים ניתן להתקשר אלינו: 052-9067101"; topError.style.whiteSpace = "pre-line"; }   // אבטחה (2.11): השרת חוסם הרשמה סגורה
     else if (/needs review|already registered/.test(m)) {   // נועה 8.11: גם "כבר רשום/ה" – בלי הודעת שגיאה; ההתראה נכנסת למערכת ונחזור אליהם. אבטחה (כל-21, 3.11): אותו שם בלי טלפון מוכר וכבר רשום – לא שומרים, לא מגלים; נחזור אליהם
