@@ -310,6 +310,8 @@
   html.sg-prefill #trackPick > :not(.tp-on), html.sg-prefill #trackPick .tp-radio{ display:none !important; }   /* מהכרטיס – רק המסלול שנבחר */
   html.sig-only #payPhoneOnly{ display:block !important; background:#EEF6EF; border:1px solid #BFD9C4; color:#2F6B3D; border-radius:12px; padding:10px 14px; font-size:14.5px; }
   html.sig-only #payPhoneOnly.unpaid{ background:#FFF6E0 !important; border-color:#E9CF8F !important; color:#6B4D12 !important; }
+  html.sg-trial .pay-grp-h, html.sg-trial .pay-once, html.sg-trial .amount-row-recur{ display:none !important; }
+  html.sig-only #payPhoneOnly.trial{ background:#EAF3FB !important; border-color:#A9C9E6 !important; color:#1F4566 !important; }   /* תש-47: חודש ניסיון */
   .submit-wrap{ text-align:center; margin-top:30px; }
   button#submitBtn{
     font-family:'Heebo',sans-serif;
@@ -1878,12 +1880,19 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (d.registered === false) {   /* נועה 5.11 (166): הקורס עוד לא "רשום" – לא "התשלום בוצע" */
       var pu = document.getElementById("payPhoneOnly"); if (pu) { pu.classList.add("unpaid"); pu.innerHTML = RH("r.card_unpaid", "<b>📞 התשלום יוסדר טלפונית</b> ונציגנו ייצרו עמכם קשר. בשלב זה נותר רק לאשר את התנאים ולחתום.", "הקישור מהכרטיס – עוד לא שולם"); }
       var au = document.getElementById("amtFirstLbl"); if (au) au.innerHTML = RH("r.first_unpaid", "תשלום ראשון – ייגבה טלפונית", "הסכום הראשון – הקישור מהכרטיס, עוד לא שולם"); }
+    if (d.trial && !d.trial.ended) {   /* תש-47 (נועה): בחודש ניסיון – מה קורה אם ממשיכים (כמה, מתי ובאיזה כרטיס) */
+      var t = d.trial, dm = function(x){ var m = String(x || "").match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + "." + m[2] : String(x || ""); }, nis = function(n){ return n == null ? "" : "₪" + Number(n).toLocaleString("he-IL"); };
+      var tv = { "סוף הניסיון": dm(t.end), "תאריך החיוב": dm(t.second_date), "סכום ראשון": nis(t.second_amount), "כרטיס": t.card_last4 || "", "סכום חודשי": nis(t.monthly), "חודש אחרון": t.last_month || "" };
+      var pt = document.getElementById("payPhoneOnly"); if (pt) { pt.classList.remove("unpaid"); pt.classList.add("trial"); pt.hidden = false;
+        pt.innerHTML = RH("r.trial_note", "<b>🎓 חודש הניסיון עד {סוף הניסיון}.</b> אם ממשיכים – ב-{תאריך החיוב} ייגבו {סכום ראשון} (חודש + דמי הרשמה + חומרי תרגול) בכרטיס שמסתיים ב-{כרטיס}, ואז {סכום חודשי} ב-1 בכל חודש עד {חודש אחרון}.", "הקישור מהכרטיס – בחודש ניסיון: ההמשך", tv); }
+      document.documentElement.classList.add("sg-trial");   /* הסכומים של הטופס הרגיל לא נכונים לניסיון – ההסבר למטה במקומם */
+    }
     var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + RH("r.intro_card", "שלום {שם ההורה}, להלן טופס ההרשמה של <b>{שם התלמיד/ה}</b> ל{קורס}.", "פתיחה – הקישור מהכרטיס", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": d.course || "" }) + "</div><div class=\"sg-sub\">" + RH("r.intro_card_sub", "הפרטים כבר ממולאים. יש לוודא שהם נכונים, לקרוא את התנאים, לסמן את שני האישורים, לחתום ולשלוח. מילוי הטופס אורך כדקה.", "פתיחה – הקישור מהכרטיס (שורה שנייה)") + "</div>";
   }
   function escHtml(t){ return String(t).replace(/[&<>"']/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function signBad(msg){ var ri = document.getElementById("regInfo"); if (ri) ri.innerHTML = "<div>" + escHtml(msg) + "</div>"; form.hidden = true; }
   // עורך הנוסחים במערכת: הקישור מהכרטיס עם נתוני דוגמה (c=sample, בלי שרת)
-  if (PHONE_REG && /[?&]c=sample(&|$)/.test(location.search)) setTimeout(function(){ signFill({ ok: true, registered: !/[?&]unpaid=1/.test(location.search), student_first: "נועה", student_last: "לוי", student_phone: "0500000000", grade: "ז'", class_num: "3", school: (CONFIG.citySchools[cityEl.value] || [""])[0], city: cityEl.value, course: "תרגול שוטף תשפ\"ז", track: "single", subject: "מתמטיקה", parent_first: "מיכל", parent_last: "לוי", parent_phone: "0500000001", parent_email: "parent@example.com" }); }, 300);
+  if (PHONE_REG && /[?&]c=sample(&|$)/.test(location.search)) setTimeout(function(){ signFill({ ok: true, trial: /[?&]trial=1/.test(location.search) ? { ended: false, start: "2026-11-01", end: "2026-11-28", second_date: "2026-12-01", second_amount: 1031, monthly: 742, card_last4: "1234", last_month: "06/2027" } : null, registered: !/[?&]unpaid=1/.test(location.search), student_first: "נועה", student_last: "לוי", student_phone: "0500000000", grade: "ז'", class_num: "3", school: (CONFIG.citySchools[cityEl.value] || [""])[0], city: cityEl.value, course: "תרגול שוטף תשפ\"ז", track: "single", subject: "מתמטיקה", parent_first: "מיכל", parent_last: "לוי", parent_phone: "0500000001", parent_email: "parent@example.com" }); }, 300);
   if (SIGN_CODE) {
     var sgp = { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey };
     fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: sgp, body: JSON.stringify({ p_code: SIGN_CODE }) }).then(function(r){ return r.json(); }).then(function(d){
