@@ -870,7 +870,7 @@ const FIELD_GROUPS = [["המסלול", ["track", "subject"]], ["פרטי התל�
 const BASE_REQ = ["parent_name", "parent_phone", "student_first"];
 const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first", "student_last", "student_phone", "school", "grade", "class_num"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
 const money = (n) => "₪" + Number(n).toLocaleString("he-IL", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-const dateHe = (d) => { if (!d) return ""; const p = String(d).split("-"); return p.length === 3 ? (+p[2]) + "." + (+p[1]) + "." + p[0] : d; };
+const dateHe = (d) => { if (!d) return ""; const p = String(d).slice(0, 10).split("-"); return p.length === 3 ? p[2] + "." + p[1] + "." + p[0] : d; };   // נועה 8.11: כמו בטופס ההרשמה – 01.12.2026
 var LINK = null;
 // נועה 6.11: עיר + בית ספר לדף התודה (קבוצת הווטסאפ של בית הספר)
 function payCS(){ var F = (LINK && LINK.fields) || {}, fv = function(k){ return (F[k] && F[k].value) || (LINK && LINK[k]) || ""; }; return { city: (($("f-city") || {}).value || fv("city")), school: (($("f-school") || {}).value || fv("school")) }; }
@@ -896,7 +896,9 @@ function fill(d){
     const inc = ["חודש"].concat(Number(t.late_extra) > 0 ? ["50% על חודש ההצטרפות"] : [], Number(t.registration_fee) > 0 ? ["דמי הרשמה"] : [], Number(t.materials_fee) > 0 ? ["חומרי תרגול"] : []);
     $("trSecLbl").innerHTML = PS("tr.second", "תשלום שני – ב-{תאריך}", "חודש ניסיון – התשלום השני", v) + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + esc(inc.join(" + ")) + "</small>";
     $("trSec").textContent = money(t.second_amount);
-    if (Number(t.charges_after) > 0) { $("trRestLbl").innerHTML = PX("tr.rest", "יתר התשלומים", "חודש ניסיון – יתר התשלומים") + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + PS("tr.rest_sub", "ב-1 בכל חודש · {מספר} תשלומים עד {חודש אחרון}", "חודש ניסיון – מתחת ליתר התשלומים", v) + "</small>"; $("trRest").textContent = money(t.monthly); }
+    if (Number(t.charges_after) > 0) {   // נועה 8.11: בדיוק כמו בהרשמה – "N תשלומים חודשיים, החל מ-DD.MM.YYYY ועד חודש יוני כולל" (אותו נוסח, p.recur_sub)
+      const sd = String(t.second_date || "").slice(0, 10).split("-").map(Number), nx = sd.length === 3 ? (sd[1] === 12 ? (sd[0] + 1) + "-01-01" : sd[0] + "-" + String(sd[1] + 1).padStart(2, "0") + "-01") : "";
+      $("trRestLbl").innerHTML = PX("tr.rest", "יתר התשלומים", "חודש ניסיון – יתר התשלומים") + '<small class="tr-sub" style="display:block;font-size:12.5px;font-weight:400;opacity:.75;">' + esc(recurTxt({ monthly_count: t.charges_after, first_monthly_date: nx })) + "</small>"; $("trRest").textContent = money(t.monthly); }
     else $("trRest").closest(".amount-row").hidden = true;
     $("trialRows").hidden = false;
   } else
