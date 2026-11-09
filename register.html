@@ -1424,7 +1424,36 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     phoneEl.value = phoneEl.value.replace(/\D/g, "").slice(0, 10);
   });
 
+  // תש-70 (icredit-55, נועה 9.11): טופס הרשמה אישי עם חודש ניסיון – הסכומים מהשרת (reg_link_get.trial), לכל מסלול
+  var TRIAL = null;
+  function trDM(iso){ return iso ? String(iso).slice(8, 10) + "." + String(iso).slice(5, 7) : ""; }
+  function trMonth(iso){ var M = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"]; if (!iso) return ""; if (/^\d{4}-\d{2}/.test(String(iso))) return M[Number(String(iso).slice(5, 7)) - 1] || String(iso); return String(iso); }
+  function trialTrack(){ if (!TRIAL) return null; var v = subjectEl.value; return TRIAL.tracks.filter(function(t){ return t.track_type === v; })[0] || null; }
+  function trialSetup(t){
+    TRIAL = t; document.body.classList.add("is-trial");
+    var h = document.createElement("div"); h.className = "trial-banner"; h.innerHTML = "<b>🎁 חודש ניסיון</b><span>מתחיל ב-" + trDM(t.start) + ". מחיר החודש הראשון – בהמשך, לפי המסלול שתבחרו.</span>";
+    form.insertBefore(h, form.firstChild);
+    var box = document.querySelector(".consents-box"), lb = document.createElement("label"); lb.className = "consent"; lb.id = "field-consent-recur";
+    lb.innerHTML = '<input type="checkbox" id="f-consent-recur" required> <span id="consentRecurText">אני מאשר/ת הוראת קבע לפי הפירוט למעלה. מי שלא ממשיכים – מודיעים לנו לפני מועד החיוב השני.</span>';
+    if (box) box.insertBefore(lb, box.firstChild);
+    var e = document.createElement("div"); e.className = "error-msg"; e.id = "consentRecurError"; if (box) box.insertBefore(e, lb.nextSibling);
+    var st = document.createElement("style"); st.textContent = ".trial-banner{display:flex;flex-direction:column;gap:2px;background:#FBF0DC;border:1px solid #E8D3A6;color:#5A3F0E;border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:14.5px}.trial-banner b{font-size:17px}.bd-note{font-size:12.5px;color:#6B625A;margin-top:4px}body.is-trial .amount-row-recur,body.is-trial .pay-grp-h{display:none !important}";
+    document.head.appendChild(st);
+    try { updateAmountDisplay(); } catch(x) {}
+  }
+  function trialPaint(){
+    var tr = trialTrack(); amountBreakdown.textContent = "";
+    if (!tr) { amountDisplay.innerHTML = "יש לבחור מסלול"; amountDisplay.classList.add("ph"); return; }
+    amountDisplay.textContent = "₪" + Number(tr.first_amount).toFixed(2); amountDisplay.classList.remove("ph");
+    var rows = [["היום – חודש הניסיון (מ-" + trDM(tr.start || TRIAL.start) + " עד " + trDM(tr.end) + ")", tr.first_amount],
+                ["ב-" + trDM(tr.second_date) + ": " + (Number(tr.late_extra) > 0 ? "50% על חודש ההצטרפות" : "חודש") + " + דמי שיבוץ והרשמה + חומרי תרגול", tr.second_amount],
+                ["ואחר כך בכל חודש" + (tr.last_month ? " עד " + trMonth(tr.last_month) : ""), tr.monthly]];
+    rows.forEach(function(p){ var d = document.createElement("div"); d.className = "bd-row"; var a = document.createElement("span"); a.textContent = p[0]; var b = document.createElement("b"); b.textContent = "₪" + Number(p[1] || 0).toFixed(2); d.appendChild(a); d.appendChild(b); amountBreakdown.appendChild(d); });
+    var n = document.createElement("div"); n.className = "bd-note"; n.textContent = "לא ממשיכים אחרי חודש הניסיון? מודיעים לנו לפני " + trDM(tr.second_date) + " – ואין חיוב נוסף."; amountBreakdown.appendChild(n);
+    var ct = document.getElementById("consentRecurText"); if (ct) ct.textContent = "אני מאשר/ת הוראת קבע: ב-" + trDM(tr.second_date) + " ₪" + Number(tr.second_amount).toFixed(2) + ", ואחר כך ₪" + Number(tr.monthly).toFixed(2) + " בכל חודש" + (tr.last_month ? " עד " + trMonth(tr.last_month) : "") + ". מי שלא ממשיכים – מודיעים לפני " + trDM(tr.second_date) + ".";
+  }
   function getAmount(){
+    if (TRIAL) { var tt = trialTrack(); return tt ? Number(tt.first_amount) : null; }
     // הסכום הנגבה מיידית כולל שלושה מרכיבים אפשריים:
     // 1. דמי שיבוץ והרשמה (registrationFee) - תמיד.
     // 2. עלות חומרי תרגול/עזרי לימוד דיגיטליים (materialsFee), אם יש
@@ -1446,6 +1475,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
 
   function updateAmountDisplay(){
+    if (TRIAL) { trialPaint(); return; }
     var amount = getAmount();
     if (amount != null) amountDisplay.textContent = "₪" + amount.toFixed(2); else amountDisplay.innerHTML = RH("r.amount_none", "יש לבחור עיר ומסלול", "במקום הסכום – כשעוד לא נבחר מסלול");
     amountDisplay.classList.toggle("ph", amount == null);   // 5.19.84: כמו במרתון – הודעה במקום סכום בכתב קטן
@@ -1902,6 +1932,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         if (d.school) { var se = document.getElementById("f-school"); if (se && [].some.call(se.options, function(o){ return o.value === d.school; })) put("f-school", d.school); else { put("f-school", "אחר"); put("f-school-other", d.school); } }
         put("f-grade", d.grade); put("f-class", d.class_num);
         put("f-parent-first", d.parent_first); put("f-parent-last", d.parent_last); put("f-phone", d.parent_phone); put("f-email", d.parent_email);
+        if (d.trial && Array.isArray(d.trial.tracks)) trialSetup(d.trial);   // תש-70 (icredit-55): חודש ניסיון
       }).catch(function(){});
   }
   form.addEventListener("submit", function(e){
@@ -1926,6 +1957,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     const amount = getAmount();
 
     let valid = true;
+    if (TRIAL) { var cr = document.getElementById("f-consent-recur"), ce = document.getElementById("consentRecurError"); if (cr && !cr.checked) { valid = false; if (ce) ce.textContent = "יש לאשר את הוראת הקבע"; } else if (ce) ce.textContent = ""; }   // תש-70
 
     setInvalid("field-city", !cityEl.value);
     if (!cityEl.value) valid = false;
@@ -2025,6 +2057,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       parent: { first_name: parentFirst, last_name: parentLast, phone: phone, email: email }
     };
     if (REG_CODE) payload.reg_code = REG_CODE;   // תש-59: ההרשמה לאותו כרטיס
+    if (TRIAL) payload.consent_recur = !!(document.getElementById("f-consent-recur") || {}).checked;   // תש-70: חודש ניסיון – אישור הוראת קבע
 
     if (SIGN_CODE) {   // נועה 4.11: מהכרטיס – הקורס הקיים מסומן "טופס חתום" (בלי הרשמה חדשה)
       var vals = { student_first: studentFirst, student_last: studentLast, student_phone: studentPhoneEl.value.trim(), grade: grade, class_num: classNum, parent_first: parentFirst, parent_last: parentLast, parent_phone: phone, parent_email: email };
