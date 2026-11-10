@@ -1431,8 +1431,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function trialTrack(){ if (!TRIAL) return null; var v = subjectEl.value; return TRIAL.tracks.filter(function(t){ return t.track_type === v; })[0] || null; }
   function trialSetup(t){
     TRIAL = t; document.body.classList.add("is-trial");
-    var h = document.createElement("div"); h.className = "trial-banner"; h.innerHTML = "<b>🎁 חודש ניסיון</b><span>מתחיל ב-" + trDMY(t.start) + ". הסכומים – למטה, לפי המסלול שתבחרו.</span>";
-    form.insertBefore(h, form.firstChild);
+    // נועה 10.11: בלי כותרת "חודש ניסיון" למעלה – רק הסכומים למטה משתנים
     var box = document.querySelector(".consents-box"), lb = document.createElement("label"); lb.className = "consent"; lb.id = "field-consent-recur";
     lb.innerHTML = '<input type="checkbox" id="f-consent-recur" required> <span id="consentRecurText">אני מאשר/ת הוראת קבע לפי הפירוט למעלה. מי שלא ממשיכים – מודיעים לנו לפני מועד החיוב השני.</span>';
     if (box) box.insertBefore(lb, box.firstChild);
