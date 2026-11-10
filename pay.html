@@ -934,6 +934,7 @@ function fill(d){
   }
   FIELDS.forEach(function(def){
     const k = def[0], cfg = f[k] || {}, val = (cfg.value || "").trim();
+    if (cfg.hide) return;   // מערכת הניהול 5.21.88 (נועה 10.11): שדה "לא להצגה" – נשמר בקישור, ההורה לא רואה
     const req = !!cfg.required || (d.needs_student && BASE_REQ.indexOf(k) >= 0);
     if (!val && !req) return;
     shown++;
