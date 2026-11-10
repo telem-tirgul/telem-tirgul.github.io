@@ -1432,10 +1432,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function trialSetup(t){
     TRIAL = t; document.body.classList.add("is-trial");
     // נועה 10.11: בלי כותרת "חודש ניסיון" למעלה – רק הסכומים למטה משתנים
-    var box = document.querySelector(".consents-box"), lb = document.createElement("label"); lb.className = "consent"; lb.id = "field-consent-recur";
-    lb.innerHTML = '<input type="checkbox" id="f-consent-recur" required> <span id="consentRecurText">אני מאשר/ת הוראת קבע לפי הפירוט למעלה. מי שלא ממשיכים – מודיעים לנו לפני מועד החיוב השני.</span>';
-    if (box) box.insertBefore(lb, box.firstChild);
-    var e = document.createElement("div"); e.className = "error-msg"; e.id = "consentRecurError"; if (box) box.insertBefore(e, lb.nextSibling);
+    // נועה 10.11: בלי צ'קבוקס נוסף – הטקסט של הוראת הקבע נכנס לצ'קבוקס האישור הקיים (f-consent)
+    var cs = document.getElementById("consentText"); if (cs && !document.getElementById("consentRecurText")) { var wr = document.createElement("span"), sp = document.createElement("span"); sp.id = "consentRecurText"; cs.parentNode.insertBefore(wr, cs); wr.appendChild(cs); wr.appendChild(sp); }
     var st = document.createElement("style"); st.textContent = ".trial-banner{display:flex;flex-direction:column;gap:2px;background:#FBF0DC;border:1px solid #E8D3A6;color:#5A3F0E;border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:14.5px}.trial-banner b{font-size:17px}.bd-note{font-size:12.5px;color:#6B625A;margin-top:4px}body.is-trial .pay-grp-h{display:none !important}";
     document.head.appendChild(st);
     try { updateAmountDisplay(); } catch(x) {}
@@ -1463,7 +1461,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     recurLabel.innerHTML = "בנוסף, תשלום חודשי<small class=\"recur-sub\">" + (n ? n + " " : "") + "תשלומים חודשיים, החל מ-" + trDMY(from) + " ועד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל</small>";
     var until = trAdd(start, 21);
     noteEl.textContent = "במידה ולא תרצו להמשיך נא להודיע לתלם עד לתאריך " + trDMY(until) + " ולפי תנאי ההתקשרות.";
-    var ct = document.getElementById("consentRecurText"); if (ct) ct.textContent = "אני מאשר/ת הוראת קבע: סכום לתשלום חודש שני ב-" + trDMY(tr.second_date) + " ₪" + Number(tr.second_amount).toFixed(2) + ", ובנוסף תשלום חודשי ₪" + Number(tr.monthly).toFixed(2) + " עד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל. במידה ולא תרצו להמשיך – להודיע לתלם עד " + trDMY(until) + ", ולפי תנאי ההתקשרות.";
+    var ct = document.getElementById("consentRecurText"); if (ct) ct.textContent = " הוראת קבע: סכום לתשלום חודש שני ב-" + trDMY(tr.second_date) + " ₪" + Number(tr.second_amount).toFixed(2) + ", ובנוסף תשלום חודשי ₪" + Number(tr.monthly).toFixed(2) + " עד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל. במידה ולא תרצו להמשיך – להודיע לתלם עד " + trDMY(until) + ", ולפי תנאי ההתקשרות.";
   }
   function getAmount(){
     if (TRIAL) { var tt = trialTrack(); return tt ? Number(tt.first_amount) : null; }
@@ -1975,7 +1973,6 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     const amount = getAmount();
 
     let valid = true;
-    if (TRIAL) { var cr = document.getElementById("f-consent-recur"), ce = document.getElementById("consentRecurError"); if (cr && !cr.checked) { valid = false; if (ce) ce.textContent = "יש לאשר את הוראת הקבע"; } else if (ce) ce.textContent = ""; }   // תש-70
 
     setInvalid("field-city", !cityEl.value);
     if (!cityEl.value) valid = false;
@@ -2075,7 +2072,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       parent: { first_name: parentFirst, last_name: parentLast, phone: phone, email: email }
     };
     if (REG_CODE) payload.reg_code = REG_CODE;   // תש-59: ההרשמה לאותו כרטיס
-    if (TRIAL) payload.consent_recur = !!(document.getElementById("f-consent-recur") || {}).checked;   // תש-70: חודש ניסיון – אישור הוראת קבע
+    if (TRIAL) payload.consent_recur = !!(document.getElementById("f-consent") || {}).checked;   // תש-70: חודש ניסיון – אישור הוראת קבע
 
     if (SIGN_CODE) {   // נועה 4.11: מהכרטיס – הקורס הקיים מסומן "טופס חתום" (בלי הרשמה חדשה)
       var vals = { student_first: studentFirst, student_last: studentLast, student_phone: studentPhoneEl.value.trim(), grade: grade, class_num: classNum, parent_first: parentFirst, parent_last: parentLast, parent_phone: phone, parent_email: email };
@@ -2202,11 +2199,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     else if (/link expired/.test(m)) topError.textContent = "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101";
     else if (/registration closed|unknown or closed track/.test(m)) { var schEl = document.getElementById("f-school"), sch = schEl && schEl.value ? schEl.value : ((document.getElementById("f-city") || {}).value || "");
       topError.textContent = "ההרשמה לתרגול השוטף" + (sch ? " ב" + sch : "") + " סגורה כרגע.\nלפרטים ניתן להתקשר אלינו: 052-9067101"; topError.style.whiteSpace = "pre-line"; }   // אבטחה (2.11): השרת חוסם הרשמה סגורה
-    else if (/needs review|already registered/.test(m)) {   // נועה 8.11: גם "כבר רשום/ה" – בלי הודעת שגיאה; ההתראה נכנסת למערכת ונחזור אליהם. אבטחה (כל-21, 3.11): אותו שם בלי טלפון מוכר וכבר רשום – לא שומרים, לא מגלים; נחזור אליהם
-      topError.style.display = "none"; var rn = document.getElementById("reviewNote");
-      if (!rn) { rn = document.createElement("div"); rn.id = "reviewNote"; rn.setAttribute("role", "status"); rn.style.cssText = "background:#EAF6EC;border:1.5px solid #8CC79A;color:#1E5B2C;border-radius:12px;padding:14px 16px;margin:12px 0;font-size:16px;line-height:1.6;white-space:pre-line;font-weight:600;"; topError.parentNode.insertBefore(rn, topError.nextSibling); }
-      rn.textContent = "הפרטים התקבלו ונחזור אליכם בהקדם.\nלשאלות: 052-9067101"; rn.scrollIntoView({ behavior: "smooth", block: "center" });
-      submitBtn.disabled = true; submitBtn.textContent = "הפרטים נשלחו"; return; }
+    else if (/needs review|already registered/.test(m)) {   // נועה 10.11: גם כשכבר קיימת הרשמה פעילה – לדף התודה ("טופס ההרשמה התקבל" + "כבר קיימת הרשמה פעילה… נחזור אליכם"), לא הודעה בתוך הטופס. אבטחה (כל-21): לא מגלים פרטים
+      try { sessionStorage.removeItem("reg_summary"); } catch (x) {}
+      location.href = "thank-you.html?review=1"; return; }
     else if (m) console.warn("submit error:", m);   // נועה 25.10: בלי קוד שגיאה בטופס
     topError.style.display = "block";
     topError.scrollIntoView({ behavior: "smooth", block: "center" });

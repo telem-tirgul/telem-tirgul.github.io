@@ -158,6 +158,7 @@
     ["ty.al_title", "הפרטים כבר אצלנו", "מרתון – כבר נשלח: כותרת", {}, []],   // נועה 6.11: בלי "רשום/ה" בשום מקום
     ["ty.al_lead", "הפרטים כבר שמורים אצלנו, ואין צורך לשלוח את הטופס פעם נוספת.<br>נתראה במרתון!", "מרתון – כבר רשום/ה: הטקסט", {}, []],
     ["ty.int_title", "תודה, פנייתכם התקבלה", "התעניינות – כותרת", {}, []],
+    ["ty.rev_msg", "כבר קיימת הרשמה פעילה באותו הקורס, נחזור אליכם בהקדם.", "הרשמה – כבר קיימת הרשמה פעילה: ההודעה מתחת לכותרת", {}, []],   // נועה 10.11
     ["ty.int_msg", "נציג תלם ייצור עמכם קשר בהקדם עם פרטים על התרגולים השוטפים.", "התעניינות – ההודעה בתיבה", {}, []],
     ["ty.lead_title", "תודה, פנייתכם התקבלה", "רק פרטים (מרתון) – כותרת", {}, []],
     ["ty.lead_lead", "נציג תלם ייצור עמכם קשר בהקדם עם פרטים על המרתון.", "רק פרטים (מרתון) – שורה מתחת לכותרת", {}, []],
@@ -239,6 +240,12 @@
       $("title").textContent = tyT("ty.int_title"); $("title").classList.add("ty-ok"); $("stChip").hidden = true;
       var pmI = $("pendingMsg"); pmI.innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.int_msg") + '</span>'; pmI.hidden = false;
       document.title = "פנייתכם התקבלה - תלם"; return;
+    }
+    // נועה 10.11: טופס הרשמה כשכבר קיימת הרשמה פעילה – דף התודה ("טופס ההרשמה התקבל") ושורה אחת מתחת, לא הודעה בתוך הטופס
+    if ((/[?&]review=1/.test(location.search) && !TY_EDIT) || (TY_EDIT && TYV === "review")) {
+      $("title").textContent = tyT("ty.title_reg"); $("title").classList.add("ty-ok"); $("stChip").hidden = true;
+      var pmR = $("pendingMsg"); pmR.innerHTML = '<span class="ic">📞</span><span>' + tyH("ty.rev_msg") + '</span>'; pmR.hidden = false;
+      document.title = "טופס ההרשמה התקבל - תלם"; return;
     }
     // תלם 5.19.41: תשלום טלפוני - ההרשמה עוד לא הושלמה (נוסח הלקוחה), בכל הטפסים
     if (phone && pending && !preview) {
