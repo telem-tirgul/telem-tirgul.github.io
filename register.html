@@ -1435,8 +1435,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // נועה 10.11: בלי כותרת "חודש ניסיון" למעלה – רק הסכומים למטה משתנים
     // נועה 10.11: בלי צ'קבוקס נוסף – הטקסט של הוראת הקבע נכנס לצ'קבוקס האישור הקיים (f-consent)
     // נועה 10.11 (22:18): צ'קבוקס האישור – כמו בהרשמה רגילה ("בסכומים ובמועדים"), בלי פירוט התשלומים
-    var st = document.createElement("style"); st.textContent = ".trial-banner{display:flex;flex-direction:column;gap:2px;background:#FBF0DC;border:1px solid #E8D3A6;color:#5A3F0E;border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:14.5px}.trial-banner b{font-size:17px}.bd-note{font-size:12.5px;color:#6B625A;margin-top:4px}body.is-trial .pay-grp-h{display:none !important}";
-    document.head.appendChild(st);
+    // נועה 10.11: אותו טופס בדיוק – בלי עיצוב / כותרות / הסברים נוספים לחודש ניסיון
     try { updateAmountDisplay(); } catch(x) {}
   }
   function trDMY(iso){ return iso ? String(iso).slice(8, 10) + "." + String(iso).slice(5, 7) + "." + String(iso).slice(0, 4) : ""; }
@@ -1447,21 +1446,18 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var row2 = document.getElementById("trial2Row");
     if (!row2) { var po = document.querySelector(".pay-once"); row2 = document.createElement("div"); row2.className = "amount-row amount-row-recur"; row2.id = "trial2Row";
       row2.innerHTML = '<span id="trial2Label"></span><strong id="trial2Amount"></strong>'; if (po) po.parentNode.insertBefore(row2, po.nextSibling); }
-    var noteEl = document.getElementById("trialNote");
-    if (!noteEl) { noteEl = document.createElement("div"); noteEl.className = "bd-note"; noteEl.id = "trialNote"; var rr = document.querySelector(".amount-row-recur:not(#trial2Row)"); if (rr) rr.parentNode.insertBefore(noteEl, rr.nextSibling); }
-    if (!tr) { amountDisplay.innerHTML = "יש לבחור מסלול"; amountDisplay.classList.add("ph"); row2.style.display = "none"; recurAmountDisplay.textContent = ""; recurLabel.innerHTML = "בנוסף, תשלום חודשי"; noteEl.textContent = ""; return; }
+    if (!tr) { amountDisplay.innerHTML = "יש לבחור מסלול"; amountDisplay.classList.add("ph"); row2.style.display = "none"; recurAmountDisplay.textContent = ""; recurLabel.innerHTML = "בנוסף, תשלום חודשי"; return; }
     row2.style.display = "";
     var start = tr.start || TRIAL.start;
     amountDisplay.textContent = "₪" + Number(tr.first_amount).toFixed(2); amountDisplay.classList.remove("ph");
     var d = document.createElement("div"); d.className = "bd-row"; var a = document.createElement("span"); a.textContent = "שכר לימוד חודש ניסיון";   // נועה 10.11: בלי תאריכים
     var b = document.createElement("b"); b.textContent = "₪" + Number(tr.first_amount).toFixed(2); d.appendChild(a); d.appendChild(b); amountBreakdown.appendChild(d);
-    document.getElementById("trial2Label").innerHTML = "בנוסף, סכום לתשלום חודש שני<small class=\"recur-sub\">ב-" + trDMY(tr.second_date) + ": " + (Number(tr.late_extra) > 0 ? "50% משכר הלימוד של חודש ההצטרפות" : "שכר לימוד חודש") + " + דמי שיבוץ והרשמה + שירות עבור חומרי תרגול דיגיטליים</small>";
+    document.getElementById("trial2Label").innerHTML = "בנוסף, סכום לתשלום חודש שני<small class=\"recur-sub\">ב-" + trDMY(tr.second_date) + "</small>";   // נועה 10.11: בלי הסבר
     document.getElementById("trial2Amount").textContent = "₪" + Number(tr.second_amount).toFixed(2);
     var from = trAdd(tr.second_date, 0, 1), n = Number(tr.charges_after) || 0;
     recurAmountDisplay.textContent = "₪" + Number(tr.monthly).toFixed(2);
     recurLabel.innerHTML = "בנוסף, תשלום חודשי<small class=\"recur-sub\">" + (n ? n + " " : "") + "תשלומים חודשיים, החל מ-" + trDMY(from) + " ועד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל</small>";
     var until = trAdd(start, 21);
-    noteEl.textContent = ""; noteEl.hidden = true;   // נועה 10.11: המשפט רק בצ'קבוקס של התנאים (לא פעמיים)
     // נועה 10.11: בצ'קבוקס התנאים – "במידה ולא נרצה להמשיך…" עד שלושה שבועות מהיום, באותו גודל כמו השאר
     var tq = document.getElementById("trialQuit"), tc = document.querySelector("#field-terms-consent span");
     if (!tq && tc) { tq = document.createElement("span"); tq.id = "trialQuit"; var tw = document.createElement("span"); tc.parentNode.insertBefore(tw, tc); tw.appendChild(tc); tw.appendChild(tq); }
