@@ -1453,7 +1453,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     row2.style.display = "";
     var start = tr.start || TRIAL.start;
     amountDisplay.textContent = "₪" + Number(tr.first_amount).toFixed(2); amountDisplay.classList.remove("ph");
-    var d = document.createElement("div"); d.className = "bd-row"; var a = document.createElement("span"); a.textContent = "שכר לימוד חודש ניסיון (" + trDMY(start) + " – " + trDMY(tr.end) + ")";
+    var d = document.createElement("div"); d.className = "bd-row"; var a = document.createElement("span"); a.textContent = "שכר לימוד חודש ניסיון";   // נועה 10.11: בלי תאריכים
     var b = document.createElement("b"); b.textContent = "₪" + Number(tr.first_amount).toFixed(2); d.appendChild(a); d.appendChild(b); amountBreakdown.appendChild(d);
     document.getElementById("trial2Label").innerHTML = "בנוסף, סכום לתשלום חודש שני<small class=\"recur-sub\">ב-" + trDMY(tr.second_date) + ": " + (Number(tr.late_extra) > 0 ? "50% משכר הלימוד של חודש ההצטרפות" : "שכר לימוד חודש") + " + דמי שיבוץ והרשמה + שירות עבור חומרי תרגול דיגיטליים</small>";
     document.getElementById("trial2Amount").textContent = "₪" + Number(tr.second_amount).toFixed(2);
