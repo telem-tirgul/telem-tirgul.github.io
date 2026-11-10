@@ -994,7 +994,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const SUBMIT_TXT = () => PHONE_REG_ ? RS("r.btn_paid", "אישור ושליחה", "כפתור השליחה – שילמו בטלפון / מהכרטיס") : isPhonePay() ? RS("r.btn_phone", "שליחת ההרשמה", "כפתור השליחה – תשלום טלפוני") : RS("r.btn_card", "שליחה ומעבר לתשלום מאובטח ←", "כפתור השליחה – אשראי");   // נועה 4.11: הכפתורים בדיוק כמו בטופס המרתון
   document.addEventListener("telem-texts", function(){ try { paintPayPhone(); } catch(e) {} });   // 5.19.100: נוסח האישור מהמערכת
   function paintPayPhone(){
-    const c = document.getElementById("consentText"); if (PHONE_REG_) c.innerHTML = RH("r.consent_paid", "אני מאשר/ת שהפרטים נכונים.", "האישור השני – שילמו בטלפון / מהכרטיס"); else c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;   // נועה 3.11: חתימה על התנאים – בלי תשלום
+    const c = document.getElementById("consentText"); if (PHONE_REG_) c.innerHTML = RH("r.consent_paid", "אני מאשר/ת שהפרטים נכונים.", "האישור השני – שילמו בטלפון / מהכרטיס"); else c.textContent = isPhonePay() ? c.dataset.phone : c.dataset.card;
+    if (typeof TRIAL !== "undefined" && TRIAL && !PHONE_REG_) c.textContent = c.textContent.replace("בסכום ובמועדים", "בסכומים ובמועדים");   // נועה 10.11: חודש ניסיון   // נועה 3.11: חתימה על התנאים – בלי תשלום
     if (!submitBtn.disabled || !/…$|^הפרטים נשלחו$/.test(submitBtn.textContent.trim())) submitBtn.textContent = SUBMIT_TXT();
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
@@ -1433,7 +1434,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     TRIAL = t; document.body.classList.add("is-trial");
     // נועה 10.11: בלי כותרת "חודש ניסיון" למעלה – רק הסכומים למטה משתנים
     // נועה 10.11: בלי צ'קבוקס נוסף – הטקסט של הוראת הקבע נכנס לצ'קבוקס האישור הקיים (f-consent)
-    var cs = document.getElementById("consentText"); if (cs && !document.getElementById("consentRecurText")) { var wr = document.createElement("span"), sp = document.createElement("span"); sp.id = "consentRecurText"; cs.parentNode.insertBefore(wr, cs); wr.appendChild(cs); wr.appendChild(sp); }
+    // נועה 10.11 (22:18): צ'קבוקס האישור – כמו בהרשמה רגילה ("בסכומים ובמועדים"), בלי פירוט התשלומים
     var st = document.createElement("style"); st.textContent = ".trial-banner{display:flex;flex-direction:column;gap:2px;background:#FBF0DC;border:1px solid #E8D3A6;color:#5A3F0E;border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:14.5px}.trial-banner b{font-size:17px}.bd-note{font-size:12.5px;color:#6B625A;margin-top:4px}body.is-trial .pay-grp-h{display:none !important}";
     document.head.appendChild(st);
     try { updateAmountDisplay(); } catch(x) {}
@@ -1460,12 +1461,14 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     recurAmountDisplay.textContent = "₪" + Number(tr.monthly).toFixed(2);
     recurLabel.innerHTML = "בנוסף, תשלום חודשי<small class=\"recur-sub\">" + (n ? n + " " : "") + "תשלומים חודשיים, החל מ-" + trDMY(from) + " ועד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל</small>";
     var until = trAdd(start, 21);
-    noteEl.textContent = "במידה ולא תרצו להמשיך נא להודיע לתלם עד לתאריך " + trDMY(until) + " ולפי תנאי ההתקשרות.";
-    var ct = document.getElementById("consentRecurText"); if (ct) ct.textContent = " הוראת קבע: סכום לתשלום חודש שני ב-" + trDMY(tr.second_date) + " ₪" + Number(tr.second_amount).toFixed(2) + ", ובנוסף תשלום חודשי ₪" + Number(tr.monthly).toFixed(2) + " עד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל.";
-    // נועה 10.11: "במידה ולא תרצו להמשיך…" – בולט (גדול ושחור), בתוך הצ'קבוקס של התנאים
+    noteEl.textContent = ""; noteEl.hidden = true;   // נועה 10.11: המשפט רק בצ'קבוקס של התנאים (לא פעמיים)
+    // נועה 10.11: בצ'קבוקס התנאים – "במידה ולא נרצה להמשיך…" עד שלושה שבועות מהיום, באותו גודל כמו השאר
     var tq = document.getElementById("trialQuit"), tc = document.querySelector("#field-terms-consent span");
-    if (!tq && tc) { tq = document.createElement("b"); tq.id = "trialQuit"; tq.style.cssText = "display:block;margin-top:6px;font-size:16px;font-weight:800;color:#000;line-height:1.5;"; var tw = document.createElement("span"); tc.parentNode.insertBefore(tw, tc); tw.appendChild(tc); tw.appendChild(tq); }
-    if (tq) tq.textContent = "במידה ולא תרצו להמשיך – יש להודיע לתלם עד " + trDMY(until) + ", ולפי תנאי ההתקשרות.";
+    if (!tq && tc) { tq = document.createElement("span"); tq.id = "trialQuit"; var tw = document.createElement("span"); tc.parentNode.insertBefore(tw, tc); tw.appendChild(tc); tw.appendChild(tq); }
+    var td = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jerusalem" })); td.setDate(td.getDate() + 21);
+    var tds = td.getFullYear() + "-" + String(td.getMonth() + 1).padStart(2, "0") + "-" + String(td.getDate()).padStart(2, "0");
+    if (tq) tq.textContent = " במידה ולא נרצה להמשיך – יש להודיע לתלם עד " + trDMY(tds) + ", ולפי תנאי ההתקשרות.";
+    try { paintPayPhone(); } catch(x) {}
   }
   function getAmount(){
     if (TRIAL) { var tt = trialTrack(); return tt ? Number(tt.first_amount) : null; }
