@@ -1444,15 +1444,20 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function trialPaint(){
     var tr = trialTrack(); amountBreakdown.textContent = "";
     var row2 = document.getElementById("trial2Row");
-    if (!row2) { var po = document.querySelector(".pay-once"); row2 = document.createElement("div"); row2.className = "amount-row amount-row-recur"; row2.id = "trial2Row";
-      row2.innerHTML = '<span id="trial2Label"></span><strong id="trial2Amount"></strong>'; if (po) po.parentNode.insertBefore(row2, po.nextSibling); }
+    // נועה 10.11: התשלום השני – אותו מבנה כמו התשלום המיידי (פירוט בשורות + שורת הסכום)
+    if (!row2) { var po = document.querySelector(".pay-once"); row2 = document.createElement("div"); row2.className = "pay-once"; row2.id = "trial2Row"; row2.style.marginTop = "10px";
+      row2.innerHTML = '<div class="amount-breakdown" id="trial2Bd"></div><div class="amount-row"><span id="trial2Label"></span><strong id="trial2Amount"></strong></div>'; if (po) po.parentNode.insertBefore(row2, po.nextSibling); }
     if (!tr) { amountDisplay.innerHTML = "יש לבחור מסלול"; amountDisplay.classList.add("ph"); row2.style.display = "none"; recurAmountDisplay.textContent = ""; recurLabel.innerHTML = "בנוסף, תשלום חודשי"; return; }
     row2.style.display = "";
     var start = tr.start || TRIAL.start;
     amountDisplay.textContent = "₪" + Number(tr.first_amount).toFixed(2); amountDisplay.classList.remove("ph");
     var d = document.createElement("div"); d.className = "bd-row"; var a = document.createElement("span"); a.textContent = "שכר לימוד חודש ניסיון";   // נועה 10.11: בלי תאריכים
     var b = document.createElement("b"); b.textContent = "₪" + Number(tr.first_amount).toFixed(2); d.appendChild(a); d.appendChild(b); amountBreakdown.appendChild(d);
-    document.getElementById("trial2Label").innerHTML = "בנוסף, סכום לתשלום חודש שני<small class=\"recur-sub\">ב-" + trDMY(tr.second_date) + "</small>";   // נועה 10.11: בלי הסבר
+    document.getElementById("trial2Label").innerHTML = "בנוסף, סכום לתשלום חודש שני<small class=\"recur-sub\">ב-" + trDMY(tr.second_date) + "</small>";
+    { var bd2 = document.getElementById("trial2Bd"), ct2 = CONFIG.trackPricing[cityEl.value] || {}, rg2 = Number(ct2.registrationFee || 0), mt2 = Number(ct2.materialsFee || 0), tu2 = Math.round((Number(tr.second_amount) - rg2 - mt2) * 100) / 100;
+      bd2.textContent = ""; var rh = function(k, d, n, v){ try { return RH(k, d, n, v); } catch(x) { return d; } };
+      var parts2 = tu2 > 0 ? [[Number(tr.late_extra) > 0 ? rh("r.bd_month_pct", "שכר לימוד חודש נוכחי ({אחוז}%)", "פירוט התשלום – חלק מהחודש", { "אחוז": 50 }).replace("{אחוז}", "50") : rh("r.bd_month", "שכר לימוד חודש נוכחי", "פירוט התשלום – שכר לימוד"), tu2], [rh("r.bd_reg", "דמי שיבוץ והרשמה", "פירוט התשלום – דמי שיבוץ"), rg2]].concat(mt2 ? [[rh("r.bd_mat", "שירות עבור חומרי תרגול דיגיטליים", "פירוט התשלום – חומרי תרגול"), mt2]] : []) : [];
+      parts2.forEach(function(p){ var d = document.createElement("div"); d.className = "bd-row"; var a = document.createElement("span"); a.innerHTML = p[0]; var b = document.createElement("b"); b.textContent = "₪" + Number(p[1]).toFixed(2); d.appendChild(a); d.appendChild(b); bd2.appendChild(d); }); }
     document.getElementById("trial2Amount").textContent = "₪" + Number(tr.second_amount).toFixed(2);
     var from = trAdd(tr.second_date, 0, 1), n = Number(tr.charges_after) || 0;
     recurAmountDisplay.textContent = "₪" + Number(tr.monthly).toFixed(2);
