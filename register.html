@@ -1948,6 +1948,10 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         put("f-grade", d.grade); put("f-class", d.class_num);
         put("f-parent-first", d.parent_first); put("f-parent-last", d.parent_last); put("f-phone", d.parent_phone); put("f-email", d.parent_email);
         if (d.trial && Array.isArray(d.trial.tracks)) trialSetup(d.trial);   // תש-70 (icredit-55): חודש ניסיון
+        // מנ-381 (נועה 10.11): המסלול / המקצוע מהכרטיס (&t=…&s=… בקישור) – מסומנים מראש, ההורה יכול לשנות
+        (function(){ var qp = function(k){ var m = location.search.match(new RegExp("[?&]" + k + "=([^&]*)")); try { return m ? decodeURIComponent(m[1]) : ""; } catch(x) { return ""; } };
+          var pt = qp("t"), ps = qp("s"); if (pt) put("f-subject", pt); if (ps && pt !== "double" && ps !== "מתמטיקה ואנגלית") put("f-subject-choice", ps);
+          try { if (pt) trackPickPaint(); } catch(x) {} })();
       }).catch(function(){});
   }
   form.addEventListener("submit", function(e){
