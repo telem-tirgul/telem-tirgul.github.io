@@ -2104,6 +2104,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       goToPayment("registration", res.order_id, res.pay_secret);
     }).catch(function(err){
       console.error("submit_registration failed:", err);
+      // נועה 10.11: שליחה חוזרת של קישור אישי שכבר נרשם (השרת מחזיר "server error") – לדף התודה, כמו "כבר קיימת הרשמה"
+      if (REG_CODE && /server error|invalid or used link/.test(String(err && err.message || ""))) {
+        fetch(CONFIG.supabase.url + "/rest/v1/rpc/reg_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: REG_CODE }) })
+          .then(function(r){ return r.json(); }).then(function(d){ if (d && d.ok === false && d.reason === "used") location.href = "thank-you.html?review=1"; else showSubmitError(err); }, function(){ showSubmitError(err); });
+        return; }
       showSubmitError(err);
     });
     });
