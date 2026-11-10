@@ -1461,7 +1461,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     recurLabel.innerHTML = "בנוסף, תשלום חודשי<small class=\"recur-sub\">" + (n ? n + " " : "") + "תשלומים חודשיים, החל מ-" + trDMY(from) + " ועד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל</small>";
     var until = trAdd(start, 21);
     noteEl.textContent = "במידה ולא תרצו להמשיך נא להודיע לתלם עד לתאריך " + trDMY(until) + " ולפי תנאי ההתקשרות.";
-    var ct = document.getElementById("consentRecurText"); if (ct) ct.textContent = " הוראת קבע: סכום לתשלום חודש שני ב-" + trDMY(tr.second_date) + " ₪" + Number(tr.second_amount).toFixed(2) + ", ובנוסף תשלום חודשי ₪" + Number(tr.monthly).toFixed(2) + " עד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל. במידה ולא תרצו להמשיך – להודיע לתלם עד " + trDMY(until) + ", ולפי תנאי ההתקשרות.";
+    var ct = document.getElementById("consentRecurText"); if (ct) ct.textContent = " הוראת קבע: סכום לתשלום חודש שני ב-" + trDMY(tr.second_date) + " ₪" + Number(tr.second_amount).toFixed(2) + ", ובנוסף תשלום חודשי ₪" + Number(tr.monthly).toFixed(2) + " עד חודש " + (tr.last_month ? trMonth(tr.last_month) : "יוני") + " כולל.";
+    // נועה 10.11: "במידה ולא תרצו להמשיך…" – בולט (גדול ושחור), בתוך הצ'קבוקס של התנאים
+    var tq = document.getElementById("trialQuit"), tc = document.querySelector("#field-terms-consent span");
+    if (!tq && tc) { tq = document.createElement("b"); tq.id = "trialQuit"; tq.style.cssText = "display:block;margin-top:6px;font-size:16px;font-weight:800;color:#000;line-height:1.5;"; var tw = document.createElement("span"); tc.parentNode.insertBefore(tw, tc); tw.appendChild(tc); tw.appendChild(tq); }
+    if (tq) tq.textContent = "במידה ולא תרצו להמשיך – יש להודיע לתלם עד " + trDMY(until) + ", ולפי תנאי ההתקשרות.";
   }
   function getAmount(){
     if (TRIAL) { var tt = trialTrack(); return tt ? Number(tt.first_amount) : null; }
