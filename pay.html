@@ -865,7 +865,8 @@ const PG = "דף התשלום – שדות וטקסטים";
 const PX = (k, def, lbl) => window.TX && TX.h ? TX.h("p." + k, def, lbl, PG) : String(def).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const esc = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const PS = (k, def, lbl, v) => window.TX && TX.h ? TX.h("p." + k, def, lbl, PG, v) : esc(String(def).replace(/\{([^}]+)\}/g, (m, n) => v && v[n] != null ? v[n] : m));   // תש-57: נוסח עם ערכים
-const SUBMIT_T = () => window.TX && TX.s ? TX.s("p.submit", "המשך לתשלום מאובטח", "כפתור השליחה", PG) : "המשך לתשלום מאובטח";
+let REC_ONLY = false;   // נועה 11.11: קישור "הוראת קבע בלבד"
+const SUBMIT_T = () => REC_ONLY ? (window.TX && TX.s ? TX.s("p.submit_rec", "המשך להזנת כרטיס", "כפתור השליחה – הוראת קבע בלבד", PG) : "המשך להזנת כרטיס") : window.TX && TX.s ? TX.s("p.submit", "המשך לתשלום מאובטח", "כפתור השליחה", PG) : "המשך לתשלום מאובטח";
 const FIELD_GROUPS = [["המסלול", ["track", "subject"]], ["פרטי התלמיד/ה", ["student_first", "student_last", "student_phone"]], ["בית הספר", ["city", "school", "grade", "class_num"]], ["פרטי ההורה", ["parent_name", "parent_phone", "parent_email"]]];
 const BASE_REQ = ["parent_name", "parent_phone", "student_first"];
 const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first", "student_last", "student_phone", "school", "grade", "class_num"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
@@ -909,6 +910,11 @@ function fill(d){
     $("v-recur-lbl").innerHTML = PX("recur", "תשלום חודשי - באותו כרטיס", "שורת התשלום החודשי");
     const sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = recurTxt(d); $("v-recur-lbl").appendChild(sm);
     $("consentText").innerHTML = PX("consent_recur", "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של הסכום המיידי בכרטיס האשראי בעמוד התשלום המאובטח, וכן חיוב חודשי אוטומטי באותו כרטיס בסכום ובמספר החיובים המפורטים למעלה.", "אישור – עם תשלום חודשי");
+  }
+  if (d.recurring_only) {   // נועה 11.11 (מנ-414): הוראת קבע בלבד – בלי חיוב עכשיו
+    $("v-amount").innerHTML = PS("rec.none", "ללא", "הוראת קבע בלבד – הסכום לתשלום מיידי");
+    $("consentText").innerHTML = PX("consent_reconly", "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב חודשי אוטומטי בכרטיס האשראי בסכום ובמספר החיובים המפורטים למעלה. לא יבוצע חיוב עכשיו.", "אישור – הוראת קבע בלבד");
+    REC_ONLY = true; submitBtn.textContent = SUBMIT_T();
   }
   const box = $("fieldsBox"), f = d.fields || {}; let shown = 0;
   const grpBox = {};
@@ -965,10 +971,10 @@ function showQuick(d, sent){
   const row = (l, v, cls) => '<div class="q-row' + (cls ? " " + cls : "") + '"><span>' + l + '</span><b>' + v + '</b></div>';
   const esc2 = (t) => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   box.innerHTML = (sent ? '<div class="q-sent">✓ הטופס התקבל, והפרטים נעולים לשינוי. נותר להשלים את התשלום.<small>לתיקון הפרטים ניתן לפנות אלינו: 052-9067101</small></div>' : "") + '<div class="q-card">' + (d.student_name ? row("שם התלמיד/ה", esc2(d.student_name)) : "") + row("על מה", esc2(d.description || "תשלום לתלם"))
-    + row("לתשלום עכשיו", esc2(money(d.one_time_amount)), "q-amt")
+    + row("לתשלום עכשיו", d.recurring_only ? "ללא" : esc2(money(d.one_time_amount)), "q-amt")
     + (d.trial ? row("חודש ניסיון", "מ-" + esc2(dm(d.trial.start)) + " עד " + esc2(dm(d.trial.end))) : "")
     + (d.monthly_amount ? row("ואחר כך תשלום חודשי", esc2(money(d.monthly_amount)) + '<small class="recur-sub">' + esc2(recurTxt(d)) + '</small>') : "")
-    + '</div><div class="q-err" id="qErr" hidden></div><button type="button" class="q-go" id="qGo">לתשלום מאובטח ←</button>'
+    + '</div><div class="q-err" id="qErr" hidden></div><button type="button" class="q-go" id="qGo">' + (d.recurring_only ? "להזנת כרטיס ←" : "לתשלום מאובטח ←") + '</button>'
     + '<div class="q-lock">🔒 פרטי האשראי מוזנים בעמוד המאובטח של חברת הסליקה ולא נשמרים אצלנו.</div>';
   $("payForm").parentNode.insertBefore(box, $("payForm"));
   $("qGo").onclick = function(){
