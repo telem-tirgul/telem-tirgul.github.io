@@ -529,7 +529,7 @@
       </label>
       <div class="error-msg" id="consentError"></div>
       </div>
-      <div class="sig-wrap" id="field-signature">
+      <div class="sig-wrap" id="field-signature" hidden><!-- נועה 11.11: בקישור תשלום אין תנאים – בלי חתימה (מנ-421) -->
         <span class="sig-lbl"><span data-t="t009">חתימת ההורה</span> <span class="req">*</span></span>
         <div class="sig-box" id="sigBox"><canvas id="sigCanvas" aria-label="משטח חתימה"></canvas><div class="sig-ph" data-t="t010">חתמו כאן באצבע או בעכבר</div></div>
         <div class="sig-tools"><span id="sigHint" data-t="t011">החתימה נשמרת יחד עם הטופס.</span><button type="button" id="sigClear" data-t="t012">ניקוי</button></div>
@@ -560,7 +560,7 @@ const $ = (id) => document.getElementById(id);
 const Q = new URLSearchParams(location.search), CODE = (Q.get("c") || "").trim().slice(0, 100), PREVIEW = Q.get("preview") === "1";
 if (PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר"; document.body.insertBefore(pb, document.body.firstChild); }
 const submitBtn = $("submitBtn"), topError = $("topError");
-function updateSubmitAvailability(){ submitBtn.disabled = !($("f-consent").checked && $("f-terms").checked && sigHas); }
+function updateSubmitAvailability(){ submitBtn.disabled = !($("f-consent").checked && $("f-terms").checked); }   // נועה 11.11: בלי חתימה
 $("f-consent").addEventListener("change", updateSubmitAvailability);
 $("f-terms").addEventListener("change", updateSubmitAvailability);
   // ----------------------------------------------------------------
@@ -1022,12 +1022,12 @@ $("payForm").addEventListener("submit", function(e){
   Object.keys(values).forEach(function(k){ if (orig[k] && orig[k] === values[k]) delete values[k]; });
   $("termsError").textContent = $("f-terms").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-terms").checked) ok = false;
   $("consentError").textContent = $("f-consent").checked ? "" : "יש לאשר כדי להמשיך."; if (!$("f-consent").checked) ok = false;
-  const signature = signatureImage(); if (!signature) { $("sigError").textContent = "יש לחתום כדי להמשיך."; ok = false; }
+  const signature = "";   // נועה 11.11: "למה יש לי חתימה בקישור תשלום? אין שם תנאים" – בלי חתימה (השרת: מנ-421)
   if (!ok) { topError.textContent = "יש להשלים את השדות המסומנים."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); else topError.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
   if (window.TELEM_OK) TELEM_OK();
   topError.style.display = "none"; submitBtn.disabled = true; submitBtn.textContent = "ממשיכים לתשלום…";
   const signer = [($("f-parent_first") || {}).value, ($("f-parent_last") || {}).value].filter(function(x){ return x && x !== "—"; }).join(" ").trim();
-  makeSignedPdf("טופס תשלום" + (LINK.description ? " - " + LINK.description : ""), signer).then(function(pdf){
+  Promise.resolve(null).then(function(pdf){   // בלי חתימה – בלי PDF חתום
     if (PREVIEW) { if (pdf) { const a = document.createElement("a"); a.href = pdf; a.download = "טופס-תשלום-תצוגה-מקדימה.pdf"; document.body.appendChild(a); a.click(); }
       showDone("תצוגה מקדימה - הטופס לא נשמר ולא עבר לתשלום."); return; }
     callSupabase("submit_pay_link", { code: CODE, values: values, terms_accepted: true, details_confirmed: true, signature: signature, pdf: pdf, website: $("f-website").value })
