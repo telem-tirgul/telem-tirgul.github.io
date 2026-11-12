@@ -562,8 +562,8 @@
         <div id="gradePad"></div>
       </div>
       <div class="row">
-        <div class="field"><label for="f-math" data-t="t016">רמה במתמטיקה</label><input id="f-math" type="text" dir="rtl" style="text-align:right" maxlength="40" list="hak-math" autocomplete="off" placeholder="אפשר לבחור מהרשימה או לכתוב" aria-label="הקבצה במתמטיקה"><datalist id="hak-math"></datalist></div>
-        <div class="field"><label for="f-eng" data-t="t019">רמה באנגלית</label><input id="f-eng" type="text" dir="rtl" style="text-align:right" maxlength="40" list="hak-eng" autocomplete="off" placeholder="אפשר לבחור מהרשימה או לכתוב" aria-label="הקבצה באנגלית"><datalist id="hak-eng"></datalist></div>
+        <div class="field"><label for="f-math" data-t="t016">רמה במתמטיקה</label><input id="f-math" type="text" dir="rtl" style="text-align:right" maxlength="40" data-dd="hak-math" autocomplete="off" placeholder="אפשר לבחור מהרשימה או לכתוב" aria-label="הקבצה במתמטיקה"><datalist id="hak-math"></datalist></div>
+        <div class="field"><label for="f-eng" data-t="t019">רמה באנגלית</label><input id="f-eng" type="text" dir="rtl" style="text-align:right" maxlength="40" data-dd="hak-eng" autocomplete="off" placeholder="אפשר לבחור מהרשימה או לכתוב" aria-label="הקבצה באנגלית"><datalist id="hak-eng"></datalist></div>
       </div>
     </fieldset>
     <fieldset>
@@ -924,6 +924,29 @@ $("intForm").addEventListener("submit", function(e){
   if (PREVIEW) { setTimeout(done, 400); return; }
   callSupabase("submit_interest", payload).then(done).catch(function(){ $("topError").textContent = "לא ניתן היה לשלוח את הטופס. נא לנסות שוב בעוד מספר רגעים, או לפנות אלינו בטלפון 052-9067101."; $("topError").style.display = "block"; btn.disabled = false; btn.innerHTML = btn.__lbl || "שליחה"; });
 });
+})();
+</script>
+<script>/* נועה 12.11: רשימת הקבצות משלנו (מימין לשמאל) במקום הרשימה של הדפדפן, שנפתחת משמאל */
+(function(){
+  var css = document.createElement("style");
+  css.textContent = ".dd-wrap{position:relative}.dd-list{position:absolute;top:100%;right:0;left:0;z-index:50;background:#fff;border:1px solid #E6DDD3;border-radius:12px;box-shadow:0 8px 20px rgba(43,36,32,.14);margin-top:4px;max-height:240px;overflow:auto;direction:rtl;text-align:right;padding:4px}.dd-list[hidden]{display:none}.dd-list div{padding:10px 14px;border-radius:8px;cursor:pointer;font-size:16px}.dd-list div:hover{background:#F6EFE6}";
+  document.head.appendChild(css);
+  function setup(inp){
+    var dl = document.getElementById(inp.getAttribute("data-dd")); if (!dl || inp.parentNode.className === "dd-wrap") return;
+    var w = document.createElement("div"); w.className = "dd-wrap"; inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+    var box = document.createElement("div"); box.className = "dd-list"; box.hidden = true; w.appendChild(box); var picking = false;
+    function show(){ if (picking) return; var q = inp.value.trim();
+      var opts = [].map.call(dl.options, function(o){ return o.value; }).filter(function(v){ return v && (!q || v.indexOf(q) >= 0); });
+      box.innerHTML = ""; opts.forEach(function(v){ var d = document.createElement("div"); d.textContent = v;
+        d.addEventListener("mousedown", function(e){ e.preventDefault(); inp.value = v; box.hidden = true; picking = true;
+          inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); picking = false; });
+        box.appendChild(d); });
+      box.hidden = !opts.length; }
+    inp.addEventListener("focus", show); inp.addEventListener("click", show); inp.addEventListener("input", show);
+    inp.addEventListener("blur", function(){ setTimeout(function(){ box.hidden = true; }, 150); });
+  }
+  function init(){ [].forEach.call(document.querySelectorAll("input[data-dd]"), setup); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
 </script>
 </body>
