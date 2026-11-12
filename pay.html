@@ -418,6 +418,7 @@
   .q-sent small{ display:block; font-weight:400; color:#4F6B45; margin-top:2px; }
   .p-incl{ background:#F3E3C3; border-radius:18px; padding:14px 16px; margin:0 0 14px; font-size:15.5px; line-height:1.7; color:#3A2A1F; white-space:pre-line; }   /* כמו תיבת הפירוט במרתון */
   #payForm .ti-box, #ackCard .ti-box{ display:none; } #ackCard .amount-row{ margin:0 0 12px; }   /* נועה 6.11: התיאור – בכותרת, בלי "התשלום מתבצע…" */   /* נועה 6.11: פירוט – מה כלול בתשלום */
+  #f-school-dd + #f-school:not([hidden]){ margin-top:8px; }
 </style>
 <style>
   .ro-val{ background:#F6F1E7 !important; color:#2B2320 !important; font-weight:700; }
@@ -949,8 +950,22 @@ function fill(d){
       mk("parent_first", "שם פרטי הורה", "text", fv, req, k); mk("parent_last", "שם משפחה הורה", "text", lv, req && !(val && !lv), k); return; }
     mk(k, def[1], def[2], val, req);
   });
+  schoolDd();
   sigResize();
 }
+// נועה 12.11: בית ספר – רשימה לפי העיר (כמו בטופס ההרשמה); "אחר" – תיבה לשם. השדה המקורי (f-school) נשאר מקור הערך בשליחה
+const CITY_SCHOOLS = { "ראש העין": ["גוונים", "היובל", "בראשית", "בארי", "עומר"], "הוד השרון": ["הראשונים", "השחר", "השקמים", "עתידים"], "כפר סבא": ["אלון", "שז\"ר", "שרת", "אורט שפירא"] };
+function schoolDd(){
+  const inp = $("f-school"); if (!inp || inp.tagName !== "INPUT" || inp.readOnly) return;
+  const sel = document.createElement("select"); sel.id = "f-school-dd"; sel.setAttribute("aria-label", "בית ספר"); inp.before(sel);
+  const paint = () => { const city = payCS().city, list = CITY_SCHOOLS[city] || [], cur = inp.value.trim();
+    if (!list.length) { sel.hidden = true; inp.hidden = false; inp.placeholder = ""; return; }
+    sel.hidden = false; sel.innerHTML = '<option value="">בחירת בית ספר</option>' + list.concat(["אחר"]).map(n => `<option>${n.replace(/</g, "&lt;")}</option>`).join("");
+    if (cur && list.indexOf(cur) >= 0) { sel.value = cur; inp.hidden = true; } else if (cur) { sel.value = "אחר"; inp.hidden = false; } else { sel.value = ""; inp.hidden = true; }
+    inp.placeholder = "שם בית הספר"; };
+  sel.addEventListener("change", () => { if (sel.value === "אחר") { inp.value = ""; inp.hidden = false; inp.focus(); } else { inp.value = sel.value; inp.hidden = true; } inp.dispatchEvent(new Event("input", { bubbles: true })); });
+  const cs = $("f-city"); if (cs) cs.addEventListener("change", () => { inp.value = ""; paint(); });
+  paint(); }
 const SAMPLE = { status: "opened", description: "הרשמה לתרגולים + חודש ראשון", one_time_amount: 582, monthly_amount: 464, monthly_count: 8, first_monthly_date: "2026-11-01",
   needs_student: true, fields: { parent_name: { value: "מיכל לוי", required: true }, parent_email: { value: "", required: true }, subject: { value: "מתמטיקה" } } };
 submitBtn.textContent = SUBMIT_T(); { let last = submitBtn.textContent; document.addEventListener("telem-texts", () => { if (submitBtn.textContent === last) { submitBtn.textContent = SUBMIT_T(); last = submitBtn.textContent; } }); }
