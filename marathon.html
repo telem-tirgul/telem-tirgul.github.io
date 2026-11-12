@@ -972,6 +972,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // השם, העיר, בית הספר, המחירים והקבוצות נטענים מהמערכת. קבוצה מלאה - אי אפשר לבחור בה.
   var MARATHON = null, MARATHON_CODE = "";
   var MSIGN = (location.search.match(/[?&]c=([0-9a-f]{32}|sample)(?:&|$)/) || [])[1] || "";   /* נועה 5.11: הקישור האישי מכרטיס התלמיד (marathon.html?m=…&c=…) */
+  /* נועה 12.11: קישור אישי בשלב ההתעניינות (&f=1) – הטופס הרגיל (מועד, תשלום, תנאים), רק עם הפרטים מהכרטיס ממולאים (אפשר לשנות) */
+  var MPRE = /[?&]f=1(&|$)/.test(location.search) ? MSIGN : ""; if (MPRE) MSIGN = "";
   function lockSchool(school){
     var el = document.getElementById("f-school");
     el.value = school; el.readOnly = true; el.classList.add("locked");
@@ -1125,7 +1127,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function initMarathon(){
     var q; try { q = new URLSearchParams(location.search); } catch (err) { q = new URLSearchParams(""); }
     MARATHON_CODE = (q.get("m") || "").trim().slice(0, 20);
-    if (MARATHON_CODE) { (window.TELEM_HOLD || function(p){ return p; })(loadMarathon().then(function(){ if (MSIGN) return mCardInit(); })); return; }   // נועה 24.10: הטופס מוצג רק אחרי שהנתונים הגיעו
+    if (MARATHON_CODE) { (window.TELEM_HOLD || function(p){ return p; })(loadMarathon().then(function(){ if (MSIGN) return mCardInit(); if (MPRE) return mPrefill(); })); return; }   // נועה 24.10: הטופס מוצג רק אחרי שהנתונים הגיעו
     // קישור ישן (city/school) - אין בו קבוצות. בתצוגה מקדימה אפשר לראות את הטופס, אבל אי אפשר להירשם.
     var school = (q.get("school") || "").trim().slice(0, 60), city = (q.get("city") || "").trim().slice(0, 40);
     if (school) lockSchool(school);
@@ -1734,6 +1736,23 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
                                               : H("m.card_paid", "<b>✓ שולם טלפונית</b>", "הקישור מהכרטיס – שולם"); }
       submitBtn.textContent = SUBMIT_TXT(); if (typeof updateSubmitAvailability === "function") updateSubmitAvailability();
     }).catch(function(){ bad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."); });
+  }
+  function mPrefill(){
+    if (!MARATHON) return;
+    var H = function(k, d, l, v){ return (window.TX && TX.h) ? TX.h(k, d, l, "הקישור האישי מהכרטיס", v) : d; };
+    var pr = MPRE === "sample" ? Promise.resolve({ ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", parent_first: "דנה", parent_last: "לוי", parent_phone: "0500000001", parent_email: "dana@example.com", school: "", grade: "" })
+      : fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: MPRE }) }).then(function(r){ return r.json(); });
+    return pr.then(function(d){
+      if (!d || !d.ok) return;   /* קישור לא תקין / פג – הטופס הרגיל, ריק */
+      var setv = function(id, v){ var el = document.getElementById(id); if (el && v != null && v !== "" && !el.value) { el.value = String(v); try { el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {} } };
+      setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
+      setv("f-parent-first", d.parent_first); setv("f-parent-last", d.parent_last); setv("f-phone", String(d.parent_phone || "").replace(/\D/g, "")); setv("f-email", d.parent_email);
+      setv("f-grade", d.grade); setv("f-school", d.school);
+      var rr = document.querySelector("input[name=mkmode][value=reg]"); if (rr && !document.querySelector("input[name=mkmode]:checked")) { rr.checked = true; mkPaint(); }
+      var info = document.createElement("div"); info.className = "mk-cardinfo"; info.id = "mkCardInfo"; form.parentNode.insertBefore(info, form);
+      info.innerHTML = "<div>" + H("m.intro_pre", "שלום {שם ההורה}, להלן טופס ההרשמה של <b>{שם התלמיד/ה}</b> ל{קורס}.", "פתיחה – קישור אישי (התעניינות)", { "שם ההורה": d.parent_first || "", "שם התלמיד/ה": d.student_first || "", "קורס": MARATHON.name || "מרתון" })
+        + "</div><div class=\"sg-sub\">" + H("m.intro_pre_sub", "הפרטים שמסרתם כבר ממולאים – אפשר לשנות. נותר לבחור מועד ואופן תשלום, לאשר את התנאים ולחתום.", "פתיחה – קישור אישי (התעניינות), שורה 2") + "</div>";
+    }).catch(function(){});
   }
   form.addEventListener("submit", function(e){
     e.preventDefault();
