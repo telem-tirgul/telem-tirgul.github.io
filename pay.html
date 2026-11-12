@@ -519,8 +519,8 @@
       </div>
       <div class="terms-box" id="termsBox" hidden></div>
       <div class="consents-box">
-      <label class="consent" id="field-terms">
-        <input type="checkbox" id="f-terms" required>
+      <label class="consent" id="field-terms" hidden><!-- נועה 12.11: אין תנאים בדף התשלום – רק האישור השני -->
+        <input type="checkbox" id="f-terms" checked>
         <span data-t="t008">קראתי את פרטי התשלום ואני מסכים/ה להם.</span>
       </label>
       <div class="error-msg" id="termsError"></div>
@@ -802,7 +802,7 @@ $("f-terms").addEventListener("change", updateSubmitAvailability);
     document.querySelectorAll("#amountBreakdown .bd-row").forEach(function(r){ var a = r.querySelector("span"), b = r.querySelector("b"); if (a && b) payment.breakdown.push([a.textContent.trim(), b.textContent.trim()]); });
     document.querySelectorAll(".amount-row").forEach(function(r){ if (!vis(r)) return; var a = r.querySelector("span"), b = r.querySelector("strong"); if (a && b && b.textContent.trim()) payment.main.push([a.textContent.trim(), b.textContent.trim()]); });
 
-    var consents = []; form.querySelectorAll("label.consent").forEach(function(l){ var cb = l.querySelector("input[type=checkbox]"); if (cb && cb.checked) consents.push(l.textContent.replace(/\s+/g, " ").trim()); });
+    var consents = []; form.querySelectorAll("label.consent").forEach(function(l){ if (l.hidden) return; var cb = l.querySelector("input[type=checkbox]"); if (cb && cb.checked) consents.push(l.textContent.replace(/\s+/g, " ").trim()); });
     return { sections: sections, terms: terms, payment: payment, consents: consents };
   }
   function makeSignedPdf(title, signerName){
@@ -871,7 +871,7 @@ const SUBMIT_T = () => REC_ONLY ? (window.TX && TX.s ? TX.s("p.submit_rec", "ה�
 const FIELD_GROUPS = [["המסלול", ["track", "subject"]], ["פרטי התלמיד/ה", ["student_first", "student_last", "student_phone"]], ["בית הספר", ["city", "school", "grade", "class_num"]], ["פרטי ההורה", ["parent_name", "parent_phone", "parent_email"]]];
 const BASE_REQ = ["parent_name", "parent_phone", "student_first"];
 const EDITABLE = ["parent_name", "parent_email", "parent_phone", "student_first", "student_last", "student_phone", "school", "grade", "class_num"];   // ילד/ה חדש/ה - חובה תמיד (השרת בודק)
-const money = (n) => "₪" + Number(n).toLocaleString("he-IL", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const money = (n) => "₪" + Number(n).toLocaleString("he-IL", { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 });   // נועה 12.11: ₪2.10 ולא ₪2.1
 const dateHe = (d) => { if (!d) return ""; const p = String(d).slice(0, 10).split("-"); return p.length === 3 ? p[2] + "." + p[1] + "." + p[0] : d; };   // נועה 8.11: כמו בטופס ההרשמה – 01.12.2026
 var LINK = null;
 // נועה 6.11: עיר + בית ספר לדף התודה (קבוצת הווטסאפ של בית הספר)
