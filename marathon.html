@@ -677,7 +677,7 @@
         <!-- 5.19.92 (נועה): ההקבצה ליד הנייד של התלמיד/ה, באותה שורה -->
         <div class="field" id="field-hakbatsa" hidden>
           <label for="f-hakbatsa"><span data-t="t020">הקבצה</span> <span class="req">*</span></label>
-          <select id="f-hakbatsa" name="hakbatsa"><option value="" disabled selected data-t="t021">בחירה</option></select>
+          <input id="f-hakbatsa" name="hakbatsa" type="text" maxlength="40" list="hakList" autocomplete="off" placeholder="אפשר לבחור מהרשימה או לכתוב"><datalist id="hakList"></datalist><!-- נועה 12.11: טקסט חופשי + הצעות -->
           <div class="error-msg" data-t="t022">שדה חובה</div>
         </div>
       </div>
@@ -1108,9 +1108,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         var hkShow = function(list, fixed){
           list = list.filter(function(o){ return String(o).trim() !== "אחר"; });
           // נועה 28.10: בלי "אחר" בהקבצה בכלל (השרת מקבל רק ערך מהרשימה של המרתון)   // נועה 23.10: "אחר" (בלי שדה טקסט); 25.10 – לא כשיש "עוד אין הקבצות"
-          list.forEach(function(o){ var op = document.createElement("option"); op.value = o; op.textContent = o; hkSel.appendChild(op); });
+          var dl = document.getElementById("hakList"); dl.innerHTML = ""; list.forEach(function(o){ var op = document.createElement("option"); op.value = o; dl.appendChild(op); });   // נועה 12.11: הצעות; אפשר גם לכתוב
           document.getElementById("field-hakbatsa").hidden = false; hkSel.required = true;
-          hkSel.addEventListener("change", function(){ setInvalid("field-hakbatsa", false); });
+          hkSel.addEventListener("input", function(){ setInvalid("field-hakbatsa", false); });
         };
         if (hk.length) hkShow(hk, true);
         else fetch(s.url + "/rest/v1/rpc/school_hakbatsa_public", { method: "POST", headers: headers, body: JSON.stringify({ p_city: MARATHON.city || "", p_school: MARATHON.school || "" }) })
@@ -1677,7 +1677,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var bad = function(id, b){ setInvalid(id, b); if (b) ok = false; };
     bad("field-group", needGroup && !groupEl);
     bad("field-student-first", !v("f-student-first")); bad("field-student-last", !v("f-student-last")); bad("field-grade", !v("f-grade"));
-    bad("field-student-phone", !isValidPhone(v("f-student-phone"))); bad("field-hakbatsa", needHak && !hakEl.value);
+    bad("field-student-phone", !isValidPhone(v("f-student-phone"))); bad("field-hakbatsa", needHak && !hakEl.value.trim());
     bad("field-school", !v("f-school")); bad("field-parent-first", !v("f-parent-first")); bad("field-phone", !isValidPhone(v("f-phone"))); bad("field-parent-last", !v("f-parent-last")); bad("field-email", !isValidEmail(v("f-email")));
     topError.style.display = ok ? "none" : "block";
     var btn = document.getElementById("leadBtn");
@@ -1775,7 +1775,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (!grade) valid = false;
 
     const hakEl = document.getElementById("f-hakbatsa"), needHak = !MSIGN && !document.getElementById("field-hakbatsa").hidden;
-    const hakbatsa = needHak ? hakEl.value : "";
+    const hakbatsa = needHak ? hakEl.value.trim() : "";
     setInvalid("field-hakbatsa", needHak && !hakbatsa);
     if (needHak && !hakbatsa) valid = false;
 

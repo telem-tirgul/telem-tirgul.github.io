@@ -561,8 +561,8 @@
         <div id="gradePad"></div>
       </div>
       <div class="row">
-        <div class="field"><label for="f-math" data-t="t016">רמה במתמטיקה</label><select id="f-math"><option value="" data-t="t017">בחירה</option><option data-t="t018">עוד אין הקבצות</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select><input id="f-math-other" type="text" maxlength="40" placeholder="איזו הקבצה?" aria-label="הקבצה במתמטיקה - אחר" hidden style="margin-top:6px"></div>
-        <div class="field"><label for="f-eng" data-t="t019">רמה באנגלית</label><select id="f-eng"><option value="" data-t="t020">בחירה</option><option data-t="t021">עוד אין הקבצות</option><option>הקבצה א'</option><option>הקבצה ב'</option><option>הקבצה ג'</option><option>3 יח"ל</option><option>4 יח"ל</option><option>5 יח"ל</option></select><input id="f-eng-other" type="text" maxlength="40" placeholder="איזו הקבצה?" aria-label="הקבצה באנגלית - אחר" hidden style="margin-top:6px"></div>
+        <div class="field"><label for="f-math" data-t="t016">רמה במתמטיקה</label><input id="f-math" type="text" maxlength="40" list="hak-math" autocomplete="off" placeholder="אפשר לבחור מהרשימה או לכתוב" aria-label="הקבצה במתמטיקה"><datalist id="hak-math"></datalist></div>
+        <div class="field"><label for="f-eng" data-t="t019">רמה באנגלית</label><input id="f-eng" type="text" maxlength="40" list="hak-eng" autocomplete="off" placeholder="אפשר לבחור מהרשימה או לכתוב" aria-label="הקבצה באנגלית"><datalist id="hak-eng"></datalist></div>
       </div>
     </fieldset>
     <fieldset>
@@ -858,18 +858,16 @@ const digits = (v) => String(v || "").replace(/\D/g, "");
 // תלם 5.19.70: ההקבצות לפי בית הספר (מסך "בתי ספר" במערכת, קובץ 78). אין רשימה לבית הספר - ברירת המחדל. תמיד גם "אחר".
 const HAK_DEFAULT = ["עוד אין הקבצות", "הקבצה א'", "הקבצה ב'", "הקבצה ג'", '3 יח"ל', '4 יח"ל', '5 יח"ל'];   // נועה 25.10
 let hakReq = 0;
-function hakOther(id){ const w = $(id + "-other"); if (w) w.hidden = $(id).value !== "אחר"; }
-function hakFill(list){ ["f-math", "f-eng"].forEach(id => { const el = $(id), cur = el.value; el.innerHTML = '<option value="">בחירה</option>';
-  /* נועה 28.10: בלי "אחר" בהקבצה */ list.filter(t => String(t).trim() !== "אחר").forEach(t => { const o = document.createElement("option"); o.value = o.textContent = t; el.appendChild(o); });
-  if ([...el.options].some(o => o.value === cur)) el.value = cur; hakOther(id); }); }
+// נועה 12.11: ההקבצה – טקסט חופשי, עם הצעות מהרשימה של בית הספר
+function hakFill(list){ ["math", "eng"].forEach(k => { const dl = $("hak-" + k); dl.innerHTML = "";
+  list.filter(t => String(t).trim() !== "אחר").forEach(t => { const o = document.createElement("option"); o.value = t; dl.appendChild(o); }); }); }
 function hakLoad(){ const c = $("f-city").value, sc = $("f-school").value, n = ++hakReq;
   if (!c || !sc) { hakFill(HAK_DEFAULT); return; }
   callSupabase("school_hakbatsa_public", { p_city: c, p_school: sc }, true)
     .then(r => { if (n === hakReq) hakFill(r && Array.isArray(r.options) && r.options.length ? r.options : HAK_DEFAULT); })
     .catch(() => { if (n === hakReq) hakFill(HAK_DEFAULT); }); }
-const hakVal = (id) => $(id).value === "אחר" ? ($(id + "-other").value.trim() || "אחר") : ($(id).value || null);
+const hakVal = (id) => ($(id).value || "").trim() || null;
 $("f-school").addEventListener("change", hakLoad); $("f-city").addEventListener("change", hakLoad);
-["f-math", "f-eng"].forEach(id => $(id).addEventListener("change", () => hakOther(id)));
 setTimeout(hakLoad, 0);
   function callSupabase(fnName, payload, raw){
     const s = CONFIG.supabase;
