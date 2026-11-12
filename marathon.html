@@ -854,7 +854,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // תשלום באשראי באיקרדיט. enabled: false = כרגע רק תשלום טלפוני.
     // לבדיקה לפני שמדליקים: מוסיפים לקישור ?cardtest=1 - יופיע גם "אשראי עכשיו" (רק בדפדפן שנכנסו בו למערכת הניהול, 5.19.97).
     // אין כאן שום סוד: פרטי המסוף נמצאים רק ב-Supabase Secrets.
-    creditCard: { enabled: true },   // נועה 11.11, 20:39: "האשראי במרתון – נדליק" (בשרת: ICREDIT_PAY_KINDS כולל marathon)
+    creditCard: { enabled: false },   // נועה 12.11, 11:27: כבוי זמנית – החשבון באיקרדיט פג (-20 Account has expired). להדליק שוב כשמחודש
 
     // קישור "חזרה לאתר תלם" בראש הטופס - false כל עוד האתר לא עלה
     showSiteLink: false,
