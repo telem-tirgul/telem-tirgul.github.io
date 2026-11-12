@@ -523,6 +523,7 @@
   .amount-row.amount-row-recur > strong{ font-size:20px !important; font-weight:900 !important; color:var(--accent) !important; }
   .amount-row.amount-row-recur .recur-sub{ color:#6B5F55 !important; font-weight:500 !important; }
   .bd-note{ font-size:12.5px; line-height:1.5; color:#7a6a5c; margin:-4px 0 8px; padding:0 14px; }   /* נועה 6.11 */
+  .disc-note{ background:#EEF6EF; border:1px solid #BFD9C4; color:#2F6B3D; border-radius:12px; padding:10px 14px; margin:0 0 14px; font-weight:600; font-size:15px; }
 </style>
 <link rel="stylesheet" href="site-look.css?v=7"><script src="site-look.js?v=11"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 <link rel="icon" type="image/png" href="favicon.png?v=1">
@@ -1842,8 +1843,9 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     Object.keys(all).forEach(function(c){
       var x = all[c] && typeof all[c] === "object" ? cleanPrices(all[c]) : null;
       if (!x || !x.single || x.single.early == null || x.registrationFee == null) return;
-      CONFIG.trackPricing[c] = Object.assign({}, CONFIG.trackPricing[c] || {}, x);
+      CONFIG.trackPricing[c] = Object.assign({}, CONFIG.trackPricing[c] || {}, x);   /* icredit-72: הנחה – שוב על המחירים מהשרת */ if (DISC) { delete CONFIG.trackPricing[c].__disc; }
     });
+    if (DISC) discApply();
     updateAmountDisplay(); updateRecurDisplay(); updateTrackInfo(); updateTermsBox();
     REG_OPEN = all; regClosedCheck();
   }).catch(function(){});
@@ -1943,6 +1945,16 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     }).catch(function(){ signBad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."); });
   }
   // תש-59 (icredit-47, נועה 8.11): טופס הרשמה אישי מהכרטיס (register.html?city=…&r=CODE) – ממולא מהכרטיס; בשליחה reg_code → לאותו כרטיס
+  // icredit-72/73 (נועה 12.11): הנחה בקישור האישי – רק להצגה; השרת מחשב את המחיר בעצמו (reg_links.discount). אותו עיגול כמו בשרת
+  var DISC = null;
+  function discOf(v, item){ if (!DISC || v == null || DISC.items.indexOf(item) < 0) return v; var f = DISC.round === false ? 100 : 1; return Math.max(0, Math.round(Number(v) * (100 - DISC.pct) / 100 * f) / f); }
+  function discApply(){ if (!DISC) return; Object.keys(CONFIG.trackPricing || {}).forEach(function(c){ var t = CONFIG.trackPricing[c]; if (!t || t.__disc) return;
+      ["single", "unlimited-single", "double"].forEach(function(k){ if (t[k]) t[k] = { early: discOf(t[k].early, "lessons"), regular: discOf(t[k].regular, "lessons") }; });
+      if (t.registrationFee != null) t.registrationFee = discOf(t.registrationFee, "reg_fee"); if (t.materialsFee) t.materialsFee = discOf(t.materialsFee, "materials"); t.__disc = true; });
+    try { updateTrackInfo(); } catch(x) {} try { updateAmountDisplay(); } catch(x) {} try { trackPickPaint(); } catch(x) {} }
+  function discNote(){ if (!DISC || document.getElementById("discNote")) return; var NM = { lessons: "שכר הלימוד החודשי", reg_fee: "דמי שיבוץ והרשמה", materials: "חומרי תרגול" };
+    var n = document.createElement("div"); n.id = "discNote"; n.className = "disc-note"; n.textContent = "🏷️ הנחה של " + DISC.pct + "% על " + DISC.items.map(function(k){ return NM[k] || k; }).join(", ") + " – המחירים בטופס כבר אחרי ההנחה.";
+    form.parentNode.insertBefore(n, form); }
   var REG_CODE = (location.search.match(/[?&]r=([0-9A-Za-z]{32})(?:&|$)/) || [])[1] || "";
   if (REG_CODE) {
     fetch(CONFIG.supabase.url + "/rest/v1/rpc/reg_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: REG_CODE }) })
@@ -1953,6 +1965,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         if (d.school) { var se = document.getElementById("f-school"); if (se && [].some.call(se.options, function(o){ return o.value === d.school; })) put("f-school", d.school); else { put("f-school", "אחר"); put("f-school-other", d.school); } }
         put("f-grade", d.grade); put("f-class", d.class_num);
         put("f-parent-first", d.parent_first); put("f-parent-last", d.parent_last); put("f-phone", d.parent_phone); put("f-email", d.parent_email);
+        if (d.discount && Number(d.discount.pct) > 0 && Array.isArray(d.discount.items)) { DISC = { pct: Number(d.discount.pct), items: d.discount.items.map(String), round: d.discount.round !== false }; discApply(); discNote(); }
         if (d.trial && Array.isArray(d.trial.tracks)) trialSetup(d.trial);   // תש-70 (icredit-55): חודש ניסיון
         // מנ-381 (נועה 10.11): המסלול / המקצוע מהכרטיס (&t=…&s=… בקישור) – מסומנים מראש, ההורה יכול לשנות
         (function(){ var qp = function(k){ var m = location.search.match(new RegExp("[?&]" + k + "=([^&]*)")); try { return m ? decodeURIComponent(m[1]) : ""; } catch(x) { return ""; } };

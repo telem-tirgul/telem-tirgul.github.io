@@ -1692,6 +1692,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var payload = { website: document.getElementById("f-website").value, city: (MARATHON && MARATHON.city) || "", school: v("f-school"),
       courses: ["מרתון: " + mName + (when ? " (" + when + ")" : "")], filled_by: "טופס מרתון – רק פרטים",
       notes: "השאירו פרטים בטופס המרתון (בלי הרשמה)" + (gLbl ? " · " + gLbl : ""),
+      session_id: gObj ? Number(gObj.session_id) : null,   // icredit-72 (נועה 12.11): הקבוצה שנבחרה – נשמרת בשורה בקורס (lead_session_id), בלי שיבוץ ובלי לתפוס מקום
       marathon_code: MARATHON_CODE || null,   // קובץ 118: כבר רשום/ה למרתון הזה → "הפרטים כבר אצלנו"
       student: { first_name: v("f-student-first"), last_name: v("f-student-last"), phone: v("f-student-phone"), grade: v("f-grade"), math_level: needHak ? hakEl.value : null, english_level: null, school: v("f-school") },
       parent: { first_name: v("f-parent-first"), last_name: v("f-parent-last"), phone: v("f-phone"), email: v("f-email") || null } };
