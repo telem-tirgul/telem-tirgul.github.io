@@ -889,7 +889,7 @@ function roField(label, val, k){
   return wrap;
 }
 // 5.20.1 (נועה): ההורה יכול לעדכן / להשלים – הפרטים הקיימים כבר בפנים
-const GRADES = ["ה'", "ו'", "ז'", "ח'", "ט'", "י'", "יא'", "יב'"];
+const GRADES = ["ד'", "ה'", "ו'", "ז'", "ח'", "ט'", "י'", "יא'", "יב'"];
 function edField(key, label, val, type, req){
   const wrap = document.createElement("div"); wrap.className = "field"; wrap.id = "field-" + key;
   const lab = document.createElement("label"); lab.htmlFor = "f-" + key; lab.innerHTML = SX(key, label) + " "; if (req) { const r = document.createElement("span"); r.className = "req"; r.textContent = "*"; lab.appendChild(r); } wrap.appendChild(lab);
