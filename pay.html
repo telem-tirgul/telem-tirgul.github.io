@@ -909,7 +909,7 @@ function fill(d){
     $("recurRow").hidden = false;
     // 5.19.58 (הלקוחה): בלי "× 8" - הסכום לבד, ומתחת בטקסט קטן: מספר התשלומים, מאיזה תאריך ועד יוני כולל
     $("v-recur").textContent = money(d.monthly_amount);
-    $("v-recur-lbl").innerHTML = PX("recur", "תשלום חודשי - באותו כרטיס", "שורת התשלום החודשי");
+    $("v-recur-lbl").innerHTML = PX("recur", "תשלום חודשי", "שורת התשלום החודשי");
     const sm = document.createElement("small"); sm.className = "recur-sub"; sm.textContent = recurTxt(d); $("v-recur-lbl").appendChild(sm);
     $("consentText").innerHTML = PX("consent_recur", "אני מאשר/ת שהפרטים נכונים, ומאשר/ת חיוב של הסכום המיידי בכרטיס האשראי בעמוד התשלום המאובטח, וכן חיוב חודשי אוטומטי באותו כרטיס בסכום ובמספר החיובים המפורטים למעלה.", "אישור – עם תשלום חודשי");
   }
