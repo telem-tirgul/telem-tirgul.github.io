@@ -512,10 +512,7 @@
         <div class="field"><label data-t="t012">מסלול</label><input type="text" class="ro-val" id="v-track" readonly></div>
         <div class="field"><label data-t="t013">מקצוע</label><input type="text" class="ro-val" id="v-subject" readonly></div>
       </div>
-      <div class="row">
-        <div class="field"><label data-t="t014">תשלום חודשי</label><input type="text" class="ro-val" id="v-price" readonly></div>
-        <div class="field" id="field-fees"><label data-t="t015">תשלומים חד-פעמיים</label><input type="text" class="ro-val" id="v-fees" readonly></div>
-      </div>
+      <!-- נועה 15.11: בטופס הביטול – בלי סכומים (תשלום חודשי / תשלומים חד-פעמיים) -->
       <div class="ti-box" id="priceBox"></div>
     </fieldset>
     <fieldset>
@@ -921,12 +918,12 @@ function fill(d){
   $("canForm").hidden = false;
   $("v-city").value = d.city || ""; $("v-school").value = d.school || ""; $("v-track").value = TRACK_TITLE(d.track); $("v-subject").value = d.subject || "";
   $("v-student").value = ((d.student_first || "") + " " + (d.student_last || "")).trim(); $("v-grade").value = d.grade || "";
-  $("f-signer").value = ((d.parent_first || "") + " " + (d.parent_last || "")).trim();
+  $("f-signer").value = ((d.parent_first || "") + " " + (d.parent_last || d.student_last || "")).trim();   // נועה 15.11: בלי שם משפחה של ההורה – שם המשפחה של הילד/ה
   const cityT = CONFIG.trackPricing[d.city] || CONFIG.trackPricing["כפר סבא"], pr = cityT && cityT[d.track];
   const info = CONFIG.trackInfo[d.track];
   $("priceBox").innerHTML = info ? "<h3></h3><p></p>" : ""; $("priceBox").hidden = !info;
-  $("v-price").value = pr ? pr.early + " ₪ בהרשמה מוקדמת · " + pr.regular + " ₪ בהרשמה רגילה" : "";
-  $("v-fees").value = cityT ? "דמי שיבוץ והרשמה " + cityT.registrationFee + " ₪" + (cityT.materialsFee ? " · חומרי תרגול ועזרי לימוד דיגיטליים " + cityT.materialsFee + " ₪ (מקוזז מעלות חודש יוני)" : "") : "";
+  if ($("v-price")) $("v-price").value = pr ? pr.early + " ₪ בהרשמה מוקדמת · " + pr.regular + " ₪ בהרשמה רגילה" : "";
+  if ($("v-fees")) $("v-fees").value = cityT ? "דמי שיבוץ והרשמה " + cityT.registrationFee + " ₪" + (cityT.materialsFee ? " · חומרי תרגול ועזרי לימוד דיגיטליים " + cityT.materialsFee + " ₪ (מקוזז מעלות חודש יוני)" : "") : "";
   if (info) { $("priceBox").querySelector("h3").textContent = info.title; $("priceBox").querySelector("p").textContent = info.body; }
   const mt = $("materialsTermsNote"); if (mt) mt.style.display = cityT && cityT.materialsFee ? "block" : "none";
   sigResize();
