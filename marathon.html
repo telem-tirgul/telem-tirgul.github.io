@@ -975,6 +975,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   var MSIGN = (location.search.match(/[?&]c=([0-9a-f]{32}|sample)(?:&|$)/) || [])[1] || "";   /* נועה 5.11: הקישור האישי מכרטיס התלמיד (marathon.html?m=…&c=…) */
   /* נועה 12.11: קישור אישי בשלב ההתעניינות (&f=1) – הטופס הרגיל (מועד, תשלום, תנאים), רק עם הפרטים מהכרטיס ממולאים (אפשר לשנות) */
   var MPRE = /[?&]f=1(&|$)/.test(location.search) ? MSIGN : ""; if (MPRE) MSIGN = "";
+  /* תש-102 (icredit-77, נועה 15.11): קישור אישי למרתון עם הנחה (marathon.html?m=…&reg=CODE) – ממולא מהכרטיס, המחירים אחרי ההנחה מהשרת; בשליחה reg_code */
+  var MREG = (location.search.match(/[?&]reg=([0-9A-Za-z]{32})(?:&|$)/) || [])[1] || ""; if (MREG) { MSIGN = ""; MPRE = ""; }
   function lockSchool(school){
     var el = document.getElementById("f-school");
     el.value = school; el.readOnly = true; el.classList.add("locked");
@@ -1085,19 +1087,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
           gsel.value = gv; document.getElementById("field-grade").hidden = true; }
         CONFIG.locationLabel = [MARATHON.city, MARATHON.school].filter(Boolean).join(" · ");
         document.getElementById("subtitleLocation").textContent = "";
-        CONFIG.priceFirstTime = Number(MARATHON.price_first); CONFIG.priceReturning = Number(MARATHON.price_repeat) || Number(MARATHON.price_first);
-        document.querySelector("#opt-first .opt-price").textContent = PRICE(CONFIG.priceFirstTime);
-        document.querySelector("#opt-returning .opt-price").textContent = PRICE(CONFIG.priceReturning);
-        { var mf = document.getElementById("mpFirst"), mr = document.getElementById("mpRep"), rr = document.getElementById("mpRepRow");
-          if (mf) mf.textContent = PRICE(CONFIG.priceFirstTime); if (mr) mr.textContent = PRICE(CONFIG.priceReturning); if (rr) rr.hidden = CONFIG.priceReturning === CONFIG.priceFirstTime; }
-        document.getElementById("marPriceFirst").textContent = PRICE(CONFIG.priceFirstTime);
-        document.getElementById("marPriceRepeat").textContent = PRICE(CONFIG.priceReturning);
-        // מחיר אחד למרתון: לא שואלים אם זה המרתון הראשון, ומציגים מחיר אחד
-        if (CONFIG.priceFirstTime === CONFIG.priceReturning) {
-          document.getElementById("fsFirstTime").hidden = true; firstTimeYesEl.checked = true; document.querySelector(".amount-row.main span").textContent = ttx("mar.price_one"); document.getElementById("sidePriceLbl").textContent = ttx("mar.price_one");
-          document.getElementById("marPriceRepeat").parentNode.hidden = true;
-          document.getElementById("marPriceFirst").parentNode.innerHTML = '<b id="marPriceFirst"></b>'; document.getElementById("marPriceFirst").textContent = PRICE(CONFIG.priceFirstTime);
-        }
+        marPrices(MARATHON.price_first, MARATHON.price_repeat);
         // תלם 5.19.38: הכותרת = שם המרתון בלבד (בית הספר והשכבה כבר בשם)
         // 5.19.91 (נועה): "הרשמה ותשלום ל<מרתון>" ובשורה השנייה בתוך התגית – השכבה ובית הספר
         { var baseN = String(MARATHON.name || "").replace(/\s*·.*$/, "").replace(/\s*שכבת\s*\S+/, "").trim() || "מרתון מתמטיקה";
@@ -1128,7 +1118,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function initMarathon(){
     var q; try { q = new URLSearchParams(location.search); } catch (err) { q = new URLSearchParams(""); }
     MARATHON_CODE = (q.get("m") || "").trim().slice(0, 20);
-    if (MARATHON_CODE) { (window.TELEM_HOLD || function(p){ return p; })(loadMarathon().then(function(){ if (MSIGN) return mCardInit(); if (MPRE) return mPrefill(); })); return; }   // נועה 24.10: הטופס מוצג רק אחרי שהנתונים הגיעו
+    if (MARATHON_CODE) { (window.TELEM_HOLD || function(p){ return p; })(loadMarathon().then(function(){ if (MSIGN) return mCardInit(); if (MPRE || MREG) return mPrefill(); })); return; }   // נועה 24.10: הטופס מוצג רק אחרי שהנתונים הגיעו
     // קישור ישן (city/school) - אין בו קבוצות. בתצוגה מקדימה אפשר לראות את הטופס, אבל אי אפשר להירשם.
     var school = (q.get("school") || "").trim().slice(0, 60), city = (q.get("city") || "").trim().slice(0, 40);
     if (school) lockSchool(school);
@@ -1739,12 +1729,31 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       submitBtn.textContent = SUBMIT_TXT(); if (typeof updateSubmitAvailability === "function") updateSubmitAvailability();
     }).catch(function(){ bad("לא ניתן היה לטעון את הטופס. נא לנסות שוב מאוחר יותר; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101."); });
   }
+  function marPrices(pf, pr){   /* תש-102: גם אחרי ההנחה בקישור האישי */
+        CONFIG.priceFirstTime = Number(pf); CONFIG.priceReturning = Number(pr) || Number(pf);
+        document.querySelector("#opt-first .opt-price").textContent = PRICE(CONFIG.priceFirstTime);
+        document.querySelector("#opt-returning .opt-price").textContent = PRICE(CONFIG.priceReturning);
+        { var mf = document.getElementById("mpFirst"), mr = document.getElementById("mpRep"), rr = document.getElementById("mpRepRow");
+          if (mf) mf.textContent = PRICE(CONFIG.priceFirstTime); if (mr) mr.textContent = PRICE(CONFIG.priceReturning); if (rr) rr.hidden = CONFIG.priceReturning === CONFIG.priceFirstTime; }
+        document.getElementById("marPriceFirst").textContent = PRICE(CONFIG.priceFirstTime);
+        document.getElementById("marPriceRepeat").textContent = PRICE(CONFIG.priceReturning);
+        // מחיר אחד למרתון: לא שואלים אם זה המרתון הראשון, ומציגים מחיר אחד
+        if (CONFIG.priceFirstTime === CONFIG.priceReturning) {
+          document.getElementById("fsFirstTime").hidden = true; firstTimeYesEl.checked = true; document.querySelector(".amount-row.main span").textContent = ttx("mar.price_one"); document.getElementById("sidePriceLbl").textContent = ttx("mar.price_one");
+          document.getElementById("marPriceRepeat").parentNode.hidden = true;
+          document.getElementById("marPriceFirst").parentNode.innerHTML = '<b id="marPriceFirst"></b>'; document.getElementById("marPriceFirst").textContent = PRICE(CONFIG.priceFirstTime);
+        }
+    try { updateAmountDisplay(); } catch (e) {}
+  }
   function mPrefill(){
     if (!MARATHON) return;
     var H = function(k, d, l, v){ return (window.TX && TX.h) ? TX.h(k, d, l, "הקישור האישי מהכרטיס", v) : d; };
-    var pr = MPRE === "sample" ? Promise.resolve({ ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", parent_first: "דנה", parent_last: "לוי", parent_phone: "0500000001", parent_email: "dana@example.com", school: "", grade: "" })
+    var pr = MREG ? fetch(CONFIG.supabase.url + "/rest/v1/rpc/reg_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: MREG }) }).then(function(r){ return r.json(); })
+      : MPRE === "sample" ? Promise.resolve({ ok: true, student_first: "נועה", student_last: "לוי", student_phone: "0500000000", parent_first: "דנה", parent_last: "לוי", parent_phone: "0500000001", parent_email: "dana@example.com", school: "", grade: "" })
       : fetch(CONFIG.supabase.url + "/rest/v1/rpc/sign_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: MPRE }) }).then(function(r){ return r.json(); });
     return pr.then(function(d){
+      if (MREG && (!d || !d.ok || !d.marathon || d.marathon.code !== MARATHON_CODE)) { var why = d && d.reason; var inf = document.getElementById("mkInfo") || document.createElement("div"); inf.className = "mk-cardinfo"; inf.textContent = why === "used" ? "ההרשמה בקישור הזה כבר התקבלה. תודה!" : why === "expired" ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101"; form.parentNode.insertBefore(inf, form); form.hidden = true; return; }   /* אותם טקסטים כמו בטופס ההרשמה האישי */
+      if (MREG && d.marathon) marPrices(d.marathon.price_first, d.marathon.price_repeat);
       if (!d || !d.ok) return;   /* קישור לא תקין / פג – הטופס הרגיל, ריק */
       var setv = function(id, v){ var el = document.getElementById(id); if (el && v != null && v !== "" && !el.value) { el.value = String(v); try { el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {} } };
       setv("f-student-first", d.student_first); setv("f-student-last", d.student_last); setv("f-student-phone", String(d.student_phone || "").replace(/\D/g, ""));
@@ -1886,6 +1895,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       student: { first_name: studentFirst, last_name: studentLast, phone: studentPhone, school: school, grade: grade },
       parent: { first_name: parentFirst, last_name: parentLast, phone: phone, email: email }
     };
+    if (MREG) payload.reg_code = MREG;   // תש-102: לאותו כרטיס, עם ההנחה
 
     submitPayload("submit_marathon_v2", "marathon", payload).then(function(res){
       if (window.TELEM_GA) TELEM_GA("sign_up", { form: "marathon", method: isPhonePay() ? "phone" : "card" });
