@@ -453,6 +453,9 @@
   @media (max-width:560px){ .tk-subj, .tk-subj:not(.invalid){ flex-wrap:wrap !important; gap:8px; padding:10px; } .tk-subj .tks-l{ flex:0 0 100%; font-size:15px; } .tk-subj .tks-opt{ display:inline; font-size:12.5px; }
     .tk-subj label{ flex:1 1 0; min-width:0; justify-content:center; padding:8px 6px; font-size:15px; gap:6px; } }
   .tk-subj .tks-err{ display:none; flex-basis:100%; font-size:13.5px; font-weight:700; color:#B8463F; } .tk-subj.invalid{ border-color:#C9554F; } .tk-subj.invalid .tks-err{ display:block; }
+  body.pers-noterms #termsBox, body.pers-noterms #field-terms-consent, body.pers-noterms #termsConsentError, body.pers-noterms #field-signature{ display:none !important; }   /* מנ-500: קישור אישי בלי תנאים */
+  body.pers-lock #field-subject, body.pers-lock #field-subject-choice{ pointer-events:none; }
+  body.pers-lock #trackPick .tk:not(:has(.tp-radio input:checked)), body.pers-lock #trackPick .tk-price, body.pers-lock #trackPick .tp-stars{ display:none !important; } body.pers-lock #trackPick .tp-radio, body.pers-lock #trackPick .tk-subj{ pointer-events:none; }   /* מנ-500: מסלול ומקצוע נעולים, המחירים – רק בתשלום (מהשרת) */
   .consent .error-msg:not(:empty), #sigError:not(:empty), #termsConsentError:not(:empty), #consentError:not(:empty){ display:block !important; }   /* 28.10: ההודעות "יש לחתום" / "יש לאשר" לא הוצגו בכלל */
 
   /* ===== 5.19.83 (נועה): שדות לבנים כמו במערכת הניהול – לא שמנת. פינות 8, גובה 44 בכל הטפסים ===== */
@@ -951,7 +954,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   const termsConsentEl = document.getElementById("f-terms-consent");
   const paymentConsentEl = document.getElementById("f-consent");
   function updateSubmitAvailability(){
-    submitBtn.disabled = !(termsConsentEl.checked && paymentConsentEl.checked && (typeof sigHas === "undefined" || sigHas));
+    submitBtn.disabled = !(termsConsentEl.checked && paymentConsentEl.checked && (typeof sigHas === "undefined" || sigHas || (typeof persNoTerms === "function" && persNoTerms())));
     if (typeof subShield === "function") subShield(submitBtn.disabled);
   }
 
@@ -964,7 +967,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       var first = null, mark = function(id, txt, el){ document.getElementById(id).textContent = txt; if (!first) first = el; };
       if (!termsConsentEl.checked) mark("termsConsentError", "יש לאשר את תנאי ההתקשרות כדי להמשיך.", termsConsentEl);
       if (!paymentConsentEl.checked) mark("consentError", "יש לאשר את התיבה כדי להמשיך.", paymentConsentEl);
-      if (typeof sigHas !== "undefined" && sigHas !== true) mark("sigError", "יש לחתום כדי להמשיך.", document.getElementById("sigCanvas"));
+      if (typeof sigHas !== "undefined" && sigHas !== true && !persNoTerms()) mark("sigError", "יש לחתום כדי להמשיך.", document.getElementById("sigCanvas"));
       if (window.TELEM_BAD) TELEM_BAD(submitBtn);
       if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
     });
@@ -1474,7 +1477,37 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (tq) tq.textContent = " במידה ולא נרצה להמשיך – יש להודיע לתלם עד " + trDMY(tds) + ", ולפי תנאי ההתקשרות.";
     try { paintPayPhone(); } catch(x) {}
   }
+  // מנ-500 (icredit-86/87): "קישור אישי" – ההגדרות מהמערכת (reg_link_get.settings): בלי תנאים / מסלול ומקצוע נעולים / הסכומים מהשרת (quote)
+  var PERS = null;
+  function persNoTerms(){ return !!(PERS && PERS.settings && PERS.settings.terms === false); }
+  function persSetup(d){
+    PERS = { settings: d.settings || {}, quote: d.quote || null }; document.body.classList.add("is-pers");
+    var st = PERS.settings, put = function(id, v){ var el = document.getElementById(id); if (!el || !v) return; el.value = v; el.dispatchEvent(new Event("change", { bubbles: true })); };
+    if (st.track) { put("f-subject", st.track); if (st.subject && st.track !== "double") put("f-subject-choice", st.subject); ["f-subject", "f-subject-choice"].forEach(function(id){ var el = document.getElementById(id); if (el) el.disabled = true; }); document.body.classList.add("pers-lock"); try { trackPickPaint(); } catch(x) {} }
+    if (st.terms === false) { document.body.classList.add("pers-noterms"); termsConsentEl.checked = true; try { updateSubmitAvailability(); } catch(x) {} }
+    try { updateAmountDisplay(); updateRecurDisplay(); } catch(x) {}
+  }
+  function persPaint(){
+    var q = PERS.quote, nis = function(x){ return "₪" + Number(x || 0).toFixed(2); };
+    var row2 = document.getElementById("trial2Row");
+    if (!row2) { var po = document.querySelector(".pay-once"); row2 = document.createElement("div"); row2.className = "pay-once"; row2.id = "trial2Row"; row2.style.marginTop = "10px";
+      row2.innerHTML = '<div class="amount-breakdown" id="trial2Bd"></div><div class="amount-row"><span id="trial2Label"></span><strong id="trial2Amount"></strong></div>'; if (po) po.parentNode.insertBefore(row2, po.nextSibling); }
+    row2.style.display = "none"; amountBreakdown.textContent = "";
+    if (!q || !q.now) { amountDisplay.innerHTML = "יש לבחור מסלול"; amountDisplay.classList.add("ph"); return; }
+    var rows = function(box, items){ (items || []).forEach(function(it){ var d = document.createElement("div"); d.className = "bd-row"; var a = document.createElement("span"); a.textContent = it.description || ""; var b = document.createElement("b"); b.textContent = nis(it.amount); d.appendChild(a); d.appendChild(b); box.appendChild(d); }); };
+    amountDisplay.textContent = nis(q.now.total); amountDisplay.classList.remove("ph"); rows(amountBreakdown, q.now.items);
+    var sc = q.schedule || [], mo = q.monthly || {}, first = sc[0], firstX = first && ((first.items || []).length > 1 || Number(first.amount) !== Number(mo.amount));
+    if (firstX) { row2.style.display = ""; var bd2 = document.getElementById("trial2Bd"); bd2.textContent = ""; rows(bd2, (first.items || []).map(function(x){ return typeof x === "string" ? { description: x } : x; }).filter(function(x){ return x.amount != null; }));
+      document.getElementById("trial2Label").innerHTML = "בנוסף, סכום לתשלום בחיוב הראשון<small class=\"recur-sub\">ב-" + trDMY(first.date) + "</small>"; document.getElementById("trial2Amount").textContent = nis(first.amount); }
+    var rest = firstX ? sc.slice(1) : sc;
+    if (!rest.length || !Number(mo.amount)) { recurAmountDisplay.textContent = ""; recurLabel.innerHTML = ""; var rr = recurLabel.closest(".amount-row, .pay-recur"); if (rr) rr.style.display = "none"; return; }
+    recurAmountDisplay.textContent = nis(mo.amount);
+    var last = rest[rest.length - 1].date;
+    recurLabel.innerHTML = "בנוסף, תשלום חודשי<small class=\"recur-sub\">" + rest.length + " תשלומים חודשיים, החל מ-" + trDMY(rest[0].date) + " ועד חודש " + trMonth(last) + " כולל</small>";
+    recurLabel.setAttribute("data-pdf", "תשלום חודשי (" + recurLabel.textContent.replace("בנוסף, תשלום חודשי", "").trim() + ")");
+  }
   function getAmount(){
+    if (PERS) return PERS.quote && PERS.quote.now ? Number(PERS.quote.now.total) : null;
     if (TRIAL) { var tt = trialTrack(); return tt ? Number(tt.first_amount) : null; }
     // הסכום הנגבה מיידית כולל שלושה מרכיבים אפשריים:
     // 1. דמי שיבוץ והרשמה (registrationFee) - תמיד.
@@ -1497,6 +1530,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
 
   function updateAmountDisplay(){
+    if (PERS) { persPaint(); return; }
     if (TRIAL) { trialPaint(); return; }
     var amount = getAmount();
     if (amount != null) amountDisplay.textContent = "₪" + amount.toFixed(2); else amountDisplay.innerHTML = RH("r.amount_none", "יש לבחור עיר ומסלול", "במקום הסכום – כשעוד לא נבחר מסלול");
@@ -1682,6 +1716,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   }
 
   function updateRecurDisplay(){
+    if (PERS) { persPaint(); return; }   // מנ-500: קישור אישי
     if (TRIAL) { trialPaint(); return; }   // תש-70: חודש ניסיון – trialPaint
     var info = getRecurInfo();
     var RLBL = window.TX ? TX.h("r.recur_lbl", "בנוסף, תשלום חודשי", "התשלום החודשי – הכותרת", "תשלום ואישור") : "בנוסף, תשלום חודשי";   // נועה 4.11: "בנוסף" בתוך המסגרת
@@ -1972,6 +2007,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
         (function(){ var qp = function(k){ var m = location.search.match(new RegExp("[?&]" + k + "=([^&]*)")); try { return m ? decodeURIComponent(m[1]) : ""; } catch(x) { return ""; } };
           var pt = qp("t"), ps = qp("s"); if (pt) put("f-subject", pt); if (ps && pt !== "double" && ps !== "מתמטיקה ואנגלית") put("f-subject-choice", ps);
           try { if (pt) trackPickPaint(); } catch(x) {} })();
+        if (d.settings) persSetup(d);   // מנ-500 (icredit-86): קישור אישי
       }).catch(function(){});
   }
   form.addEventListener("submit", function(e){
@@ -2061,8 +2097,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     // 1) שמירת ההרשמה במסד הנתונים. 2) מעבר לתשלום עם מספר ההזמנה.
     // הסכומים לתשלום מגיעים מהשרת (לפי טבלת המסלולים ב-DB), כך שמה
     // שנגבה תמיד תואם למה שנרשם.
-    const signature = signatureImage();
-    if (!signature) { document.getElementById("sigError").textContent = "יש לחתום כדי להמשיך."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); return; }
+    const signature = persNoTerms() ? null : signatureImage();
+    if (!signature && !persNoTerms()) { document.getElementById("sigError").textContent = "יש לחתום כדי להמשיך."; topError.style.display = "block"; if (window.TELEM_BAD) TELEM_BAD(submitBtn); submitBtn.disabled = false; submitBtn.textContent = SUBMIT_TXT(); return; }
     submitBtn.textContent = "ההרשמה נשלחת…";
     // תלם 5.19.42: הטופס החתום נשמר בדפדפן (בלשונית הזו בלבד) - בדף התודה כפתור "הורדת הטופס החתום"
     function saveRegPdf(pdf, isPreview){
@@ -2070,7 +2106,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       if (!pdf) return;
       try { sessionStorage.setItem("reg_saved_at", String(Date.now())); sessionStorage.setItem("reg_pdf", pdf); sessionStorage.setItem("reg_pdf_name", ("טופס הרשמה - " + String(studentFirst + " " + studentLast).replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim() + (isPreview ? " (תצוגה מקדימה)" : "")).trim() + ".pdf"); } catch (e) {}   // תלם 5.19.48: שם הקובץ בעברית
     }
-    makeSignedPdf("טופס הרשמה לתרגולים", (parentFirst + " " + parentLast).trim()).then(function(signedPdf){
+    (persNoTerms() ? Promise.resolve(null) : makeSignedPdf("טופס הרשמה לתרגולים", (parentFirst + " " + parentLast).trim())).then(function(signedPdf){
     if (isPreviewNow()) {
       saveRegPdf(signedPdf, true);   // תלם 5.19.42: לא מורידים אוטומטית - כפתור הורדה בדף התודה (כמו במרתון)
       try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", subject: (track === "double" ? "מתמטיקה ואנגלית" : subjectChoice) || "", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
