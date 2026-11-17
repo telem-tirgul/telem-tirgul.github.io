@@ -1483,7 +1483,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function persSetup(d){
     PERS = { settings: d.settings || {}, quote: d.quote || null }; document.body.classList.add("is-pers");
     var st = PERS.settings, put = function(id, v){ var el = document.getElementById(id); if (!el || !v) return; el.value = v; el.dispatchEvent(new Event("change", { bubbles: true })); };
-    var lk = st.lock || { track: true, subject: true };   // נועה 17.11: מה נעול להורה – לפי החלון (בדיפולט המסלול נעול)
+    var lk = st.lock === false ? { track: false, subject: false } : (st.lock && typeof st.lock === "object") ? st.lock : { track: true, subject: true };   // icredit-88: lock – true / false (מסלול ומקצוע יחד)   // נועה 17.11: מה נעול להורה – לפי החלון (בדיפולט המסלול נעול)
     if (st.track) { put("f-subject", st.track); if (lk.track !== false) { subjectEl.disabled = true; document.body.classList.add("pers-lock"); } }
     if (st.subject && st.track !== "double") { put("f-subject-choice", st.subject); if (lk.subject !== false) { subjectChoiceEl.disabled = true; document.body.classList.add("pers-lock-s"); } }
     try { trackPickPaint(); } catch(x) {}
