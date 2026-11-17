@@ -454,8 +454,8 @@
     .tk-subj label{ flex:1 1 0; min-width:0; justify-content:center; padding:8px 6px; font-size:15px; gap:6px; } }
   .tk-subj .tks-err{ display:none; flex-basis:100%; font-size:13.5px; font-weight:700; color:#B8463F; } .tk-subj.invalid{ border-color:#C9554F; } .tk-subj.invalid .tks-err{ display:block; }
   body.pers-noterms #termsBox, body.pers-noterms #field-terms-consent, body.pers-noterms #termsConsentError, body.pers-noterms #field-signature{ display:none !important; }   /* מנ-500: קישור אישי בלי תנאים */
-  body.pers-lock #field-subject, body.pers-lock #field-subject-choice{ pointer-events:none; }
-  body.pers-lock #trackPick .tk:not(:has(.tp-radio input:checked)), body.pers-lock #trackPick .tk-price, body.pers-lock #trackPick .tp-stars{ display:none !important; } body.pers-lock #trackPick .tp-radio, body.pers-lock #trackPick .tk-subj{ pointer-events:none; }   /* מנ-500: מסלול ומקצוע נעולים, המחירים – רק בתשלום (מהשרת) */
+  body.pers-lock #field-subject, body.pers-lock-s #field-subject-choice{ pointer-events:none; }
+  body.pers-lock #trackPick .tk:not(:has(.tp-radio input:checked)){ display:none !important; } body.is-pers #trackPick .tk-price, body.is-pers #trackPick .tp-stars{ display:none !important; } body.pers-lock #trackPick .tp-radio, body.pers-lock-s #trackPick .tk-subj{ pointer-events:none; }   /* מנ-500: מסלול ומקצוע נעולים, המחירים – רק בתשלום (מהשרת) */
   .consent .error-msg:not(:empty), #sigError:not(:empty), #termsConsentError:not(:empty), #consentError:not(:empty){ display:block !important; }   /* 28.10: ההודעות "יש לחתום" / "יש לאשר" לא הוצגו בכלל */
 
   /* ===== 5.19.83 (נועה): שדות לבנים כמו במערכת הניהול – לא שמנת. פינות 8, גובה 44 בכל הטפסים ===== */
@@ -1483,7 +1483,14 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   function persSetup(d){
     PERS = { settings: d.settings || {}, quote: d.quote || null }; document.body.classList.add("is-pers");
     var st = PERS.settings, put = function(id, v){ var el = document.getElementById(id); if (!el || !v) return; el.value = v; el.dispatchEvent(new Event("change", { bubbles: true })); };
-    if (st.track) { put("f-subject", st.track); if (st.subject && st.track !== "double") put("f-subject-choice", st.subject); ["f-subject", "f-subject-choice"].forEach(function(id){ var el = document.getElementById(id); if (el) el.disabled = true; }); document.body.classList.add("pers-lock"); try { trackPickPaint(); } catch(x) {} }
+    var lk = st.lock || { track: true, subject: true };   // נועה 17.11: מה נעול להורה – לפי החלון (בדיפולט המסלול נעול)
+    if (st.track) { put("f-subject", st.track); if (lk.track !== false) { subjectEl.disabled = true; document.body.classList.add("pers-lock"); } }
+    if (st.subject && st.track !== "double") { put("f-subject-choice", st.subject); if (lk.subject !== false) { subjectChoiceEl.disabled = true; document.body.classList.add("pers-lock-s"); } }
+    try { trackPickPaint(); } catch(x) {}
+    if (st.trial) {   // נועה 17.11: "חודש ניסיון" – המשפט הקיים בצ'קבוקס התנאים, 21 יום מתאריך ההתחלה
+      var tq = document.getElementById("trialQuit"), tc = document.querySelector("#field-terms-consent span");
+      if (!tq && tc) { tq = document.createElement("span"); tq.id = "trialQuit"; var tw = document.createElement("span"); tc.parentNode.insertBefore(tw, tc); tw.appendChild(tc); tw.appendChild(tq); }
+      var sd = String(st.start_date || "").slice(0, 10) || ilTodayISO(); if (tq) tq.textContent = " במידה ולא נרצה להמשיך – יש להודיע לתלם עד " + trDMY(trAdd(sd, 21)) + ", ולפי תנאי ההתקשרות."; }
     if (st.terms === false) { document.body.classList.add("pers-noterms"); termsConsentEl.checked = true; try { updateSubmitAvailability(); } catch(x) {} }
     try { updateAmountDisplay(); updateRecurDisplay(); } catch(x) {}
   }
