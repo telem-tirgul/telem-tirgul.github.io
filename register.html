@@ -1616,7 +1616,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // 5.19.58: קיזוז ביוני לפי מסך חוקי החיוב (icredit-20: june_offset + city_offsets). ברירת מחדל: חומרי תרגול, ואם אין - דמי הרשמה.
   var JUNE = { on: true, cities: {}, known: false };
   // נועה 17.11: "סכום זה יקוזז מתשלום חודש יוני." – מתחת לשורה של הפריט שמקוזז (בתשלום המיידי או בחיוב השני), לפי העיר
-  function juneMark(row, kind){ try { var jo = juneOffset(cityEl.value) || {}; if (!(kind === "reg" ? jo.registration : kind === "mat" ? jo.materials : false)) return; var sp = row.querySelector("span"); if (!sp) return; var n = document.createElement("small"); n.className = "bd-jn"; n.textContent = "סכום זה יקוזז מתשלום חודש יוני."; sp.appendChild(n); } catch(x) {} }
+  function juneMark(row, kind){ try { var jo = juneOffset(cityEl.value) || {}; if (!(kind === "reg" ? jo.registration : kind === "mat" ? jo.materials : false)) return; var sp = row.querySelector("span"); if (!sp) return; var n = document.createElement("small"); n.className = "bd-jn"; n.textContent = "* סכום זה יקוזז מתשלום חודש יוני"; sp.appendChild(n); } catch(x) {} }
   function juneOffset(city){
     var t = CONFIG.trackPricing[city] || {}, mat = Number(t.materialsFee || 0), reg = Number(t.registrationFee || 0);
     if (!JUNE.on) return { materials: false, registration: false, sum: 0 };
