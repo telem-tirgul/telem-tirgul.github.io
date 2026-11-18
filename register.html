@@ -1922,6 +1922,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       : "<b>ההרשמה" + (c ? " ב" + c.replace(/[<>&]/g, "") : "") + " כרגע סגורה.</b><br>לפרטים ולהרשמה: <a href=\"tel:0529067101\">052-9067101</a>";
   }
   cityEl.addEventListener("change", regClosedCheck);
+  cityEl.addEventListener("change", function(){ if (window.TELEM_GA_SET) TELEM_GA_SET({ form_city: cityEl.value || "" }); }); schoolEl.addEventListener("change", function(){ if (window.TELEM_GA_SET) TELEM_GA_SET({ form_school: schoolEl.value || "" }); });   // נועה 18.11: GA לפי עיר ובית ספר
   updateSubjectChoiceVisibility();
   updateLevelFieldsVisibility();
   renderSchoolOptions();
@@ -2154,7 +2155,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       return;
     }
     submitPayload("submit_registration_v2", "registration", payload).then(function(res){
-      if (window.TELEM_GA) TELEM_GA("sign_up", { form: "register", method: isPhonePay() ? "phone" : "card" });
+      if (window.TELEM_GA) TELEM_GA("sign_up", { form: "register", method: isPhonePay() ? "phone" : "card", form_city: cityEl.value || "", form_school: schoolEl.value || "" });   // נועה 18.11: עיר ובית ספר
       saveRegPdf(signedPdf, false);
       try {
         sessionStorage.setItem("reg_studentFullName", studentFirst + " " + studentLast);

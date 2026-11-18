@@ -24,6 +24,8 @@
   window.dataLayer = window.dataLayer || [];
   window.gtag = function(){ dataLayer.push(arguments); };
   gtag("js", new Date());
+  try { var sp = new URLSearchParams(location.search), cty = sp.get("city"), sch = sp.get("school"), g0 = {};   // נועה 18.11: העיר ובית הספר – לכל האירועים בדף (ב-GA: מאפיינים מותאמים "form_city", "form_school")
+    if (cty && cty.length < 60) g0.form_city = cty; if (sch && sch.length < 80) g0.form_school = sch; if (g0.form_city || g0.form_school) gtag("set", g0); } catch (e) {}
   gtag("config", ID, { page_location: clean(location.href, true), page_referrer: document.referrer ? clean(document.referrer, false) : "",
     allow_google_signals: false, allow_ad_personalization_signals: false });
   var s = document.createElement("script"); s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + ID; document.head.appendChild(s);
