@@ -12,7 +12,7 @@
   try {
     if (location.hostname !== "telem-tirgul.github.io") no = true;
     if (/[?&](preview|cardtest|txedit|tyv|render|noga)=/.test(q)) no = true;
-    if (/\/telem-admin\//.test(document.referrer || "")) no = true;
+    if (/\/telem-admin\/|\/\/telem-admin\.pages\.dev\//.test(document.referrer || "")) no = true;   // 19.11: גם מערכת הניהול בכתובת החדשה (Cloudflare)
     try { if (window.top !== window && /\/telem-admin\//.test(window.top.location.pathname)) no = true; } catch (e) {}
     if (no) sessionStorage.setItem("tl_noga", "1"); else if (sessionStorage.getItem("tl_noga")) no = true;
   } catch (e) {}
