@@ -98,11 +98,12 @@
     var h = document.createElement("div"); h.className = "wa-h"; h.appendChild(FT("foot.h", "לשאלות ניתן לפנות אלינו", "תחתית – כותרת"));   // נועה: הכול במסגרת אחת – כותרת, ומתחתיה וואטסאפ ואימייל
     box.appendChild(h); box.appendChild(a); box.appendChild(m);
     var pv = document.createElement("a"); pv.className = "wa-privacy"; pv.target = "_blank"; pv.rel = "noopener"; pv.appendChild(FT("foot.privacy", "מדיניות פרטיות", "תחתית – מדיניות פרטיות"));   // את-46: עד שהאתר החדש באוויר – העמוד באתר הישן
-    pv.href = "https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA"; box.appendChild(pv);
+    pv.href = "https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA";
     var ac = document.createElement("a"); ac.className = "wa-privacy wa-access"; ac.target = "_blank"; ac.rel = "noopener"; ac.appendChild(FT("foot.access", "הצהרת נגישות", "תחתית – הצהרת נגישות"));   // את-68 (נועה 19.11): נגישות – קישור קבוע בכל טופס (עד האתר החדש – באתר הישן)
-    ac.href = "https://www.telem-tr.co.il/accessibillity-statement"; box.appendChild(ac);
+    ac.href = "https://www.telem-tr.co.il/accessibillity-statement";
+    var lg = document.createElement("div"); lg.className = "wa-legal"; lg.appendChild(pv); lg.appendChild(ac); box.appendChild(lg);   // נועה 19.11: שני הקישורים באותה שורה
     if (!document.getElementById("tlA11yCss")) { var st = document.createElement("style"); st.id = "tlA11yCss";   // את-68: ניגודיות (WCAG AA) – התחתית בלי שקיפות, טקסט כהה יותר
-      st.textContent = "footer{opacity:1 !important;color:#6b5f55 !important}.wa-privacy{color:#5c4f45 !important}.priv-note{font-size:13px;color:#5c4f45;margin:10px 0 0;line-height:1.6}.priv-note a{color:inherit;font-weight:700}"; document.head.appendChild(st); }
+      st.textContent = "footer{opacity:1 !important;color:#6b5f55 !important}.wa-privacy{color:#5c4f45 !important}.priv-note{font-size:13px;color:#5c4f45;margin:10px 0 0;line-height:1.6}.priv-note a{color:inherit;font-weight:700}.wa-legal{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 14px;margin-top:6px}.wa-legal .wa-privacy{margin:0 !important;display:inline}"; document.head.appendChild(st); }
     if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
 })();
@@ -161,3 +162,62 @@ window.TELEM_BAD = function(btn){
   }
 };
 window.TELEM_OK = function(){ var n = document.getElementById("tlFixNote"); if (n) n.hidden = true; };
+
+// את-68 (נועה 19.11): תפריט נגישות – אותו כפתור ותפריט כמו באתר (את-69). ההגדרות נשמרות בדפדפן (telem_a11y)
+(function(){
+  if (window.TELEM_A11Y_MENU) return; window.TELEM_A11Y_MENU = 1;
+  var STMT = "https://www.telem-tr.co.il/accessibillity-statement";
+  var CSS = ".a11y-btn{position:fixed;bottom:18px;left:18px;right:auto;z-index:60;width:52px;height:52px;border-radius:50%;border:3px solid #fff;background:#1A5C9E;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px -6px rgba(0,0,0,.45);padding:0}"
+    + ".a11y-btn:focus-visible,.a11y-panel button:focus-visible,.a11y-panel a:focus-visible{outline:3px solid #C9A45C;outline-offset:2px}"
+    + ".a11y-panel{position:fixed;bottom:80px;left:18px;right:auto;z-index:61;width:330px;max-width:calc(100vw - 36px);max-height:calc(100vh - 110px);overflow:auto;background:#fff;border-radius:20px;padding:14px;box-shadow:0 20px 50px -18px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:10px;direction:rtl;text-align:right;font-size:15px;color:#2a2320}"
+    + ".a11y-panel[hidden]{display:none}.a11y-h{display:flex;justify-content:space-between;align-items:center;font-size:18px;color:#5A1216}.a11y-x{background:none;border:none;font-size:18px;cursor:pointer;color:#6b5f55}"
+    + ".a11y-row{display:flex;justify-content:space-between;align-items:center}.a11y-sz{display:flex;gap:6px}.a11y-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}"
+    + ".a11y-sz button,.a11y-opt,.a11y-reset{font:inherit;font-size:14px;cursor:pointer;border-radius:12px;border:1.5px solid #E2D6C8;background:#FBF7F2;color:#2a2320;padding:8px 10px}.a11y-opt{text-align:right}"
+    + ".a11y-opt[aria-pressed=\"true\"]{background:#1A5C9E;color:#fff;border-color:#1A5C9E}.a11y-reset{background:#fff}.a11y-st{text-align:center;color:#8B1E24;font-weight:700;padding-top:2px}"
+    + ".a11y-mag{position:fixed;z-index:70;max-width:min(560px,90vw);background:#111;color:#fff;font-size:26px;line-height:1.4;padding:10px 16px;border-radius:12px;pointer-events:none;direction:rtl;box-shadow:0 10px 30px rgba(0,0,0,.4)}.a11y-mag[hidden]{display:none}"
+    + "html.a11y-contrast{filter:contrast(1.4)}html.a11y-contrast p{color:#000 !important}html.a11y-gray{filter:grayscale(1)}html.a11y-dark{filter:invert(1) hue-rotate(180deg)}html.a11y-dark img,html.a11y-dark video,html.a11y-dark iframe,html.a11y-dark canvas,html.a11y-dark .a11y-btn{filter:invert(1) hue-rotate(180deg)}"
+    + "html.a11y-light body,html.a11y-light body *:not(.a11y-btn):not(.a11y-btn *):not(.a11y-opt[aria-pressed=\"true\"]):not(.a11y-mag){background-color:#fff !important;background-image:none !important;color:#000 !important;border-color:#000 !important;box-shadow:none !important}"
+    + "html.a11y-links a{text-decoration:underline !important;outline:2px dashed #C9A45C;outline-offset:2px}html.a11y-headings h1,html.a11y-headings h2,html.a11y-headings h3,html.a11y-headings h4{outline:2px solid #1A5C9E;outline-offset:4px;text-decoration:underline;text-underline-offset:6px}"
+    + "html.a11y-font body,html.a11y-font body *{font-family:Arial,'Helvetica Neue',sans-serif !important;letter-spacing:.01em}html.a11y-spacing body *{line-height:1.9 !important;letter-spacing:.06em !important;word-spacing:.16em !important}"
+    + "html.a11y-focus *:focus{outline:4px solid #E8A33D !important;outline-offset:3px !important;box-shadow:0 0 0 7px rgba(26,92,158,.45) !important}"
+    + "html.a11y-cursorB,html.a11y-cursorB *{cursor:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l14 9-6.5 1.5L15 20l-3 1.4-3.4-7.4L4 18z' fill='%23000' stroke='%23fff' stroke-width='1.2'/%3E%3C/svg%3E\") 4 2,auto !important}"
+    + "html.a11y-cursorW,html.a11y-cursorW *{cursor:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l14 9-6.5 1.5L15 20l-3 1.4-3.4-7.4L4 18z' fill='%23fff' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E\") 4 2,auto !important}"
+    + "html.a11y-noimg img:not(.brand-logo){visibility:hidden !important}html.a11y-noimg *{background-image:none !important}html.a11y-still *,html.a11y-still *::before,html.a11y-still *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}"
+    + "body:has(.m-bar:not([hidden])) .a11y-btn{bottom:86px}body:has(.m-bar:not([hidden])) .a11y-panel{bottom:148px}"
+    + "@media (max-width:640px){.a11y-btn{bottom:14px;left:14px;width:48px;height:48px}.a11y-panel{left:10px;bottom:72px;width:calc(100vw - 20px)}}@media print{.a11y-btn,.a11y-panel,.a11y-mag{display:none}}";
+  var OPT_T = [["spacing","ריווח טקסט"],["font","גופן קריא"],["headings","הדגשת כותרות"],["links","הדגשת קישורים"],["contrast","ניגודיות גבוהה"],["dark","רקע כהה"],["light","רקע בהיר"],["gray","גווני אפור"],["cursorB","סמן גדול שחור"],["cursorW","סמן גדול לבן"],["magnify","זכוכית מגדלת"],["focus","הדגשת מיקוד"],["still","עצירת אנימציות"],["noimg","הסתרת תמונות"]];
+  function init(){
+    if (document.getElementById("a11y-btn")) return;
+    var stl = document.createElement("style"); stl.id = "tlA11yMenu"; stl.textContent = CSS; document.head.appendChild(stl);
+    var wrap = document.createElement("div");
+    wrap.innerHTML = '<button type="button" class="a11y-btn" id="a11y-btn" aria-label="תפריט נגישות" aria-expanded="false" aria-controls="a11y-panel"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><circle cx="11" cy="3.6" r="2" fill="currentColor"/><path d="M10.6 7.2v6.2h5.2l2.6 5.4 2-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.6 10h4.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.8 10.6a5.6 5.6 0 1 0 7.6 7.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>'
+      + '<div class="a11y-panel" id="a11y-panel" role="dialog" aria-label="תפריט נגישות" hidden><div class="a11y-h"><b>תפריט נגישות</b><button type="button" class="a11y-x" id="a11y-x" aria-label="סגירת תפריט הנגישות">✕</button></div>'
+      + '<div class="a11y-row"><span>גודל טקסט</span><div class="a11y-sz"><button type="button" data-a11y="smaller" aria-label="הקטנת טקסט">א-</button><button type="button" data-a11y="bigger" aria-label="הגדלת טקסט">א+</button></div></div>'
+      + '<div class="a11y-grid">' + OPT_T.map(function(o){ return '<button type="button" class="a11y-opt" data-a11y="' + o[0] + '" aria-pressed="false">' + o[1] + '</button>'; }).join("") + '</div>'
+      + '<button type="button" class="a11y-reset" data-a11y="reset">איפוס כל ההתאמות</button><a class="a11y-st" href="' + STMT + '" target="_blank" rel="noopener">הצהרת נגישות</a></div><div class="a11y-mag" id="a11y-mag" aria-hidden="true" hidden></div>';
+    while (wrap.firstChild) document.body.appendChild(wrap.firstChild);
+    var KEY = "telem_a11y", OPTS = OPT_T.map(function(o){ return o[0]; }), GROUPS = [["contrast","dark","light","gray"],["cursorB","cursorW"]];
+    function blank(){ var o = {z:0}; OPTS.forEach(function(k){ o[k] = 0; }); return o; }
+    var st = blank(); try { var v = JSON.parse(localStorage.getItem(KEY) || "null"); if (v) Object.keys(st).forEach(function(k){ if (v[k] != null) st[k] = v[k]; }); } catch(e) {}
+    var root = document.documentElement, btn = document.getElementById("a11y-btn"), panel = document.getElementById("a11y-panel"), mag = document.getElementById("a11y-mag");
+    function apply(){ var zs = [1, 1.1, 1.2, 1.32, 1.45]; st.z = Math.max(0, Math.min(4, st.z | 0)); document.body.style.zoom = zs[st.z] === 1 ? "" : zs[st.z];
+      OPTS.forEach(function(k){ root.classList.toggle("a11y-" + k, !!st[k]); var b = panel.querySelector('[data-a11y="' + k + '"]'); if (b) b.setAttribute("aria-pressed", st[k] ? "true" : "false"); });
+      if (!st.magnify) mag.hidden = true; try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} }
+    function open(o){ panel.hidden = !o; btn.setAttribute("aria-expanded", o ? "true" : "false"); if (o) { var f = panel.querySelector("button"); if (f) f.focus(); } }
+    btn.addEventListener("click", function(){ open(panel.hidden); });
+    document.getElementById("a11y-x").addEventListener("click", function(){ open(false); btn.focus(); });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !panel.hidden) { open(false); btn.focus(); } });
+    panel.addEventListener("click", function(e){ var b = e.target.closest("[data-a11y]"); if (!b) return; var a = b.getAttribute("data-a11y");
+      if (a === "bigger") st.z = st.z + 1; else if (a === "smaller") st.z = st.z - 1; else if (a === "reset") st = blank();
+      else { var on = !st[a]; GROUPS.forEach(function(g){ if (g.indexOf(a) >= 0) g.forEach(function(k){ st[k] = 0; }); }); st[a] = on ? 1 : 0; }
+      apply(); });
+    document.addEventListener("mouseover", function(e){ if (!st.magnify) return; var el = e.target.closest("p,li,h1,h2,h3,h4,a,button,label,td,th,span,b,small");
+      if (!el || panel.contains(el)) { mag.hidden = true; return; } var t = (el.innerText || "").replace(/\s+/g, " ").trim(); if (!t) { mag.hidden = true; return; }
+      mag.textContent = t.length > 220 ? t.slice(0, 220) + "…" : t; mag.hidden = false; });
+    document.addEventListener("mousemove", function(e){ if (mag.hidden) return; var x = Math.min(window.innerWidth - mag.offsetWidth - 10, Math.max(10, e.clientX - mag.offsetWidth / 2)), y = e.clientY + 24;
+      if (y + mag.offsetHeight > window.innerHeight - 10) y = e.clientY - mag.offsetHeight - 16; mag.style.left = x + "px"; mag.style.top = y + "px"; });
+    apply();
+  }
+  if (window.top !== window) return;   // בתצוגה בתוך מערכת הניהול – בלי הכפתור
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();
