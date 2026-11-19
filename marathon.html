@@ -807,7 +807,6 @@
       <span data-t="t057">קראתי את תנאי ההתקשרות המפורטים למעלה ואת <a href="https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA" target="_blank" rel="noopener">מדיניות הפרטיות</a>, ואני מסכים/ה להם.</span>
     </label>
     <div class="error-msg" id="termsConsentError"></div>
-    <label class="consent mkt-consent" id="field-marketing"><input type="checkbox" id="f-marketing"> <span data-t="mkt.consent">אני מאשר/ת לקבל מתלם עדכונים ומבצעים (אפשר להסיר בכל עת).</span></label>
     <label class="consent" id="field-consent">
       <input type="checkbox" id="f-consent" required>
       <span id="consentText" data-t="consent" data-ta="card,phone" data-card="אני מאשר/ת שהפרטים נכונים, ומסכים/ה להמשיך לעמוד התשלום המאובטח ולחיוב המיידי של הסכום החד-פעמי בכרטיס האשראי." data-phone="אני מאשר/ת שהפרטים נכונים, ושנציג/ה תלם ייצור איתי קשר טלפוני לתשלום של הסכום המפורט למעלה.">אני מאשר/ת שהפרטים נכונים, ומסכים/ה להמשיך לעמוד התשלום המאובטח ולחיוב המיידי של הסכום החד-פעמי בכרטיס האשראי.</span>
@@ -1681,7 +1680,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var ev = pdfEvent() || {}, gObj = groupEl && MARATHON && (MARATHON.groups || []).find(function(g){ return String(g.session_id) === String(groupEl.value); });
     var gLbl = gObj ? (gObj.label || "") + (gObj.start_time ? " · " + String(gObj.start_time).slice(0, 5) + "–" + String(gObj.end_time || "").slice(0, 5) : "") : "";
     var mName = ev.name || "מרתון מתמטיקה", when = (ev.meetings || []).join(" · ");
-    var payload = { marketing_ok: !!(document.getElementById("f-marketing") && document.getElementById("f-marketing").checked), website: document.getElementById("f-website").value, city: (MARATHON && MARATHON.city) || "", school: v("f-school"),
+    var payload = { website: document.getElementById("f-website").value, city: (MARATHON && MARATHON.city) || "", school: v("f-school"),
       courses: ["מרתון: " + mName + (when ? " (" + when + ")" : "")], filled_by: "טופס מרתון – רק פרטים",
       notes: "השאירו פרטים בטופס המרתון (בלי הרשמה)" + (gLbl ? " · " + gLbl : ""),
       session_id: gObj ? Number(gObj.session_id) : null,   // icredit-72 (נועה 12.11): הקבוצה שנבחרה – נשמרת בשורה בקורס (lead_session_id), בלי שיבוץ ובלי לתפוס מקום
@@ -1883,7 +1882,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       try { sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(getAmount()))); } catch (err) {}
       setTimeout(function(){ goTop(tyUrl("preview=1")); }, 600); return;
     }
-    const payload = { marketing_ok: !!(document.getElementById("f-marketing") && document.getElementById("f-marketing").checked), 
+    const payload = { 
       signature: signature,
       pdf: signedPdf,
       website: document.getElementById("f-website").value,

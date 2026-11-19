@@ -537,7 +537,6 @@
     </fieldset>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" tabindex="-1" autocomplete="off"></label></div>
     <p class="disclaimer" data-t="cl12">מילוי הטופס הוא להתעניינות בלבד ואינו מחייב בהרשמה, בתשלום או בכל התחייבות שהיא.</p>
-    <label class="consent mkt-consent" id="field-marketing"><input type="checkbox" id="f-marketing"> <span data-t="mkt.consent">אני מאשר/ת לקבל מתלם עדכונים ומבצעים (אפשר להסיר בכל עת).</span></label>
     <p class="priv-note"><span data-t="priv.note">בשליחת הפרטים את/ה מאשר/ת את</span> <a href="https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA" target="_blank" rel="noopener"><span data-t="priv.link">מדיניות הפרטיות</span></a> <span data-t="priv.note2">של האתר</span></p>
     <div class="submit-wrap"><button type="submit" id="submitBtn" data-t="cl13">שליחה</button></div>
   </form>
@@ -571,7 +570,7 @@ $("clsForm").addEventListener("submit", function(e){
   mark("field-sfirst", !$("f-sfirst").value.trim()); mark("field-slast", !$("f-slast").value.trim()); mark("field-pfirst", !$("f-pfirst").value.trim());
   mark("field-sphone", !/^0\d{8,9}$/.test(sph)); mark("field-pphone", !/^0\d{8,9}$/.test(ph));
   $("topError").style.display = ok ? "none" : "block"; if (!ok) { if (window.TELEM_BAD) TELEM_BAD($("submitBtn")); return; }
-  const payload = { marketing_ok: !!(document.getElementById("f-marketing") && document.getElementById("f-marketing").checked), website: $("f-website").value, class_code: CODE, filled_by: "תלמיד",
+  const payload = { website: $("f-website").value, class_code: CODE, filled_by: "תלמיד",
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph },
     parent: { first_name: $("f-pfirst").value.trim(), phone: ph } };
   const btn = $("submitBtn"); btn.disabled = true; btn.textContent = "שולח…";
