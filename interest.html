@@ -192,6 +192,7 @@
 
   /* נועה 3.11: תיבת סימון בלבד, בתחילת שורת הכותרת (מימין); הצד השמאלי – פתיחת הפרטים */
   .ti-pick{ flex:none; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; margin-inline-end:2px; cursor:pointer; }
+  .tp-wrap{ position:relative; } .tp-wrap > .ti-pick{ position:absolute; top:12px; inset-inline-start:10px; z-index:2; } .tp-wrap > :not(.ti-pick) .tk-head{ padding-inline-start:44px; }   /* את-68 */
   .ti-pick input{ width:24px; height:24px; margin:0; accent-color:#5A1216; pointer-events:none; cursor:pointer; }
   /* נועה 3.11: בלי מסגרת סביב הכרטיס (כדי לא לפגוע בצבע של המסלול) – רק תיבת הסימון */
   .error-msg{ font-size:12.5px; color:var(--error); font-weight:700; min-height:15px; display:none; }
@@ -579,6 +580,8 @@
       <div class="field"><label for="f-filled" data-t="t030">מי ממלא/ת את הטופס?</label><select id="f-filled"><option>הורה</option><option>תלמיד</option></select></div>
       <div class="field"><label for="f-notes" data-t="t031">הערות (לא חובה)</label><textarea id="f-notes" maxlength="2000" rows="3"></textarea></div>
       <p class="disclaimer" data-t="t032">מילוי הטופס הוא להתעניינות בלבד ואינו מחייב בהרשמה, בתשלום או בכל התחייבות שהיא.</p>
+      <label class="consent mkt-consent" id="field-marketing"><input type="checkbox" id="f-marketing"> <span data-t="mkt.consent">אני מאשר/ת לקבל מתלם עדכונים ומבצעים (אפשר להסיר בכל עת).</span></label>
+      <p class="priv-note"><span data-t="priv.note">בשליחת הפרטים את/ה מאשר/ת את</span> <a href="https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA" target="_blank" rel="noopener"><span data-t="priv.link">מדיניות הפרטיות</span></a> <span data-t="priv.note2">של האתר</span></p>
       <div class="submit-wrap"><button type="submit" id="submitBtn" data-t="i.btn">שליחה</button></div><!-- נועה 3.11: כפתור השליחה בתוך הכרטיס האחרון -->
     </fieldset>
     <div class="hp-field" aria-hidden="true"><label>אתר <input type="text" id="f-website" tabindex="-1" autocomplete="off"></label></div>
@@ -727,9 +730,9 @@ const TRK_SEL = new Set(P_REG);   // נועה 3.11: המסלולים שסומנ�
 // נועה 3.11: הסימון בתוך הכרטיס (בשורת הכותרת), וכשמסומן – כל המסגרת של הכרטיס מסומנת
 // נועה 3.11: רק תיבת סימון (בלי טקסט), בתחילת שורת הכותרת – כמו ברשימת סימון; מסומן – כל המסגרת
 const trkPick = (t) => '<label class="ti-pick" title="סימון המסלול שמעניין אתכם"><input type="checkbox" data-trk="' + t + '"' + (TRK_SEL.has(t) ? " checked" : "") + ' aria-label="המסלול הזה מעניין אותי"></label>';
-function trkPut(card, t){ const h = card.querySelector(".tk-head") || card.querySelector("summary") || card;
-  h.insertAdjacentHTML("afterbegin", trkPick(t));
-  card.classList.add("ti-card"); card.classList.toggle("ti-on", TRK_SEL.has(t)); card.dataset.trkc = t; if (TRK_SEL.has(t) && card.tagName === "DETAILS") card.open = true; return card; }
+// את-68 (נגישות): תיבת הסימון מחוץ לכותרת המסלול (בלי כפתור בתוך כפתור) – עטיפה עם התיבה במקום שלה בעין; העטיפה היא ה-ti-card
+function trkPut(card, t){ const wr = document.createElement("div"); wr.className = "tp-wrap ti-card"; wr.insertAdjacentHTML("afterbegin", trkPick(t)); wr.appendChild(card);
+  wr.classList.toggle("ti-on", TRK_SEL.has(t)); card.classList.toggle("ti-on", TRK_SEL.has(t)); wr.dataset.trkc = t; if (TRK_SEL.has(t) && card.tagName === "DETAILS") card.open = true; return wr; }
 let TRK_INIT = P_REG.length === 1 ? P_REG[0] : "";
 function trackPickFill(shutT){
   const sel = $("f-track"), pick = $("trackPick"); if (!sel || !pick) return;
@@ -803,13 +806,13 @@ function renderTracks(){
 renderTracks();
 // הלחיצה על "מעניין אותי" לא פותחת / סוגרת את הכרטיס (הוא בתוך שורת הכותרת)
 $("tracksBox").addEventListener("click", (e) => { const l = e.target.closest && e.target.closest(".ti-pick"); if (!l) return; e.preventDefault(); e.stopPropagation();
-  const c = l.querySelector("[data-trk]"), on = !c.checked; c.checked = on; on ? TRK_SEL.add(c.dataset.trk) : TRK_SEL.delete(c.dataset.trk); const k = l.closest(".ti-card"); if (k) k.classList.toggle("ti-on", on);
-  if (on) { const dt = l.closest("details"); if (dt) dt.open = true; $("trkErr").hidden = true; }
+  const c = l.querySelector("[data-trk]"), on = !c.checked; c.checked = on; on ? TRK_SEL.add(c.dataset.trk) : TRK_SEL.delete(c.dataset.trk); const k = l.closest(".ti-card"); if (k) { k.classList.toggle("ti-on", on); const kc = k.querySelector(".tk, details, .track-info"); if (kc) kc.classList.toggle("ti-on", on); }
+  if (on) { const dt = l.closest("details") || (l.closest(".ti-card") && l.closest(".ti-card").querySelector("details")); if (dt) dt.open = true; $("trkErr").hidden = true; }
   if (!on) { const sj = k && k.querySelector(".tk-subj.invalid"); if (sj) { sj.classList.remove("invalid"); const er = sj.querySelector(".tks-err"); if (er) er.remove(); } } }, true);   // נועה 7.11: סימון – פותח גם את המסגרת
 // בחירת מקצוע בתוך המסלול – מסמנת גם את המסלול כ"מעניין אותי"
 $("tracksBox").addEventListener("change", (e) => { const r = e.target; if (!r || !r.dataset || !r.dataset.subjt) return; const t = r.dataset.subjt; SUBJ[t] = r.value;
   { const sj = r.closest(".tk-subj"); if (sj) { sj.classList.remove("invalid"); const er = sj.querySelector(".tks-err"); if (er) er.remove(); } $("trkErr").hidden = true; }
-  const k = r.closest(".ti-card"); if (k) { k.querySelectorAll(".tk-subj label").forEach(l => l.classList.toggle("on", l.contains(r))); const c = k.querySelector("[data-trk]"); if (c && !c.checked) { c.checked = true; TRK_SEL.add(t); k.classList.add("ti-on"); } } });
+  const k = r.closest(".ti-card"); if (k) { k.querySelectorAll(".tk-subj label").forEach(l => l.classList.toggle("on", l.contains(r))); const c = k.querySelector("[data-trk]"); if (c && !c.checked) { c.checked = true; TRK_SEL.add(t); k.classList.add("ti-on"); const kc = k.querySelector(".tk, details, .track-info"); if (kc) kc.classList.add("ti-on"); } } });
 if (P_MAR) (window.TELEM_HOLD || function(p){ return p; })(callSupabase("marathon_public", { p_code: P_MAR }, true).then(function(m){ if (m && m.name) { MAR = m; renderTracks(); } }).catch(function(){}));
 // 5.19.58: כמו בטופס ההרשמה - שכר הלימוד של חודש ההרשמה לפי חוק "הצטרפות מאוחרת" ממסך חוקי החיוב (billing_rules_public)
 var LATE_RULES = [], JUNE = { on: true, cities: {} };
@@ -906,11 +909,11 @@ $("intForm").addEventListener("submit", function(e){
     $("tracksBox").querySelectorAll(".ti-card").forEach(k => { const t = k.dataset.trkc, sj = k.querySelector(".tk-subj"); if (!sj) return;
       const miss = TRK_SEL.has(t) && !SUBJ[t]; sj.classList.toggle("invalid", miss); let er = sj.querySelector(".tks-err");
       if (miss && !er) sj.insertAdjacentHTML("beforeend", '<div class="tks-err">יש לבחור מקצוע</div>'); if (!miss && er) er.remove();
-      if (miss) { ok = false; if (k.tagName === "DETAILS") k.open = true; } }); }
+      if (miss) { ok = false; const kd = k.tagName === "DETAILS" ? k : k.querySelector("details"); if (kd) kd.open = true; } }); }
   $("topError").style.display = ok ? "none" : "block"; if (!ok) { if (window.TELEM_BAD) TELEM_BAD($("submitBtn")); return; } if (window.TELEM_OK) TELEM_OK();
   const picked = IS_MAR ? P_TRACKS.filter(t => t === "marathon" || TRK_SEL.has(t)) : Object.keys(CONFIG.trackInfo).filter(t => TRK_SEL.has(t));   // נועה 3.11: מה שסומן (בלי סימון – כל המסלולים)
   const courses = picked.map(t => t === "marathon" ? (MAR ? "מרתון: " + MAR.name + (marDates() ? " (" + marDates() + ")" : "") : "מרתון מתמטיקה") : CONFIG.trackInfo[t].title + (SUBJ[t] && TRK_SEL.has(t) ? " – " + SUBJ[t] : ""));
-  const payload = { website: $("f-website").value, city: city === "אחר" ? "" : city, school: schVal(), courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),
+  const payload = { marketing_ok: !!(document.getElementById("f-marketing") && document.getElementById("f-marketing").checked), website: $("f-website").value, city: city === "אחר" ? "" : city, school: schVal(), courses: courses, filled_by: $("f-filled").value, notes: $("f-notes").value.trim(),
     student: { first_name: $("f-sfirst").value.trim(), last_name: $("f-slast").value.trim(), phone: sph || null, grade: $("f-grade").value || null, math_level: hakVal("f-math"), english_level: hakVal("f-eng"), school: schVal() },
     parent: { first_name: $("f-pfirst").value.trim(), last_name: $("f-plast").value.trim(), phone: ph, email: em || null } };
   const btn = $("submitBtn"); btn.__lbl = btn.innerHTML; btn.disabled = true; btn.textContent = "שולח…";

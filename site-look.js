@@ -99,12 +99,17 @@
     box.appendChild(h); box.appendChild(a); box.appendChild(m);
     var pv = document.createElement("a"); pv.className = "wa-privacy"; pv.target = "_blank"; pv.rel = "noopener"; pv.appendChild(FT("foot.privacy", "מדיניות פרטיות", "תחתית – מדיניות פרטיות"));   // את-46: עד שהאתר החדש באוויר – העמוד באתר הישן
     pv.href = "https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA"; box.appendChild(pv);
+    var ac = document.createElement("a"); ac.className = "wa-privacy wa-access"; ac.target = "_blank"; ac.rel = "noopener"; ac.appendChild(FT("foot.access", "הצהרת נגישות", "תחתית – הצהרת נגישות"));   // את-68 (נועה 19.11): נגישות – קישור קבוע בכל טופס (עד האתר החדש – באתר הישן)
+    ac.href = "https://www.telem-tr.co.il/accessibillity-statement"; box.appendChild(ac);
+    if (!document.getElementById("tlA11yCss")) { var st = document.createElement("style"); st.id = "tlA11yCss";   // את-68: ניגודיות (WCAG AA) – התחתית בלי שקיפות, טקסט כהה יותר
+      st.textContent = "footer{opacity:1 !important;color:#6b5f55 !important}.wa-privacy{color:#5c4f45 !important}.priv-note{font-size:13px;color:#5c4f45;margin:10px 0 0;line-height:1.6}.priv-note a{color:inherit;font-weight:700}"; document.head.appendChild(st); }
     if (old) { old.parentNode.insertBefore(box, old); old.hidden = true; old.style.display = "none"; } else host.appendChild(box);
   });
 })();
 // את-37 (נועה 23.10): כרטיס מסלול – אותו מבנה ועיצוב כמו באתר (פס בצבע המסלול, מספר, שם קצר + המשך, התיאור, התשלום החודשי, החד-פעמיים).
 // o: {key, color, title, body, early, regular, earlyOn, cut ("8.10.26"), fees:[{amount, label, offset}], offMonth, extra:[html], fold}
 // נועה 4.11: הטקסטים הקבועים בכרטיס המסלול ובתחתית – עריכים מ"נוסחי הטפסים" (כשהטופס טוען את texts.js); בלי – ברירת המחדל
+window.TELEM_PRIV_URL = "https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA";   // את-68: מדיניות הפרטיות (עד האתר החדש – באתר הישן)
 window.TELEM_TXH = function(k, def, lbl, grp, vals){ if (window.TX && TX.h) return TX.h(k, def, lbl, grp, vals);
   return String(def).replace(/\{([^{}]+)\}/g, function(m, n){ return vals && vals[n] != null ? String(vals[n]).replace(/[&<>"]/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }) : ""; }); };
 window.TELEM_TK = function(o){

@@ -308,7 +308,8 @@
   html.sig-only .reg-info .sg-sub{ margin-top:6px; font-size:.93em; }
   /* נועה 4.11: "שילמו בטלפון" – המחירים כמו בטופס ההרשמה; במקום אופן התשלום – "✓ התשלום בוצע בטלפון" */
   html.sig-only #field-payphone .pm-title, html.sig-only #pmOpts, html.sig-only .pm-lock{ display:none !important; }
-  html.sg-prefill #trackPick > :not(.tp-on), html.sg-prefill #trackPick .tp-radio{ display:none !important; }   /* מהכרטיס – רק המסלול שנבחר */
+  html.sg-prefill #trackPick > :not(.tp-on), html.sg-prefill #trackPick .tp-radio{ display:none !important; }
+  .tp-wrap{ position:relative; } .tp-wrap > .tp-radio{ position:absolute; top:12px; inset-inline-start:10px; z-index:2; } .tp-wrap > .tk .tk-head{ padding-inline-start:44px; }   /* את-68: הבחירה מחוץ לכותרת */   /* מהכרטיס – רק המסלול שנבחר */
   html.sig-only #payPhoneOnly{ display:block !important; background:#EEF6EF; border:1px solid #BFD9C4; color:#2F6B3D; border-radius:12px; padding:10px 14px; font-size:14.5px; }
   html.sig-only #payPhoneOnly.unpaid{ background:#FFF6E0 !important; border-color:#E9CF8F !important; color:#6B4D12 !important; }
   .submit-wrap{ text-align:center; margin-top:30px; }
@@ -456,7 +457,7 @@
   .tk-subj .tks-err{ display:none; flex-basis:100%; font-size:13.5px; font-weight:700; color:#B8463F; } .tk-subj.invalid{ border-color:#C9554F; } .tk-subj.invalid .tks-err{ display:block; }
   body.pers-noterms #termsBox, body.pers-noterms #field-terms-consent, body.pers-noterms #termsConsentError, body.pers-noterms #field-signature{ display:none !important; }   /* מנ-500: קישור אישי בלי תנאים */
   body.pers-lock #field-subject, body.pers-lock-s #field-subject-choice{ pointer-events:none; }
-  body.pers-lock #trackPick .tk:not(:has(.tp-radio input:checked)){ display:none !important; } body.is-pers #trackPick .tk-price, body.is-pers #trackPick .tp-stars{ display:none !important; } body.pers-lock #trackPick .tp-radio, body.pers-lock-s #trackPick .tk-subj{ pointer-events:none; }   /* מנ-500: מסלול ומקצוע נעולים, המחירים – רק בתשלום (מהשרת) */
+  body.pers-lock #trackPick .tp-wrap:not(:has(.tp-radio input:checked)){ display:none !important; } body.is-pers #trackPick .tk-price, body.is-pers #trackPick .tp-stars{ display:none !important; } body.pers-lock #trackPick .tp-radio, body.pers-lock-s #trackPick .tk-subj{ pointer-events:none; }   /* מנ-500: מסלול ומקצוע נעולים, המחירים – רק בתשלום (מהשרת) */
   .consent .error-msg:not(:empty), #sigError:not(:empty), #termsConsentError:not(:empty), #consentError:not(:empty){ display:block !important; }   /* 28.10: ההודעות "יש לחתום" / "יש לאשר" לא הוצגו בכלל */
 
   /* ===== 5.19.83 (נועה): שדות לבנים כמו במערכת הניהול – לא שמנת. פינות 8, גובה 44 בכל הטפסים ===== */
@@ -754,7 +755,7 @@
       <div class="pm-only" id="payPhoneOnly" hidden data-t="t063"><b>📞 תשלום טלפוני</b> – לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</div>
     </div>
     <!-- 5.19.62: כמו במרתון - קודם הסכום ואופן התשלום, אחר כך התנאים ושתי תיבות האישור יחד -->
-    <div class="terms-box" id="termsBox">
+    <div class="terms-box" id="termsBox" tabindex="0" role="region" aria-label="תנאי ההתקשרות">
       <h4 data-t="t064">תנאים כלליים</h4>
       <p data-t="t065">על התלמיד/ה להגיע לתרגולים עם כל הציוד הלימודי הנדרש (ספר + מחברת הלימוד, כלי כתיבה וכו'). במהלך המפגש ניתן לצאת מהכיתה לצורך שירותים, שתייה והתרעננות בתחומי בית הספר בלבד.</p>
       <p data-t="t066">תלמיד/ה שיעזוב/תעזוב את המפגש לפני תומו, מכל סיבה שהיא, לא יהיה/תהיה זכאי/ת להחזר כספי. תלמיד/ה שלא יגיע/תגיע למפגש, מכל סיבה שהיא, יוכל/תוכל להשלים את המפגש על בסיס מקום פנוי בקבוצה אחרת (במידה וקיימת) באותו המסלול, ובכל מקרה לא יהיה/תהיה זכאי/ת להחזר כספי.</p>
@@ -778,9 +779,10 @@
     <div class="consents-box">
     <label class="consent" id="field-terms-consent">
       <input type="checkbox" id="f-terms-consent" required>
-      <span data-t="t077">קראתי את תנאי ההתקשרות המפורטים למעלה, ואני מסכים/ה להם.</span>
+      <span data-t="t077">קראתי את תנאי ההתקשרות המפורטים למעלה ואת <a href="https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA" target="_blank" rel="noopener">מדיניות הפרטיות</a>, ואני מסכים/ה להם.</span>
     </label>
     <div class="error-msg" id="termsConsentError"></div>
+    <label class="consent mkt-consent" id="field-marketing"><input type="checkbox" id="f-marketing"> <span data-t="mkt.consent">אני מאשר/ת לקבל מתלם עדכונים ומבצעים (אפשר להסיר בכל עת).</span></label>
     <label class="consent" id="field-consent">
       <input type="checkbox" id="f-consent" required>
       <span id="consentText" data-t="consent" data-ta="card,phone" data-card="אני מאשר/ת שהפרטים נכונים, מסכים/ה להמשך לעמוד התשלום המאובטח, ומאשר/ת בזאת חיוב מיידי של הסכום החד-פעמי בכרטיס האשראי, וכן הקמת הוראת קבע לחיוב חודשי אוטומטי באותו כרטיס בסכום ובמועדים המפורטים למעלה, עד ליוני (כולל)." data-phone="אני מאשר/ת שהפרטים נכונים, ושתלם תיצור איתי קשר בטלפון לתשלום בכרטיס אשראי של הסכום החד-פעמי ושל התשלום החודשי בסכום ובמועדים המפורטים למעלה, עד ליוני (כולל).">אני מאשר/ת שהפרטים נכונים, מסכים/ה להמשך לעמוד התשלום המאובטח, ומאשר/ת בזאת חיוב מיידי של הסכום החד-פעמי בכרטיס האשראי, וכן הקמת הוראת קבע לחיוב חודשי אוטומטי באותו כרטיס בסכום ובמועדים המפורטים למעלה, עד ליוני (כולל).</span>
@@ -1830,18 +1832,20 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       var w = document.createElement("div");
       w.innerHTML = TELEM_TK({ key: k, color: info.color, title: info.title, body: info.body, early: pr && pr.early, regular: pr && pr.regular, earlyOn: isEarlyRegistration(), cut: shortDate(earlyCutoff()), fees: fees, extra: extra, fold: true, noOnce: true, star: sA || sB });
       var c = w.firstChild, h = c.querySelector(".tk-head") || c;
-      h.insertAdjacentHTML("afterbegin", '<label class="tp-radio" title="בחירת המסלול"><input type="radio" name="trkpick" value="' + k + '"' + (k === cur ? " checked" : "") + ' aria-label="בחירת המסלול: ' + String(info.title).replace(/"/g, "") + '"></label>');
+      var wrp = document.createElement("div"); wrp.className = "tp-wrap" + (k === cur ? " tp-on" : "");   // את-68 (נגישות): הבחירה מחוץ לכותרת המסלול (בלי כפתור בתוך כפתור) – אותו מקום בעין
+      wrp.insertAdjacentHTML("afterbegin", '<label class="tp-radio" title="בחירת המסלול"><input type="radio" name="trkpick" value="' + k + '"' + (k === cur ? " checked" : "") + ' aria-label="בחירת המסלול: ' + String(info.title).replace(/<[^>]+>/g, "").replace(/"/g, "") + '"></label>');
       c.classList.toggle("tp-on", k === cur); if (k === cur && c.tagName === "DETAILS") c.open = true;
       // נועה 6.11: שדה "מקצוע" בתוך המסלול שנבחר (מקצוע אחד / ללא הגבלה) – במקום השדה הנפרד מתחת למסלולים
       if (k === cur && (k === "single" || k === "unlimited-single")) { var bd = c.querySelector(".tk-body"), sv = subjectChoiceEl.value, dis = subjectChoiceEl.disabled ? " disabled" : "";
         if (bd) bd.insertAdjacentHTML("afterbegin", '<div class="tk-subj' + (document.getElementById("field-subject-choice").classList.contains("invalid") ? " invalid" : "") + '" role="radiogroup" aria-label="מקצוע"><span class="tks-l"><span data-tx="tk.subj">מקצוע</span> <span class="req">*</span></span>'
           + ["מתמטיקה", "אנגלית"].map(function(x){ return '<label class="' + (sv === x ? "on" : "") + '"><input type="radio" name="tksubj" value="' + x + '"' + (sv === x ? " checked" : "") + dis + '> ' + x + '</label>'; }).join("") + '<div class="tks-err">⚠ יש לבחור מקצוע</div></div>'); }
-      box.appendChild(c);
+      wrp.appendChild(c); box.appendChild(wrp);
     });
     if (!tbl) box.insertAdjacentHTML("beforeend", '<div class="tp-note">המחירים יופיעו אחרי בחירת העיר (בחלק "בית הספר").</div>');
     // נועה 6.11: מתחת למסלולים, באותה מסגרת – שתי שורות עם כוכבית: התשלום בעת ההרשמה + הרשמה עד ה-19 (רק מאמצע השנה – לפי החוק)
     if (n1 || n2) box.insertAdjacentHTML("beforeend", '<div class="tp-stars">' + (n1 ? '<p><span class="fn">' + sA + '</span><span>' + n1 + '</span></p>' : "") + (n2 ? '<p><span class="fn">' + sB + '</span><span>' + n2 + '</span></p>' : "") + '</div>');
   }
+  document.getElementById("trackPick").addEventListener("keydown", function(e){ if (e.key !== "Enter" && e.key !== " ") return; var sm = e.target.closest && e.target.closest("summary[data-trk]"); if (!sm || subjectEl.disabled) return; var v = sm.dataset.trk; if (subjectEl.value !== v) { e.preventDefault(); subjectEl.value = v; subjectEl.dispatchEvent(new Event("change", { bubbles: true })); setInvalid("field-subject", false); } });
   document.getElementById("trackPick").addEventListener("click", function(e){ var l = e.target.closest && e.target.closest(".tp-radio"); if (!l) return; e.preventDefault(); e.stopPropagation();
     var v = l.querySelector("input").value; if (subjectEl.value === v || subjectEl.disabled) return;   /* נועה 4.11: מהכרטיס – המסלול נעול */ subjectEl.value = v; subjectEl.dispatchEvent(new Event("change", { bubbles: true })); setInvalid("field-subject", false); }, true);
   var _updTrack = updateTrackInfo; updateTrackInfo = function(){ _updTrack(); var tc = document.getElementById("trackCard"); if (tc) tc.hidden = true; trackInfoBox.style.display = "none"; trackPickPaint(); };
@@ -2124,7 +2128,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       try { sessionStorage.setItem("reg_summary", JSON.stringify({ kind: "register", subject: (track === "double" ? "מתמטיקה ואנגלית" : subjectChoice) || "", city: (cityEl && cityEl.value) || "", school: (schoolEl && schoolEl.value) || "", name: studentFirst + " " + studentLast, track: (subjectEl.selectedOptions[0] ? subjectEl.selectedOptions[0].textContent.trim() : "").replace("מתמטיקה או אנגלית", (subjectChoice && track !== "double") ? subjectChoice : "מתמטיקה או אנגלית"), amount: null })); } catch (err) {}
       setTimeout(function(){ location.href = new URL("thank-you.html?preview=1", location.href).href; }, 600); return;
     }
-    const payload = {
+    const payload = { marketing_ok: !!(document.getElementById("f-marketing") && document.getElementById("f-marketing").checked), 
       signature: signature,
       pdf: signedPdf,
       website: document.getElementById("f-website").value,

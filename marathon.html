@@ -790,7 +790,7 @@
       <div class="error-msg" id="payMethodError" data-t="t047">יש לבחור אופן תשלום</div>
       <div class="pm-only" id="payPhoneOnly" hidden data-t="t048"><b>📞 תשלום טלפוני</b> – לאחר שליחת הטופס ניצור עמכם קשר לתשלום בכרטיס אשראי.</div>
     </div>
-    <div class="terms-box" id="termsBox">
+    <div class="terms-box" id="termsBox" tabindex="0" role="region" aria-label="תנאי ההתקשרות">
       <h4 data-t="t049">תנאים כלליים</h4>
       <p data-t="t050">על התלמיד/ה להגיע למרתון עם כל הציוד הלימודי הנדרש (ספר + מחברת הלימוד, כלי כתיבה וכו'). במהלך המפגש ניתן לצאת מהכיתה לצורך שירותים, שתייה והתרעננות בתחומי בית הספר בלבד.</p>
       <p data-t="t051">תלמיד/ה שיעזוב/תעזוב את המפגש לפני תומו, מכל סיבה שהיא, לא יהיה/תהיה זכאי/ת להחזר כספי. תלמיד/ה שלא יגיע/תגיע למפגש, מכל סיבה שהיא, יוכל/תוכל להשלים את המפגש על בסיס מקום פנוי בקבוצה אחרת (במידה וקיימת) באותו המסלול בלבד, ובכל מקרה לא יהיה/תהיה זכאי/ת להחזר כספי.</p>
@@ -804,9 +804,10 @@
     <div class="consents-box">
     <label class="consent" id="field-terms-consent">
       <input type="checkbox" id="f-terms-consent" required>
-      <span data-t="t057">קראתי את תנאי ההתקשרות המפורטים למעלה, ואני מסכים/ה להם.</span>
+      <span data-t="t057">קראתי את תנאי ההתקשרות המפורטים למעלה ואת <a href="https://www.telem-tr.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A4%D7%A8%D7%98%D7%99%D7%95%D7%AA" target="_blank" rel="noopener">מדיניות הפרטיות</a>, ואני מסכים/ה להם.</span>
     </label>
     <div class="error-msg" id="termsConsentError"></div>
+    <label class="consent mkt-consent" id="field-marketing"><input type="checkbox" id="f-marketing"> <span data-t="mkt.consent">אני מאשר/ת לקבל מתלם עדכונים ומבצעים (אפשר להסיר בכל עת).</span></label>
     <label class="consent" id="field-consent">
       <input type="checkbox" id="f-consent" required>
       <span id="consentText" data-t="consent" data-ta="card,phone" data-card="אני מאשר/ת שהפרטים נכונים, ומסכים/ה להמשיך לעמוד התשלום המאובטח ולחיוב המיידי של הסכום החד-פעמי בכרטיס האשראי." data-phone="אני מאשר/ת שהפרטים נכונים, ושנציג/ה תלם ייצור איתי קשר טלפוני לתשלום של הסכום המפורט למעלה.">אני מאשר/ת שהפרטים נכונים, ומסכים/ה להמשיך לעמוד התשלום המאובטח ולחיוב המיידי של הסכום החד-פעמי בכרטיס האשראי.</span>
@@ -1680,7 +1681,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     var ev = pdfEvent() || {}, gObj = groupEl && MARATHON && (MARATHON.groups || []).find(function(g){ return String(g.session_id) === String(groupEl.value); });
     var gLbl = gObj ? (gObj.label || "") + (gObj.start_time ? " · " + String(gObj.start_time).slice(0, 5) + "–" + String(gObj.end_time || "").slice(0, 5) : "") : "";
     var mName = ev.name || "מרתון מתמטיקה", when = (ev.meetings || []).join(" · ");
-    var payload = { website: document.getElementById("f-website").value, city: (MARATHON && MARATHON.city) || "", school: v("f-school"),
+    var payload = { marketing_ok: !!(document.getElementById("f-marketing") && document.getElementById("f-marketing").checked), website: document.getElementById("f-website").value, city: (MARATHON && MARATHON.city) || "", school: v("f-school"),
       courses: ["מרתון: " + mName + (when ? " (" + when + ")" : "")], filled_by: "טופס מרתון – רק פרטים",
       notes: "השאירו פרטים בטופס המרתון (בלי הרשמה)" + (gLbl ? " · " + gLbl : ""),
       session_id: gObj ? Number(gObj.session_id) : null,   // icredit-72 (נועה 12.11): הקבוצה שנבחרה – נשמרת בשורה בקורס (lead_session_id), בלי שיבוץ ובלי לתפוס מקום
@@ -1882,7 +1883,7 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
       try { sessionStorage.setItem("reg_summary", JSON.stringify(regSummary(getAmount()))); } catch (err) {}
       setTimeout(function(){ goTop(tyUrl("preview=1")); }, 600); return;
     }
-    const payload = {
+    const payload = { marketing_ok: !!(document.getElementById("f-marketing") && document.getElementById("f-marketing").checked), 
       signature: signature,
       pdf: signedPdf,
       website: document.getElementById("f-website").value,
