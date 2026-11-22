@@ -154,3 +154,6 @@ html.embed.tl-wait::after{ align-items:flex-start; padding-top:40px; }
 /* נועה 25.10: הודעה ליד כפתור השליחה כשחסרים שדות */
 .tl-fix-note{ color:#B3261E; background:#FDECEA; border:1px solid #F3B8B2; border-radius:10px; padding:8px 12px; margin:0 auto 10px; max-width:520px; font-weight:700; font-size:14.5px; text-align:center; }
 .tl-fix-note[hidden]{ display:none; }
+
+/* נועה 22.11: כפתורי בחירה ותיבות סימון בכל הטפסים – כחול כהה (לא בורדו, לא הכחול של הדפדפן). בחירת המקצוע נשארת בצבע המסלול (כלל חזק יותר בדף) */
+input[type=radio], input[type=checkbox]{ accent-color:#2E4A6B; }
