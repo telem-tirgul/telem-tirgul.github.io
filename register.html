@@ -529,6 +529,7 @@
   .amount-row.amount-row-recur .recur-sub{ color:#6B5F55 !important; font-weight:500 !important; }
   .bd-note{ font-size:12.5px; line-height:1.5; color:#7a6a5c; margin:-4px 0 8px; padding:0 14px; }   /* נועה 6.11 */
   .disc-note{ background:#EEF6EF; border:1px solid #BFD9C4; color:#2F6B3D; border-radius:12px; padding:10px 14px; margin:0 0 14px; font-weight:600; font-size:15px; }
+  .pers-notice{ margin:10px 0 0; font-size:14px; line-height:1.6; color:var(--ink, #2B2320); }   /* נועה 22.11: משפט להורה בלי תנאים */
 </style>
 <link rel="stylesheet" href="site-look.css?v=8"><script src="site-look.js?v=11"></script><!-- עיצוב אחיד כמו באתר (נועה 23.10) -->
 <link rel="icon" type="image/png" href="favicon.png?v=1">
@@ -1494,10 +1495,17 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (st.track) { put("f-subject", st.track); if (lk.track !== false) { subjectEl.disabled = true; document.body.classList.add("pers-lock"); } }
     if (st.subject && st.track !== "double") { put("f-subject-choice", st.subject); if (lk.subject !== false) { subjectChoiceEl.disabled = true; document.body.classList.add("pers-lock-s"); } }
     try { trackPickPaint(); } catch(x) {}
-    if (st.trial) {   // נועה 17.11: "חודש ניסיון" – המשפט הקיים בצ'קבוקס התנאים, 21 יום מתאריך ההתחלה
+    // נועה 22.11 (icredit-92): "משפט להורה" מהקישור האישי (נערך בחלון); קישור ישן בלי notice – המשפט של חודש ניסיון כמו קודם (17.11)
+    var sd = String(st.start_date || "").slice(0, 10) || ilTodayISO();
+    var ntx = st.notice && st.notice.show && st.notice.text ? String(st.notice.text) : st.trial ? "במידה ולא נרצה להמשיך – יש להודיע לתלם עד " + trDMY(trAdd(sd, 21)) + ", ולפי תנאי ההתקשרות." : "";
+    if (ntx && st.terms !== false) {   // בהמשך אישור התנאים (בלי תיבת סימון נוספת)
       var tq = document.getElementById("trialQuit"), tc = document.querySelector("#field-terms-consent span");
       if (!tq && tc) { tq = document.createElement("span"); tq.id = "trialQuit"; var tw = document.createElement("span"); tc.parentNode.insertBefore(tw, tc); tw.appendChild(tc); tw.appendChild(tq); }
-      var sd = String(st.start_date || "").slice(0, 10) || ilTodayISO(); if (tq) tq.textContent = " במידה ולא נרצה להמשיך – יש להודיע לתלם עד " + trDMY(trAdd(sd, 21)) + ", ולפי תנאי ההתקשרות."; }
+      if (tq) tq.textContent = " " + ntx; }
+    else if (ntx) {   // בלי תנאים – שורת טקסט רגילה ליד מקום האישור (נועה: "לא רוצה תיבת סימון להורה")
+      var fc = document.getElementById("field-terms-consent"), pn = document.getElementById("persNotice");
+      if (!pn && fc && fc.parentNode) { pn = document.createElement("p"); pn.id = "persNotice"; pn.className = "pers-notice"; fc.parentNode.insertBefore(pn, fc.nextSibling); }
+      if (pn) pn.textContent = ntx; }
     if (st.terms === false) { document.body.classList.add("pers-noterms"); termsConsentEl.checked = true; try { updateSubmitAvailability(); } catch(x) {} }
     try { updateAmountDisplay(); updateRecurDisplay(); } catch(x) {}
   }
