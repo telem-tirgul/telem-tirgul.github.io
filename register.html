@@ -986,7 +986,8 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   // תצוגה מקדימה: ?preview=1 בקישור. כל עוד האשראי כבוי (creditCard.enabled) - רק תשלום טלפוני
   // 5.19.97 (נועה): ?cardtest=1 עובד רק בדפדפן שנכנסו בו למערכת הניהול (סימון telem_staff שהמערכת שומרת) - מי שמקבל קישור לא יראה אשראי
   const STAFF_DEV = (function(){ try { return +localStorage.getItem("telem_staff") > Date.now(); } catch(e) { return false; } })();
-  const NO_TERMINAL = !(CONFIG.creditCard && CONFIG.creditCard.enabled) && !(STAFF_DEV && /[?&]cardtest=1(&|$)/.test(location.search));
+  const CARD_TEST = STAFF_DEV && /[?&]cardtest=1(&|$)/.test(location.search);
+  let NO_TERMINAL = !(CONFIG.creditCard && CONFIG.creditCard.enabled) && !CARD_TEST;   // נועה 22.11: גם מתג "אשראי בטפסים" במערכת הניהול (forms_credit_public, קובץ 212) – למטה
   const EXPLICIT_PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   const PREVIEW = EXPLICIT_PREVIEW || NO_TERMINAL;
   // תשלום טלפוני: נשמר גם כשהאשראי באתר עוד לא מחובר (רק לא בתצוגה מקדימה מהמערכת)
@@ -1007,7 +1008,11 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
     if (!submitBtn.disabled || !/…$|^הפרטים נשלחו$/.test(submitBtn.textContent.trim())) submitBtn.textContent = SUBMIT_TXT();
   }
   // כל עוד אין מסוף אשראי: רק תשלום טלפוני - הודעה אחת במקום בחירה (גם בתצוגה מקדימה, כדי שתיראה כמו הטופס האמיתי)
-  if (NO_TERMINAL) { payPhoneEl.checked = true; var pc0 = document.getElementById("f-paycard"); if (pc0) pc0.closest(".pm-opt").hidden = true; var lk0 = document.querySelector(".pm-lock"); if (lk0) lk0.hidden = true; }   /* נועה 4.11: בלי מסוף – בחירה בין "תשלום טלפוני" ל"כבר שילמתי" */
+  function noTerminal(){ payPhoneEl.checked = true; var pc0 = document.getElementById("f-paycard"); if (pc0) pc0.closest(".pm-opt").hidden = true; var lk0 = document.querySelector(".pm-lock"); if (lk0) lk0.hidden = true; }   /* נועה 4.11: בלי מסוף – בחירה בין "תשלום טלפוני" ל"כבר שילמתי" */
+  if (NO_TERMINAL) noTerminal();
+  // נועה 22.11 (מנ-554): "אפשרות לכבות אשראי בטפסים… שהשליטה תהיה אצלי" – המתג במערכת הניהול (הגדרות ← טפסים)
+  if (!NO_TERMINAL && !CARD_TEST) fetch(CONFIG.supabase.url + "/rest/v1/rpc/forms_credit_public", { method: "POST", headers: Object.assign({ "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, CONFIG.supabase.anonKey.indexOf("eyJ") === 0 ? { "Authorization": "Bearer " + CONFIG.supabase.anonKey } : {}), body: "{}" })
+    .then(function(r){ return r.ok ? r.json() : null; }).then(function(d){ if (d && d.register === false && !NO_TERMINAL) { NO_TERMINAL = true; noTerminal(); try { paintPayPhone(); } catch(e) {} } }).catch(function(){});
   if (/[?&]phone=1(&|$)/.test(location.search) && !PHONE_REG_ && payPaidEl) payPaidEl.checked = true;
   // נועה 3.11: קישור "נרשמו בטלפון" (register.html?city=…&phone=1) – ממלאים את כל הפרטים וחותמים; התשלום מטופל מולנו בטלפון (בלי אשראי בטופס)
   var PHONE_REG = PHONE_REG_;

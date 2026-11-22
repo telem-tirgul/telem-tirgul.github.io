@@ -971,7 +971,9 @@ const SAMPLE = { status: "opened", description: "הרשמה לתרגולים + �
 submitBtn.textContent = SUBMIT_T(); { let last = submitBtn.textContent; document.addEventListener("telem-texts", () => { if (submitBtn.textContent === last) { submitBtn.textContent = SUBMIT_T(); last = submitBtn.textContent; } }); }
 if (PREVIEW && !CODE) fill(SAMPLE);
 else if (CODE.length < 32) showBad("הקישור לא תקין. לפרטים: 052-9067101");
-else (window.TELEM_HOLD || function(p){ return p; })(rpcRaw("pay_link_public", { p_code: CODE })).then(d => d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא ניתן היה לטעון את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101"));
+else (window.TELEM_HOLD || function(p){ return p; })(Promise.all([rpcRaw("pay_link_public", { p_code: CODE }), rpcRaw("forms_credit_public", {}).catch(() => null)])
+  // נועה 22.11 (מנ-554): המתג "אשראי בטפסים" במערכת הניהול – כבוי לקישור התשלום → הודעה במקום התשלום (קישור ששולם / בוטל – כרגיל)
+  .then(a => { const d = a[0], cr = a[1]; if (d && cr && cr.pay_link === false && !["paid", "cancelled", "expired"].includes(d.status)) { showBad(window.TX && TX.s ? TX.s("p.credit_off", "התשלום באשראי אינו זמין כרגע. נציג תלם ייצור עימך קשר.", "קישור תשלום – כשהאשראי כבוי במערכת", PG) : "התשלום באשראי אינו זמין כרגע. נציג תלם ייצור עימך קשר."); return undefined; } return d; })).then(d => d === undefined ? null : d ? fill(d) : showBad("הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101")).catch(() => showBad("לא ניתן היה לטעון את הטופס. יש לנסות שוב בעוד רגע, או להתקשר: 052-9067101"));
 
 function dm(d){ const p = String(d || "").split("-"); return p.length === 3 ? (+p[2]) + "." + (+p[1]) : d; }
 function trialTxt(t){
