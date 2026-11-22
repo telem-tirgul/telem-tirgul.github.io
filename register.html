@@ -2022,7 +2022,14 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
   var REG_CODE = (location.search.match(/[?&]r=([0-9A-Za-z]{32})(?:&|$)/) || [])[1] || "";
   if (REG_CODE) {
     fetch(CONFIG.supabase.url + "/rest/v1/rpc/reg_link_get", { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.supabase.anonKey }, body: JSON.stringify({ p_code: REG_CODE }) })
-      .then(function(r){ return r.json(); }).then(function(d){
+      .then(function(r){ return r.json(); }).then(regLinkApply).catch(function(){});
+  }
+  // נועה 22.11: "תצוגה מקדימה אמיתית של הטופס" – מערכת הניהול (חלון הקישור האישי) שולחת את נתוני הקישור, והטופס מוצג בדיוק כמו להורה (preview=1 – שום דבר לא נשמר)
+  if (EXPLICIT_PREVIEW && /[?&]plpv=1(&|$)/.test(location.search)) {
+    window.addEventListener("message", function(ev){ if (ev.source !== window.parent || !ev.data || ev.data.type !== "telemPL") return; regLinkApply(ev.data.d); });
+    try { window.parent.postMessage({ type: "telemPLready" }, "*"); } catch(x) {}
+  }
+  function regLinkApply(d){
         if (!d || !d.ok) { var why = d && d.reason; signBad(why === "used" ? "ההרשמה בקישור הזה כבר התקבלה. תודה!" : why === "expired" ? "תוקף הקישור פג. לקבלת קישור חדש: 052-9067101" : "הקישור לא תקין או שכבר אינו בתוקף. לפרטים: 052-9067101"); return; }
         var put = function(id, v){ var el = document.getElementById(id); if (!el || v == null || v === "") return; if (el.tagName === "SELECT") { if (![].some.call(el.options, function(o){ return o.value === String(v) || o.text === String(v); })) return; } el.value = v; el.dispatchEvent(new Event("change", { bubbles: true })); el.dispatchEvent(new Event("input", { bubbles: true })); };
         put("f-student-first", d.student_first); put("f-student-last", d.student_last); put("f-student-phone", d.student_phone);
@@ -2036,7 +2043,6 @@ function safePayUrl(u){ try { var x = new URL(u); return x.protocol === "https:"
           var pt = qp("t"), ps = qp("s"); if (pt) put("f-subject", pt); if (ps && pt !== "double" && ps !== "מתמטיקה ואנגלית") put("f-subject-choice", ps);
           try { if (pt) trackPickPaint(); } catch(x) {} })();
         if (d.settings) persSetup(d);   // מנ-500 (icredit-86): קישור אישי
-      }).catch(function(){});
   }
   form.addEventListener("submit", function(e){
     e.preventDefault();
