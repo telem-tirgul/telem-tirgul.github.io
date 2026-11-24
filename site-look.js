@@ -5,7 +5,7 @@
 // את-46 (נועה 29.10): Google Analytics בכל הטפסים – בלי מידע אישי.
 //  לגוגל נשלחת רק כתובת הדף בלי פרמטרים, חוץ מ: city, school, tracks, track, m, embed, lead, pending, already + utm_* (נועה 29.10: לדעת כמה נכנסו מכל SMS) (קוד משפחה / טלפון / קוד תשלום / ref – לא).
 //  לא מודדים: תצוגה מקדימה / עורך הנוסחים / בדיקות, טופס שנפתח מתוך מערכת הניהול (וכל מה שנפתח אחריו באותה לשונית), ולא מחוץ לאתר.
-//  אירועים (TELEM_GA): generate_lead (השארת פרטים), sign_up (הרשמה נשלחה), begin_checkout (מעבר לתשלום), purchase (תשלום אושר – בלי סכום).
+//  אירועים (TELEM_GA): generate_lead (השארת פרטים), sign_up (הרשמה נשלחה), begin_checkout (מעבר לתשלום), purchase (תשלום אושר – בלי סכום); form_start (התחיל למלא), form_error (קריאה לשרת שנכשלה / שגיאת קוד – בלי פרטים אישיים; נועה 24.11).
 (function(){
   var ID = "G-VHQ6QEBVV9", KEEP = ["city", "school", "tracks", "track", "m", "embed", "lead", "pending", "already", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
   var no = false, q = location.search;
@@ -31,6 +31,17 @@
   var s = document.createElement("script"); s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + ID; document.head.appendChild(s);
   window.TELEM_GA = function(name, params){ try { gtag("event", name, Object.assign({ transport_type: "beacon" }, params || {})); } catch (e) {} };
   window.TELEM_GA_SET = function(params){ try { gtag("set", params || {}); } catch (e) {} };   // נועה 29.10: פרטי המרתון (בית ספר / שכבה) – לכל האירועים בדף
+  // נועה 24.11 ("תוסיף את האירועים… הכול נעשה דרך גוגל אנליטיקס"): מי התחיל למלא ומי נתקע – בלי שום פרט אישי
+  //  form_start – בפעם הראשונה שממלאים שדה בדף;  form_error – קריאה לשרת שנכשלה (שם הפעולה + קוד) או שגיאת קוד בדף
+  var FORM = (location.pathname.split("/").pop() || "").replace(/\.html$/, "") || "index", started = false, errN = 0;
+  var gaErr = function(where, code){ if (errN++ < 5 && window.TELEM_GA) TELEM_GA("form_error", { form_name: FORM, error_where: String(where || "").slice(0, 40), error_code: String(code || "").slice(0, 40) }); };
+  window.TELEM_GA_ERR = gaErr;
+  var onStart = function(ev){ var t = ev.target; if (started || !t || !t.closest || !t.closest("form, .card, main, body")) return; if (t.matches && t.matches("[type=hidden], .hp-field *")) return; started = true; TELEM_GA("form_start", { form_name: FORM }); };
+  document.addEventListener("input", onStart, true); document.addEventListener("change", onStart, true);
+  window.addEventListener("error", function(ev){ gaErr("js", (ev && ev.message || "").slice(0, 40)); });
+  try { var f0 = window.fetch; if (f0) window.fetch = function(u, o){ var url = String((u && u.url) || u || ""), m = url.match(/\/(?:rpc|functions\/v1)\/([a-z0-9_-]+)/i);
+      var pr = f0.apply(this, arguments); if (!m) return pr;
+      return pr.then(function(r){ if (!r.ok) gaErr(m[1], r.status); return r; }, function(e){ gaErr(m[1], "network"); throw e; }); }; } catch (e) {}
 })();
 // תלם – עיצוב אחיד לכל הטפסים (נועה 23.10.2026): הטפסים תמיד בהירים, כמו האתר.
 // כללי "רק במצב בהיר" חלים תמיד, וכללי "מצב כהה" יורדים. רץ מיד אחרי site-look.css (בסוף ה-head).
