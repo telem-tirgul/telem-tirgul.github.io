@@ -704,7 +704,7 @@
   const CREDIT = ["once", "installments", "monthly"];
   function paintPm(){ const pm = val("paymode"), mx = Math.min(12, Number(C.max_installments) || 1), mo = C.monthly || {};
     $("instBox").hidden = pm !== "installments"; if (pm === "installments" && !$("f-inst").options.length) $("f-inst").innerHTML = Array.from({ length: mx }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
-    $("moNote").hidden = pm !== "monthly"; if (pm === "monthly") $("moNote").textContent = mo.count ? `${mo.count} חיובים חודשיים${mo.day ? ", ב-" + mo.day + " בכל חודש" : ""}. החיוב הראשון היום.` : "";
+    $("moNote").hidden = pm !== "monthly"; if (pm === "monthly") $("moNote").textContent = mo.last ? `החיוב הראשון היום, ואחר כך חיוב חודשי${mo.day ? " ב-" + mo.day + " בכל חודש" : ""} עד ${dm(mo.last)}.` : "";
     submitBtn.textContent = CREDIT.includes(pm) ? "שליחה ומעבר לתשלום" : "שליחת ההרשמה"; }
   function paintAmount(){ const it = items(), sum = it.reduce((a, x) => a + x.price, 0);
     $("amountDisplay").textContent = nis(sum); $("sidePrice").textContent = nis(sum);
