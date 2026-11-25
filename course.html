@@ -719,7 +719,8 @@
     $("fsProd").hidden = !ch("product");
     if (ch("product")) $("prodOpts").innerHTML = mains.map((p) => opt("prod", p.id, esc(p.label), "", C.early && p.early_price != null ? `${nis(p.early_price)} <s>${nis(p.price)}</s>` : nis(p.price))).join("");
     $("fsGroup").hidden = !ch("group");
-    if (ch("group")) $("groupOpts").innerHTML = (C.groups || []).map((g) => { const when = (g.meeting_dates || []).length ? g.meeting_dates.map(dm).join(", ") : (g.day ? "יום " + g.day + "'" : "");
+    if (ch("group")) $("groupOpts").innerHTML = (C.groups || []).map((g) => { const md = g.meeting_dates || [], dws = [...new Set(md.map((d) => "אבגדהו"[new Date(d + "T12:00:00").getDay()]).filter(Boolean))];
+      const when = md.length > 4 ? `${dws.map((x) => x + "'").join(" ")} · ${md.length} מפגשים · ${dm(md[0])}–${dm(md[md.length - 1])}` : md.length ? md.map(dm).join(", ") : (g.day ? "יום " + g.day + "'" : "");
       const full = g.seats_left === 0; return opt("group", g.id, esc(when + (g.time_label ? " · " + g.time_label : "")), esc(g.location || ""), full ? "הקבוצה מלאה" : (g.seats_left != null ? g.seats_left + " מקומות פנויים" : ""), full); }).join("") || '<div class="hint">עוד אין קבוצות – הצוות ישבץ אחרי ההרשמה.</div>';
     $("field-level").hidden = !ch("level");
     const pms = (C.pay_modes || []).filter((k) => PM[k]); $("pmOpts").innerHTML = pms.map((k, i) => `<label class="pm-opt"><input type="radio" name="paymode" value="${k}"${pms.length === 1 ? " checked" : ""}><span><b>${PM[k][0]}</b><small>${PM[k][1]}</small></span></label>`).join("");
