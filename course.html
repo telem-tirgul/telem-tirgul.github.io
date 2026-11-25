@@ -729,7 +729,7 @@
       const when = md.length > 4 ? `${dws.map((x) => x + "'").join(" ")} · ${md.length} מפגשים · ${dm(md[0])}–${dm(md[md.length - 1])}` : md.length ? md.map(dm).join(", ") : (g.day ? "יום " + g.day + "'" : "");
       const full = g.seats_left === 0; return opt("group", g.id, esc(when + (g.time_label ? " · " + g.time_label : "")), esc(g.location || ""), full ? "הקבוצה מלאה" : (g.seats_left != null ? g.seats_left + " מקומות פנויים" : ""), full); }).join("") || '<div class="hint">עוד אין קבוצות – הצוות ישבץ אחרי ההרשמה.</div>';
     $("field-level").hidden = !ch("level");
-    const pms = (C.pay_modes || []).filter((k) => PM[k]); $("pmOpts").innerHTML = pms.map((k, i) => `<label class="pm-opt"><input type="radio" name="paymode" value="${k}"${pms.length === 1 ? " checked" : ""}><span><b>${PM[k][0]}</b><small>${PM[k][1]}</small></span></label>`).join("")
+    const pms = (C.pay_modes || []).filter((k) => PM[k] && !(CREDIT.includes(k) && CREDIT_OFF));   /* 224: "💳 אשראי בטפסים" ← קורסים חדשים כבוי – בלי אשראי */ $("pmOpts").innerHTML = pms.map((k, i) => `<label class="pm-opt"><input type="radio" name="paymode" value="${k}"${pms.length === 1 ? " checked" : ""}><span><b>${PM[k][0]}</b><small>${PM[k][1]}</small></span></label>`).join("")
       + '<div class="field" id="instBox" hidden><label for="f-inst">מספר התשלומים</label><select id="f-inst"></select></div><div class="hint" id="moNote" hidden></div>';
     paintPm();
     $("termsBox").innerHTML = tx.terms ? esc(tx.terms).split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("") : "<p>תנאי ההתקשרות של תלם – המרכז לשיעורי תרגול.</p>";
@@ -738,7 +738,10 @@
     if (!C.reg_open && !PREVIEW) { $("crsClosed").hidden = false; return; }
     form.hidden = false; window.TELEM_GA && TELEM_GA("form_start", { form: "course" });
   }
-  function load(code){ CODE = code; return rpc("course_form_public", { p_code: code }).then((c) => { if (!c) throw new Error("not found"); C = c; render(); }); }
+  // 224 (נועה 25.11): המתג "💳 אשראי בטפסים" במערכת הניהול – course === false → בלי אשראי באתר (כמו במרתון)
+  let CREDIT_OFF = false;
+  const creditP = rpc("forms_credit_public", {}).then((d) => { CREDIT_OFF = !!(d && d.course === false); }).catch(() => {});
+  function load(code){ CODE = code; return Promise.all([rpc("course_form_public", { p_code: code }), creditP]).then(([c]) => { if (!c) throw new Error("not found"); C = c; render(); }); }
   function start(){
     if (CODE) return load(CODE).catch(() => { $("crsLoading").hidden = true; $("crsClosed").hidden = false; });
     const city = Q.get("city"); if (!city) { $("crsLoading").hidden = true; $("crsClosed").hidden = false; return; }
