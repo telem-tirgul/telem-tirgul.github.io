@@ -919,7 +919,7 @@ function fill(d){
   $("canForm").hidden = false;
   $("v-city").value = d.city || ""; $("v-school").value = d.school || ""; $("v-track").value = TRACK_TITLE(d.track); $("v-subject").value = d.subject || "";
   $("v-student").value = ((d.student_first || "") + " " + (d.student_last || "")).trim(); $("v-grade").value = d.grade || "";
-  $("f-signer").value = ((d.parent_first || "") + " " + (d.parent_last || d.student_last || "")).trim();   // נועה 15.11: בלי שם משפחה של ההורה – שם המשפחה של הילד/ה
+  // נועה 25.11: שם ההורה החותם/ת – ריק, ההורה כותב/ת בעצמו/ה (לא ממלאים מראש)
   const cityT = CONFIG.trackPricing[d.city] || CONFIG.trackPricing["כפר סבא"], pr = cityT && cityT[d.track];
   const info = CONFIG.trackInfo[d.track];
   $("priceBox").innerHTML = info ? "<h3></h3><p></p>" : ""; $("priceBox").hidden = !info;
