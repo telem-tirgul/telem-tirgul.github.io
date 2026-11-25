@@ -686,7 +686,8 @@
   const CONFIG = { supabase: { url: "https://oulivucqbpmbavbavfvy.supabase.co", anonKey: "sb_publishable_M8wEF2-9fXMmX0U97nfENw_AfZw9wNz" } };
   const Q = new URLSearchParams(location.search), PREVIEW = Q.get("preview") === "1";
   const $ = (id) => document.getElementById(id), form = $("courseForm"), topError = $("topError"), submitBtn = $("submitBtn");
-  const PM = { phone: ["📞 תשלום טלפוני", "לאחר שליחת הטופס ניצור עמכם קשר לתשלום"], paid_before: ["✅ כבר שילמתי", "שילמתי בטלפון לנציג/ה"], free: ["✔ הרשמה", "ללא תשלום"] };
+  const PM = { once: ["💳 תשלום באשראי", "תשלום מאובטח באתר מיד לאחר שליחת הטופס"], installments: ["💳 תשלומים באשראי", "חלוקת הסכום לתשלומים בכרטיס האשראי"],
+    monthly: ["🔁 הוראת קבע חודשית", "חיוב חודשי בכרטיס האשראי"], phone: ["📞 תשלום טלפוני", "לאחר שליחת הטופס ניצור עמכם קשר לתשלום"], paid_before: ["✅ כבר שילמתי", "שילמתי בטלפון לנציג/ה"], free: ["✔ הרשמה", "ללא תשלום"] };
   const GR = ["ד'", "ה'", "ו'", "ז'", "ח'", "ט'", "י'", "יא'", "יב'"];
   const esc = (t) => String(t == null ? "" : t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const nis = (n) => "₪" + Number(n || 0).toLocaleString("he-IL");
@@ -700,6 +701,11 @@
   function mainProd(){ const ps = (C.products || []).filter((p) => p.kind === "main"); return ch("product") ? ps.find((p) => String(p.id) === val("prod")) : ps[0]; }
   function items(){ const p = mainProd(), early = C.early; const fee = (C.products || []).filter((x) => x.kind === "fee");
     return (p ? [p] : []).concat(fee).map((x) => ({ label: x.label, price: early && x.early_price != null ? Number(x.early_price) : Number(x.price) })); }
+  const CREDIT = ["once", "installments", "monthly"];
+  function paintPm(){ const pm = val("paymode"), mx = Math.min(12, Number(C.max_installments) || 1), mo = C.monthly || {};
+    $("instBox").hidden = pm !== "installments"; if (pm === "installments" && !$("f-inst").options.length) $("f-inst").innerHTML = Array.from({ length: mx }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
+    $("moNote").hidden = pm !== "monthly"; if (pm === "monthly") $("moNote").textContent = mo.count ? `${mo.count} חיובים חודשיים${mo.day ? ", ב-" + mo.day + " בכל חודש" : ""}. החיוב הראשון היום.` : "";
+    submitBtn.textContent = CREDIT.includes(pm) ? "שליחה ומעבר לתשלום" : "שליחת ההרשמה"; }
   function paintAmount(){ const it = items(), sum = it.reduce((a, x) => a + x.price, 0);
     $("amountDisplay").textContent = nis(sum); $("sidePrice").textContent = nis(sum);
     $("amountBreakdown").innerHTML = it.length > 1 ? it.map((x) => `<div><span>${esc(x.label)}</span><b>${nis(x.price)}</b></div>`).join("") : "";
@@ -723,9 +729,11 @@
       const when = md.length > 4 ? `${dws.map((x) => x + "'").join(" ")} · ${md.length} מפגשים · ${dm(md[0])}–${dm(md[md.length - 1])}` : md.length ? md.map(dm).join(", ") : (g.day ? "יום " + g.day + "'" : "");
       const full = g.seats_left === 0; return opt("group", g.id, esc(when + (g.time_label ? " · " + g.time_label : "")), esc(g.location || ""), full ? "הקבוצה מלאה" : (g.seats_left != null ? g.seats_left + " מקומות פנויים" : ""), full); }).join("") || '<div class="hint">עוד אין קבוצות – הצוות ישבץ אחרי ההרשמה.</div>';
     $("field-level").hidden = !ch("level");
-    const pms = (C.pay_modes || []).filter((k) => PM[k]); $("pmOpts").innerHTML = pms.map((k, i) => `<label class="pm-opt"><input type="radio" name="paymode" value="${k}"${pms.length === 1 ? " checked" : ""}><span><b>${PM[k][0]}</b><small>${PM[k][1]}</small></span></label>`).join("");
+    const pms = (C.pay_modes || []).filter((k) => PM[k]); $("pmOpts").innerHTML = pms.map((k, i) => `<label class="pm-opt"><input type="radio" name="paymode" value="${k}"${pms.length === 1 ? " checked" : ""}><span><b>${PM[k][0]}</b><small>${PM[k][1]}</small></span></label>`).join("")
+      + '<div class="field" id="instBox" hidden><label for="f-inst">מספר התשלומים</label><select id="f-inst"></select></div><div class="hint" id="moNote" hidden></div>';
+    paintPm();
     $("termsBox").innerHTML = tx.terms ? esc(tx.terms).split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("") : "<p>תנאי ההתקשרות של תלם – המרכז לשיעורי תרגול.</p>";
-    form.addEventListener("change", (e) => { if (e.target.name === "prod") paintAmount(); const f = e.target.closest(".field, .pay-method"); if (f) f.classList.remove("invalid"); });
+    form.addEventListener("change", (e) => { if (e.target.name === "prod") paintAmount(); if (e.target.name === "paymode") paintPm(); const f = e.target.closest(".field, .pay-method"); if (f) f.classList.remove("invalid"); });
     paintAmount(); $("crsLoading").hidden = true;
     if (!C.reg_open && !PREVIEW) { $("crsClosed").hidden = false; return; }
     form.hidden = false; window.TELEM_GA && TELEM_GA("form_start", { form: "course" });
@@ -797,11 +805,25 @@
     return tsTake().then((token) => fetch(s.url + "/functions/v1/" + TS.endpoint, { method: "POST", headers: { "Content-Type": "application/json", "apikey": s.anonKey, "Authorization": "Bearer " + s.anonKey },
       body: JSON.stringify({ kind: kind, payload: payload, turnstile_token: token }) })).then((res) => res.json().catch(() => null).then((b) => { if (!res.ok) throw new Error((b && (b.error || b.message || b.hint)) || "HTTP " + res.status); return b; })); }
   function tyUrl(q){ const u = new URL("thank-you.html?" + q, location.href); return u.href; }
+  // 3ב/3ג: מעבר לתשלום באיקרדיט (כמו במרתון). הדפדפן שולח רק מספר הזמנה + סוד; הסכום נקבע בשרת (icredit-pay).
+  // אם פתיחת עמוד התשלום נכשלה – ההרשמה כבר שמורה; לחיצה נוספת רק פותחת שוב את עמוד התשלום.
+  function safePayUrl(u){ try { const x = new URL(u); return x.protocol === "https:" ? x.href : null; } catch (e) { return null; } }
+  let pendingPay = null;
+  function goToPayment(orderId, secret){ const s = CONFIG.supabase;
+    pendingPay = { kind: "course", id: String(orderId), secret: secret }; window.TELEM_GA && TELEM_GA("begin_checkout", { form: "course" });
+    submitBtn.disabled = true; submitBtn.textContent = "מעבר לתשלום…";
+    return fetch(s.url + "/functions/v1/icredit-pay", { method: "POST", headers: { "Content-Type": "application/json", "apikey": s.anonKey }, body: JSON.stringify(pendingPay) })
+      .then((r) => r.json().then((b) => { if (!r.ok || !b || !b.url) throw new Error((b && b.error) || "HTTP " + r.status); return b; }))
+      .then((b) => { const u = safePayUrl(b.url); if (!u) throw new Error("bad url"); location.href = u; })
+      .catch((err) => { console.error("icredit-pay failed:", err);
+        topError.textContent = "ההרשמה נשמרה, אך לא ניתן היה לפתוח את עמוד התשלום. נא ללחוץ שוב על הכפתור; אם התקלה חוזרת, נא לפנות אלינו."; topError.style.display = "block";
+        topError.scrollIntoView({ behavior: "smooth", block: "center" }); submitBtn.disabled = false; submitBtn.textContent = "מעבר חוזר לתשלום"; }); }
   const bad = (id, on) => { const f = $(id); if (f) f.classList.toggle("invalid", !!on); return !!on; };
   const ERR = { "no open course": "ההרשמה לקורס סגורה.", "group full": "הקבוצה שנבחרה התמלאה. נא לבחור קבוצה אחרת.", "invalid group": "נא לבחור קבוצה.", "invalid product": "נא לבחור אפשרות.",
     "subject required": "נא לבחור מקצוע.", "missing hakbatsa": "נא למלא הקבצה.", "invalid phone": "מספר הטלפון לא תקין. נא לבדוק ולשלוח שוב.", "too many attempts": "נרשמו ניסיונות שליחה רבים מדי. נא לנסות שוב בעוד מספר דקות.",
-    "pay mode": "נא לבחור אופן תשלום.", "bot_check": "לא ניתן היה לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה." };
+    "pay mode": "נא לבחור אופן תשלום.", "invalid installments": "מספר התשלומים לא תקין.", "bot_check": "לא ניתן היה לאמת את השליחה. נא ללחוץ שוב על כפתור השליחה." };
   form.addEventListener("submit", (e) => { e.preventDefault(); topError.style.display = "none";
+    if (pendingPay) { goToPayment(pendingPay.id, pendingPay.secret); return; }
     const v = (id) => $(id).value.trim(), ph = (t) => /^0\d{8,9}$/.test(t.replace(/\D/g, ""));
     let no = false;
     no = bad("field-student-first", !v("f-student-first")) || no; no = bad("field-student-last", !v("f-student-last")) || no; no = bad("field-grade", !v("f-grade")) || no;
@@ -818,14 +840,16 @@
     if (PREVIEW) { try { sessionStorage.setItem("reg_summary", JSON.stringify(summary)); } catch (er) {} location.href = tyUrl("preview=1"); return; }
     submitBtn.disabled = true; submitBtn.textContent = "ההרשמה נשלחת…";
     const payload = { course_code: CODE, product_id: p ? p.id : null, subject: val("subj") || null, session_id: val("group") ? Number(val("group")) : null, level: v("f-level") || null,
-      pay_mode: pm, paid_before: pm === "paid_before", terms_accepted: true, details_confirmed: true, signature: sig, website: $("f-website").value, city: C.city || "",
+      pay_mode: pm, installments: pm === "installments" ? Number($("f-inst").value) || 1 : null, paid_before: pm === "paid_before", terms_accepted: true, details_confirmed: true, signature: sig, website: $("f-website").value, city: C.city || "",
       student: { first_name: v("f-student-first"), last_name: v("f-student-last"), phone: v("f-student-phone").replace(/\D/g, ""), school: v("f-school"), grade: v("f-grade") },
       parent: { first_name: v("f-parent-first"), last_name: v("f-parent-last"), phone: v("f-phone").replace(/\D/g, ""), email: v("f-email") } };
     submitPayload("course", payload).then((r) => { try { sessionStorage.setItem("reg_summary", JSON.stringify(Object.assign(summary, { amount: r && r.amount != null ? r.amount : sum }))); } catch (er) {}
-      window.TELEM_GA && TELEM_GA("sign_up", { form: "course" }); location.href = tyUrl(pm === "free" ? "signed=1" : "pending=1&phone=1"); })
+      window.TELEM_GA && TELEM_GA("sign_up", { form: "course" });
+      if (CREDIT.includes(pm) && r && r.order_id && r.pay_secret) { goToPayment(r.order_id, r.pay_secret); return; }
+      location.href = tyUrl(pm === "free" ? "signed=1" : "pending=1&phone=1"); })
     .catch((err) => { const m = String(err && err.message || ""); if (/already registered/.test(m)) { try { sessionStorage.setItem("reg_already", JSON.stringify({ name: summary.name, event: C.name })); } catch (er) {} location.href = tyUrl("already=1"); return; }
       const k = Object.keys(ERR).find((x) => m.indexOf(x) >= 0); topError.textContent = k ? ERR[k] : "לא ניתן היה לשמור את ההרשמה. נא לנסות שוב בעוד מספר רגעים; אם התקלה חוזרת, נא לפנות אלינו בטלפון 052-9067101.";
-      topError.style.display = "block"; topError.scrollIntoView({ behavior: "smooth", block: "center" }); submitBtn.disabled = false; submitBtn.textContent = "שליחת ההרשמה";
+      topError.style.display = "block"; topError.scrollIntoView({ behavior: "smooth", block: "center" }); submitBtn.disabled = false; paintPm();
       window.TELEM_GA && TELEM_GA("form_error", { form: "course", reason: k || "server" }); });
   });
   if (PREVIEW) { const pb = document.createElement("div"); pb.className = "preview-banner"; pb.textContent = "תצוגה מקדימה - שום דבר לא נשמר"; document.body.prepend(pb); }
